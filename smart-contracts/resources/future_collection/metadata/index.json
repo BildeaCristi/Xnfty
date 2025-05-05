@@ -1,0 +1,12 @@
+{
+  "collectionName": "My NFT Collection",
+  "description": "A unique collection of cosmic and futuristic NFT artworks.",
+  "baseURI": "ipfs://bafybeibygwz3cwmars6kplibjqv43ijp237y57xvdv4uft4oaqrstds5ty/",
+  "items": [
+    { "id": 0, "name": "Explorer in the Cosmos" },
+    { "id": 1, "name": "Mystical Forest of Glows" },
+    { "id": 2, "name": "Neon Cyberpunk Metropolis" },
+    { "id": 3, "name": "Holographic Bot" },
+    { "id": 4, "name": "Underwater Glow" }
+  ]
+}

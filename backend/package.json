@@ -1,0 +1,20 @@
+{
+  "name": "xnfty-backend",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "apollo-server": "^3.11.0",
+    "graphql": "^16.6.0",
+    "nexus": "^1.2.0",
+    "ethers": "^5.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^18.11.0"
+  }
+}
