@@ -1,6 +1,12 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import DashboardContent from "@/components/dashboard/DashboardContent";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Xnfty | Dashboard",
+  description: "Your NFT dashboard with 3D visualization",
+};
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -9,9 +15,10 @@ export default async function DashboardPage() {
         redirect("/login");
     }
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <DashboardContent user={session.user} />
-        </div>
-    );
+    // Ensure user is defined
+    if (!session.user) {
+        redirect("/login");
+    }
+
+    return <DashboardContent user={session.user} />;
 }

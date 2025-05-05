@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { web3auth, decodeToken } from "@/lib/web3auth";
-import SignOut from "@/components/auth/login-ui/buttons/signout-button";
+import SignOut from "@/components/auth/buttons/signout-button";
 import Loading from "@/components/loading";
 import { handleSignOut } from "@/actions";
 

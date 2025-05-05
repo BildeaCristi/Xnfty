@@ -1,30 +1,25 @@
 "use client";
 
-import React, { useState } from 'react';
-import CollectionDetailsModal from './CollectionDetailsModal';
+import React from 'react';
+import { CreateCollectionButton } from '@/components/deploy';
 
 interface CollectionModalWrapperProps {
   buttonText?: string;
+  className?: string;
+  variant?: 'default' | 'icon' | 'card';
 }
 
 const CollectionModalWrapper: React.FC<CollectionModalWrapperProps> = ({ 
-  buttonText = "Create Collection" 
+  buttonText = "Create Collection",
+  className = "",
+  variant = "default"
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
-    <>
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-medium py-2 px-4 rounded"
-      >
-        {buttonText}
-      </button>
-
-      {isOpen && (
-        <CollectionDetailsModal onClose={() => setIsOpen(false)} />
-      )}
-    </>
+    <CreateCollectionButton 
+      buttonText={buttonText}
+      className={className}
+      variant={variant}
+    />
   );
 };
 

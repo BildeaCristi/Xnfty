@@ -1,28 +1,19 @@
-"use client";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { Metadata } from "next";
+import CreateCollectionContent from "@/components/create-collection/CreateCollectionContent";
 
-import React from 'react';
-import CollectionDetailsModal from '@/components/CollectionDetailsModal';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: "Xnfty | Create Collection",
+  description: "Create and deploy your own NFT collection with fractional ownership options",
+};
 
-export default function CreateCollectionPage() {
-  const router = useRouter();
+export default async function CreateCollectionPage() {
+  const session = await auth();
   
-  return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-            Create NFT Collection
-          </h1>
-          <p className="mt-3 text-xl text-gray-500 dark:text-gray-300 sm:mt-4">
-            Create and deploy your own NFT collection with fractional ownership options
-          </p>
-        </div>
-
-        <div className="mt-12">
-          <CollectionDetailsModal onClose={() => router.back()} />
-        </div>
-      </div>
-    </div>
-  );
+  if (!session) {
+    redirect("/login");
+  }
+  
+  return <CreateCollectionContent />;
 } 
