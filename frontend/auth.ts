@@ -27,8 +27,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     },
                 },
             },
-            clientId: "",
-            clientSecret: ""
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
         }),
         CredentialsProvider({
             id: "wallet-connect",

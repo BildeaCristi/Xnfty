@@ -1,0 +1,11 @@
+{
+  "NFTFactory": "0x2B3842F3B3525aDC59304483212c28Eb8Ee59047",
+  "NFTFactoryView": "0x0f9270b91CEe38fdd93e6D14ADb6Fe1b49B01E8e",
+  "network": "sepolia",
+  "sampleCollectionAddress": "0x1E88181fDd91C9D0F9a5aF8dEf3439DE43037BF6",
+  "sampleFractionalAddress": "0x671bE7EE81D9d048c299E9E017d828b861105Db6",
+  "deployer": "0xE79FbBECeD2b5A4Ec18DaB29a43b288bDE165507",
+  "timestamp": "2025-05-31T15:02:49.516Z",
+  "blockNumber": 8447096,
+  "note": "Sample contracts deployed for ABI generation. Use factory to create production collections."
+}
