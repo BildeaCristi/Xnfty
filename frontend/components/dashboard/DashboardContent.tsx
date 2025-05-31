@@ -9,6 +9,7 @@ import DashboardBackground from './DashboardBackground';
 import GlassPanel from './GlassPanel';
 import UserSharesSummary from './UserSharesSummary';
 import CreateCollectionModal from '@/components/create-collection/CreateCollectionModal';
+import Navbar from '@/components/layout/Navbar';
 import type { Collection, CollectionStats, UserNFTShare, CollectionWithShares } from '@/types';
 import { 
   getAllCollections, 
@@ -275,106 +276,15 @@ export default function DashboardContent({ session }: DashboardContentProps) {
     <div className="min-h-screen relative overflow-hidden">
       <DashboardBackground />
       
-      <div className="relative z-10 p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <GlassPanel className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  Welcome to Xnfty
-                </h1>
-                <p className="text-blue-100">
-                  Create and manage fractional ownership NFT collections
-                </p>
-                {walletAddress && (
-                  <div className="flex items-center mt-2 text-blue-200">
-                    <Wallet className="w-4 h-4 mr-2" />
-                    <span className="text-sm">{formatAddress(walletAddress)}</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
-                <button
-                  onClick={loadCollections}
-                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-                  title="Refresh all data"
-                >
-                  <span>🔄</span>
-                  <span>Refresh</span>
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Create Collection</span>
-                </button>
-              </div>
-            </div>
-          </GlassPanel>
-        </div>
-        
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <GlassPanel className="p-6">
-            <div className="flex items-center">
-              <Eye className="w-8 h-8 text-blue-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-blue-200">Total Collections</p>
-                <p className="text-2xl font-bold text-white">{allCollections.length}</p>
-              </div>
-            </div>
-          </GlassPanel>
-          
-          <GlassPanel className="p-6">
-            <div className="flex items-center">
-              <Users className="w-8 h-8 text-green-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-200">Your Collections</p>
-                <p className="text-2xl font-bold text-white">{userCollections.length}</p>
-              </div>
-            </div>
-          </GlassPanel>
-          
-          <GlassPanel className="p-6">
-            <div className="flex items-center">
-              <Share2 className="w-8 h-8 text-purple-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-purple-200">Your NFTs</p>
-                <p className="text-2xl font-bold text-white">{totalUserNFTs}</p>
-              </div>
-            </div>
-          </GlassPanel>
-          
-          <GlassPanel className="p-6">
-            <div className="flex items-center">
-              <Coins className="w-8 h-8 text-orange-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-orange-200">Your Shares</p>
-                <p className="text-2xl font-bold text-white">{totalSharedNFTs}</p>
-              </div>
-            </div>
-          </GlassPanel>
-
-          <GlassPanel className="p-6">
-            <div className="flex items-center">
-              <TrendingUp className="w-8 h-8 text-pink-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-pink-200">Marketplace NFTs</p>
-                <p className="text-2xl font-bold text-white">{totalMarketplaceNFTs}</p>
-              </div>
-            </div>
-          </GlassPanel>
-        </div>
-        
+      {/* Navbar */}
+      <Navbar 
+        session={session}
+        collections={allCollections}
+        onCreateCollection={() => setShowCreateModal(true)}
+      />
+      
+      {/* Main Content - with top padding for fixed navbar */}
+      <div className="relative z-10 pt-20 p-6">
         {/* User Shares Summary - Only show if user has shares */}
         {walletAddress && userNFTShares.length > 0 && (
           <div className="mb-8">
@@ -400,16 +310,6 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                 All Collections
               </button>
               <button
-                onClick={() => setActiveTab('owned')}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  activeTab === 'owned'
-                    ? 'bg-white/20 text-white'
-                    : 'text-blue-200 hover:text-white'
-                }`}
-              >
-                Your Collections ({userCollections.length})
-              </button>
-              <button
                 onClick={() => setActiveTab('shares')}
                 className={`px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === 'shares'
@@ -418,16 +318,6 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                 }`}
               >
                 Your Shares ({sharedCollections.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('marketplace')}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  activeTab === 'marketplace'
-                    ? 'bg-white/20 text-white'
-                    : 'text-blue-200 hover:text-white'
-                }`}
-              >
-                Marketplace
               </button>
             </div>
           </div>
@@ -441,11 +331,9 @@ export default function DashboardContent({ session }: DashboardContentProps) {
             <div className="text-center py-12">
               <p className="text-blue-200 mb-4">
                 {activeTab === 'all' && 'No collections found.'}
-                {activeTab === 'owned' && 'You haven\'t created any collections yet.'}
                 {activeTab === 'shares' && 'You don\'t own shares in any collections yet.'}
-                {activeTab === 'marketplace' && 'No NFTs available for purchase at the moment.'}
               </p>
-              {(activeTab === 'owned' || activeTab === 'shares') && (
+              {activeTab === 'shares' && (
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
@@ -465,7 +353,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                   <div
                     key={collection.collectionId}
                     onClick={() => handleCollectionClick(collection.collectionId)}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden cursor-pointer"
+                    className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden cursor-pointer hover:bg-white/15 transition-colors"
                   >
                     <img 
                       src={collection.imageURI || '/placeholder-collection.png'}

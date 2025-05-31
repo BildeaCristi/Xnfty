@@ -2,23 +2,19 @@
 // Re-export all types from different modules
 
 // Blockchain types
-export type {
-    Collection,
-    NFT,
-    FractionalNFTInfo,
-    ShareHolder,
-    CollectionStats,
-    UserNFTShare,
-    CollectionNFTInfo,
-    CollectionWithShares
-} from './blockchain';
+export type * from './blockchain';
 
-// IPFS and metadata types
-export type {
-    NFTMetadata,
-    CollectionMetadata,
-    Attribute
-} from './ipfs';
+// IPFS types  
+export type * from './ipfs';
+
+// Component types
+export type * from './components';
+
+// Form types
+export type * from './forms';
+
+// Search types
+export type * from './search';
 
 // Form types
 export type {
