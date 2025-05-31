@@ -1,30 +1,6 @@
-export interface Attribute {
-    trait_type: string;
-    value: string;
-}
+// Legacy NFT types file - redirects to new organized types
+// This file is kept for backward compatibility
 
-export interface NFTItem {
-    image: File | null;
-    attributes: Attribute[];
-    price: string;
-}
-
-export interface NftModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
-export interface NFTItemFormProps {
-    nft: NFTItem;
-    index: number;
-    nfts: NFTItem[];
-    setNfts: React.Dispatch<React.SetStateAction<NFTItem[]>>;
-}
-
-export interface NFTMetadata {
-    name: string;
-    description: string;
-    image: string;
-    attributes: Attribute[];
-    price: string;
-}
+export type { Attribute, NFTMetadata } from './ipfs';
+export type { NFTItem, NFTItemFormProps } from './forms'; 
+export type { NftModalProps } from './components';

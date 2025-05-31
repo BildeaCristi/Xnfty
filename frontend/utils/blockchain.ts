@@ -3,6 +3,15 @@ import * as factoryMetadata from '@/utils/artifacts/contracts/NFTFactory.sol/NFT
 import * as factoryViewMetadata from '@/utils/artifacts/contracts/NFTFactoryView.sol/NFTFactoryView.json';
 import * as collectionMetadata from '@/utils/artifacts/contracts/NFTCollection.sol/NFTCollection.json';
 import * as fractionalMetadata from '@/utils/artifacts/contracts/FractionalNFT.sol/FractionalNFT.json';
+import type {
+    Collection,
+    NFT,
+    FractionalNFTInfo,
+    ShareHolder,
+    CollectionStats,
+    UserNFTShare,
+    CollectionNFTInfo
+} from '@/types';
 
 // --- Contract ABIs ---
 const NFT_FACTORY_ABI = factoryMetadata.abi;
@@ -14,83 +23,6 @@ const FRACTIONAL_NFT_ABI = fractionalMetadata.abi;
 let cachedProvider: ethers.BrowserProvider | null = null;
 let cachedSigner: ethers.Signer | null = null;
 let signerPromise: Promise<ethers.Signer> | null = null;
-
-// --- Interfaces ---
-export interface Collection {
-    collectionId: number;
-    metadataURI: string;
-    collectionAddress: string;
-    owner: string;
-    creationTime: number;
-    name?: string;
-    symbol?: string;
-    description?: string;
-    imageURI?: string;
-}
-
-export interface NFT {
-    tokenId: number;
-    metadataURI: string;
-    creationTime: number;
-    fractionalContract: string;
-    isfractionalized: boolean;
-    name?: string;
-    description?: string;
-    imageURI?: string;
-    attributes?: Array<{ trait_type: string; value: string | number }>;
-}
-
-export interface FractionalNFTInfo {
-    collection: string;
-    tokenId: number;
-    metadataURI: string;
-    sharePrice: string;
-    totalShares: number;
-    currentOwner: string;
-    createdAt: number;
-}
-
-export interface ShareHolder {
-    holder: string;
-    shares: number;
-    percentage: number;
-}
-
-export interface CollectionStats {
-    totalNFTs: number;
-    fractionalizedNFTs: number;
-    currentOwner: string;
-}
-
-export interface UserNFTShare {
-    collectionId: number;
-    collectionAddress: string;
-    tokenId: number;
-    fractionalContract: string;
-    userShares: number;
-    totalShares: number;
-    sharePercentage: number;
-    metadataURI: string;
-    isOwner: boolean;
-    name?: string;
-    description?: string;
-    imageURI?: string;
-}
-
-// New interface for collection NFTs
-export interface CollectionNFTInfo {
-    tokenId: number;
-    fractionalContract: string;
-    metadataURI: string;
-    totalShares: number;
-    currentOwner: string;
-    sharePrice: number;
-    isfractionalized: boolean;
-    creationTime: number;
-    name?: string;
-    description?: string;
-    imageURI?: string;
-}
 
 // --- Provider & Signer Functions ---
 

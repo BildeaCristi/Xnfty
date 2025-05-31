@@ -7,5 +7,6 @@ declare module "next-auth" {
   
   interface Session {
     user?: User;
+    walletAddress?: string;
   }
 } 

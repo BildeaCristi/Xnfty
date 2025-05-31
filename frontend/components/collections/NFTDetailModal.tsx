@@ -16,18 +16,17 @@ import {
 import {
     addTokenToMetaMask,
     buyNFTSharesEnhanced,
-    Collection,
     formatAddress,
-    FractionalNFTInfo,
     getAvailableSharesForBuyer,
     getAvailableSharesFromOwner,
     getExtendedNFTInfo,
     getNFTShareHolders,
     getUserNFTSharePercentage,
-    isAllSharesWithOwner,
-    NFT,
-    ShareHolder
+    isAllSharesWithOwner
 } from '@/utils/blockchain';
+import type { Collection, NFT, ShareHolder, FractionalNFTInfo } from '@/types';
+import { useNotifications } from '@/components/notifications/NotificationContext';
+import { ethers } from 'ethers';
 
 interface NFTDetailModalProps {
     nft: NFT;
@@ -37,6 +36,7 @@ interface NFTDetailModalProps {
 }
 
 export default function NFTDetailModal({nft, collection, userAddress, onClose}: NFTDetailModalProps) {
+    const { showSuccess, showError, showWarning, showInfo, confirm } = useNotifications();
     const [fractionalInfo, setFractionalInfo] = useState<FractionalNFTInfo & { creator?: string } | null>(null);
     const [shareHolders, setShareHolders] = useState<ShareHolder[]>([]);
     const [userSharePercentage, setUserSharePercentage] = useState<number>(0);
@@ -138,68 +138,84 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
     };
 
     const handleBuyShares = async () => {
-        if (!fractionalInfo || !nft.fractionalContract || !userAddress) return;
+        if (!nft.fractionalContract || !fractionalInfo || !fractionalInfo.sharePrice) {
+            showError('Cannot buy shares', 'This NFT is not fractionalized or share price is not set');
+            return;
+        }
 
-        if (buyAmount <= 0) {
-            alert('Please enter a valid number of shares to buy.');
+        if (buyAmount <= 0 || !Number.isInteger(buyAmount)) {
+            showWarning('Invalid share amount', 'Please enter a valid number of shares to buy.');
             return;
         }
 
         if (buyAmount > availableShares) {
-            alert(`Only ${availableShares} shares are available for purchase.`);
+            showWarning('Not enough shares available', `Only ${availableShares} shares are available for purchase.`);
             return;
         }
 
+        // Calculate total cost and check user balance
         const totalCostEth = parseFloat(fractionalInfo.sharePrice) * buyAmount;
         const userBalanceEth = parseFloat(userBalance);
 
         if (totalCostEth > userBalanceEth) {
-            alert(`Insufficient balance. You need ${totalCostEth.toFixed(4)} ETH but only have ${userBalanceEth} ETH.`);
+            showError('Insufficient balance', `You need ${totalCostEth.toFixed(4)} ETH but only have ${userBalanceEth} ETH.`);
             return;
         }
 
-        const isBuyingAllShares = buyAmount === fractionalInfo.totalShares;
-        let confirmMessage = `Are you sure you want to buy ${buyAmount} share${buyAmount > 1 ? 's' : ''} for ${totalCostEth.toFixed(4)} ETH?`;
+        // Ask for confirmation before buying
+        const shouldBuy = await confirm({
+            title: 'Confirm Share Purchase',
+            message: `You are about to buy ${buyAmount} share${buyAmount > 1 ? 's' : ''} for ${totalCostEth.toFixed(4)} ETH. This transaction cannot be undone.`,
+            confirmText: 'Buy Shares',
+            cancelText: 'Cancel',
+            type: 'info'
+        });
 
-        if (isBuyingAllShares) {
-            confirmMessage += '\n\n⚡ You are buying ALL shares! This will automatically transfer the NFT ownership to you.';
-        }
-
-        const confirmed = window.confirm(confirmMessage);
-
-        if (!confirmed) return;
+        if (!shouldBuy) return;
 
         setIsBuying(true);
         try {
+            console.log('Starting share purchase...', {
+                fractionalContract: nft.fractionalContract,
+                shareAmount: buyAmount,
+                sharePrice: fractionalInfo.sharePrice,
+                totalCost: totalCostEth
+            });
+
             const txHash = await buyNFTSharesEnhanced(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
 
-            let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}! Transaction: ${txHash.substring(0, 10)}...`;
-            if (isBuyingAllShares) {
-                successMessage += '\n\n🎉 You now own the entire NFT! Ownership has been transferred to you.';
+            console.log('Share purchase successful:', txHash);
+            
+            let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
+            
+            // Check if user bought all shares
+            const remainingShares = availableShares - buyAmount;
+            if (remainingShares === 0) {
+                successMessage += ' You now own the entire NFT!';
             }
-            alert(successMessage);
 
-            setBuyAmount(1);
+            showSuccess('Shares purchased successfully', successMessage);
+
+            // Refresh data
             await loadFractionalData();
-            await loadUserBalance(); // Refresh balance after purchase
-
+            setBuyAmount(1);
         } catch (error) {
             console.error('Error buying shares:', error);
+            
             let errorMessage = 'Failed to buy shares. Please try again.';
-
             if (error instanceof Error) {
                 if (error.message.includes('user rejected')) {
                     errorMessage = 'Transaction was cancelled by user.';
                 } else if (error.message.includes('insufficient funds')) {
-                    errorMessage = 'Insufficient funds to complete the transaction.';
-                } else if (error.message.includes('Not enough shares available')) {
-                    errorMessage = 'Not enough shares are currently available for purchase.';
-                } else if (error.message.includes("Owner doesn't have all shares")) {
-                    errorMessage = 'Cannot buy all shares as they are distributed among multiple holders.';
+                    errorMessage = 'Insufficient funds for transaction including gas fees.';
+                } else if (error.message.includes('execution reverted')) {
+                    errorMessage = 'Transaction failed. The shares may no longer be available.';
+                } else {
+                    errorMessage = error.message;
                 }
             }
-
-            alert(errorMessage);
+            
+            showError('Purchase failed', errorMessage);
         } finally {
             setIsBuying(false);
         }
@@ -207,12 +223,13 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
 
     const handleAddToMetaMask = async () => {
         if (!nft.fractionalContract) return;
-
+        
         try {
             await addTokenToMetaMask(nft.fractionalContract);
+            showSuccess('Token added to MetaMask', 'The fractional token has been added to your MetaMask wallet.');
         } catch (error) {
-            console.error('Failed to add token to MetaMask:', error);
-            alert('Failed to add token to MetaMask. Please try again.');
+            console.error('Error adding token to MetaMask:', error);
+            showError('Failed to add token', 'Failed to add token to MetaMask. Please try again.');
         }
     };
 

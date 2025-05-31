@@ -9,7 +9,7 @@ import DashboardBackground from './DashboardBackground';
 import GlassPanel from './GlassPanel';
 import UserSharesSummary from './UserSharesSummary';
 import CreateCollectionModal from '@/components/create-collection/CreateCollectionModal';
-import { Collection, CollectionStats, UserNFTShare } from '@/utils/blockchain';
+import type { Collection, CollectionStats, UserNFTShare, CollectionWithShares } from '@/types';
 import { 
   getAllCollections, 
   getUserOwnedCollections,
@@ -25,11 +25,6 @@ import {
 
 interface DashboardContentProps {
     session: Session;
-}
-
-interface CollectionWithShares extends Collection {
-  userNFTShares?: UserNFTShare[];
-  totalUserShares?: number;
 }
 
 export default function DashboardContent({ session }: DashboardContentProps) {

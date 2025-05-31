@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Share2, Users, TrendingUp, Eye, Upload, Loader2, X, Coins, ShoppingCart, Trash2 } from 'lucide-react';
-import { Collection, NFT, CollectionStats, ShareHolder, FractionalNFTInfo } from '@/utils/blockchain';
 import { 
   getCollection, 
   getCollectionNFTs, 
@@ -16,7 +15,9 @@ import {
   getAvailableSharesForBuyer,
   getExtendedNFTInfo
 } from '@/utils/blockchain';
+import type { Collection, NFT, CollectionStats, ShareHolder, FractionalNFTInfo } from '@/types';
 import { uploadFileToIPFS, uploadNFTMetadata, createNFTMetadata } from '@/utils/ipfs';
+import { useNotifications } from '@/components/notifications/NotificationContext';
 
 interface CollectionManagerProps {
   collectionId: number;
@@ -39,6 +40,7 @@ interface FractionalizeFormData {
 }
 
 export default function CollectionManager({ collectionId, userAddress, onClose }: CollectionManagerProps) {
+  const { showSuccess, showError, showWarning, showInfo, confirm } = useNotifications();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [nfts, setNFTs] = useState<NFT[]>([]);
   const [stats, setStats] = useState<CollectionStats | null>(null);
@@ -143,53 +145,66 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
   };
 
   const handleMintNFT = async () => {
-    if (!nftForm.name || !nftForm.description || !nftForm.image || !collection) {
-      alert('Please fill in all required fields');
+    if (!nftForm.name || !nftForm.description || !nftForm.image) {
+      showWarning('Incomplete form', 'Please fill in all required fields');
       return;
     }
 
+    // Ask for confirmation
+    const shouldMint = await confirm({
+      title: 'Mint NFT?',
+      message: `You are about to mint "${nftForm.name}" to the collection. This will cost gas fees.`,
+      confirmText: 'Mint NFT',
+      cancelText: 'Cancel',
+      type: 'info'
+    });
+
+    if (!shouldMint) return;
+
     setIsMinting(true);
     try {
-      // Use the uploadNFTMetadata function that handles both image and metadata upload
-      const result = await uploadNFTMetadata(
+      const { metadataUrl } = await uploadNFTMetadata(
         nftForm.name,
         nftForm.description,
         nftForm.image,
-        nftForm.attributes.filter(attr => attr.trait_type && attr.value)
+        nftForm.attributes
       );
 
-      // Mint NFT with the metadata URI
-      const mintResult = await mintNFT(collection.collectionAddress, result.metadataUrl);
-
-      // Reset form and reload data
-      setNftForm({
-        name: '',
-        description: '',
-        image: null,
-        attributes: []
-      });
+      const result = await mintNFT(collection?.collectionAddress || '', metadataUrl);
+      showSuccess('NFT minted successfully', `Token ID: ${result.tokenId}`);
+      
+      setNftForm({ name: '', description: '', image: null, attributes: [] });
       setShowAddNFT(false);
       await loadCollectionData();
-      
-      alert(`NFT minted successfully! Token ID: ${mintResult.tokenId}`);
     } catch (error) {
       console.error('Error minting NFT:', error);
-      alert('Failed to mint NFT. Please try again.');
+      showError('Minting failed', 'Failed to mint NFT. Please try again.');
     } finally {
       setIsMinting(false);
     }
   };
 
   const handleFractionalizeNFT = async () => {
-    if (!selectedNFT || !collection || !fractionalizeForm.fractionalName || !fractionalizeForm.fractionalSymbol) {
-      alert('Please fill in all required fields');
+    if (!selectedNFT || !fractionalizeForm.fractionalName || !fractionalizeForm.fractionalSymbol) {
+      showWarning('Incomplete form', 'Please fill in all required fields');
       return;
     }
+
+    // Ask for confirmation
+    const shouldFractionalize = await confirm({
+      title: 'Fractionalize NFT?',
+      message: `You are about to fractionalize NFT #${selectedNFT.tokenId} into ${fractionalizeForm.totalShares} shares at ${fractionalizeForm.sharePrice} ETH each. This cannot be undone.`,
+      confirmText: 'Fractionalize',
+      cancelText: 'Cancel',
+      type: 'warning'
+    });
+
+    if (!shouldFractionalize) return;
 
     setIsFractionalizing(true);
     try {
       await fractionalizeNFT(
-        collection.collectionAddress,
+        collection?.collectionAddress || '',
         selectedNFT.tokenId,
         fractionalizeForm.totalShares,
         fractionalizeForm.sharePrice,
@@ -197,21 +212,12 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
         fractionalizeForm.fractionalSymbol
       );
 
-      // Reset form and reload data
-      setFractionalizeForm({
-        totalShares: 10,
-        sharePrice: '0.0001',
-        fractionalName: '',
-        fractionalSymbol: ''
-      });
-      setSelectedNFT(null);
+      showSuccess('NFT fractionalized successfully', 'Fractional ownership contract created');
       setShowFractionalize(false);
       await loadCollectionData();
-      
-      alert('NFT fractionalized successfully!');
     } catch (error) {
       console.error('Error fractionalizing NFT:', error);
-      alert('Failed to fractionalize NFT. Please try again.');
+      showError('Fractionalization failed', 'Failed to fractionalize NFT. Please try again.');
     } finally {
       setIsFractionalizing(false);
     }
@@ -219,24 +225,28 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
 
   const handleBuyShares = async () => {
     if (!selectedFractionalInfo || shareAmount <= 0) {
-      alert('Please enter a valid share amount');
+      showWarning('Invalid amount', 'Please enter a valid share amount');
       return;
     }
 
     if (shareAmount > availableShares) {
-      alert(`Only ${availableShares} shares are available for purchase.`);
+      showWarning('Not enough shares', `Only ${availableShares} shares are available for purchase.`);
       return;
     }
 
     if (shareAmount > maxAffordableShares) {
-      alert(`You can only afford ${maxAffordableShares} shares with your current balance.`);
+      showWarning('Insufficient balance', `You can only afford ${maxAffordableShares} shares with your current balance.`);
       return;
     }
 
     const totalCost = parseFloat(selectedFractionalInfo.sharePrice) * shareAmount;
-    const confirmed = window.confirm(
-      `Buy ${shareAmount} share${shareAmount > 1 ? 's' : ''} for ${totalCost.toFixed(4)} ETH?`
-    );
+    const confirmed = await confirm({
+      title: 'Buy Shares?',
+      message: `You are about to buy ${shareAmount} share${shareAmount > 1 ? 's' : ''} for ${totalCost.toFixed(4)} ETH.`,
+      confirmText: 'Buy Shares',
+      cancelText: 'Cancel',
+      type: 'info'
+    });
 
     if (!confirmed) return;
 
@@ -247,7 +257,7 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
       await loadAvailableShares(); // Refresh available shares
       setShowBuyShares(false);
       setShareAmount(1);
-      alert(`Successfully purchased ${shareAmount} share${shareAmount > 1 ? 's' : ''}! Transaction: ${txHash.substring(0, 10)}...`);
+      showSuccess('Shares purchased successfully', `${shareAmount} share${shareAmount > 1 ? 's' : ''} purchased! Transaction: ${txHash.substring(0, 10)}...`);
     } catch (error) {
       console.error('Error buying shares:', error);
       let errorMessage = 'Failed to buy shares. Please try again.';
@@ -264,7 +274,7 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
         }
       }
       
-      alert(errorMessage);
+      showError('Purchase failed', errorMessage);
     } finally {
       setIsBuying(false);
     }
@@ -336,7 +346,7 @@ export default function CollectionManager({ collectionId, userAddress, onClose }
       setShowBuyShares(true);
     } catch (error) {
       console.error('Error loading fractional info:', error);
-      alert('Failed to load NFT share information');
+      showError('Loading error', 'Failed to load NFT share information');
     }
   };
 

@@ -1,59 +1,21 @@
 'use client';
 
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {useForm} from 'react-hook-form';
+import GlassModal from '@/components/auth/modal/glass-modal';
 import {AlertCircle, CheckCircle, Loader2, Plus, Trash2, Upload, X} from 'lucide-react';
 import {createCollectionMetadata, createNFTMetadata, uploadFileToIPFS, uploadJSONToIPFS} from '@/utils/ipfs';
 import {createCollection, fractionalizeNFT, getNFTFactoryContract, getSigner, mintNFT} from '@/utils/blockchain';
-
-interface CreateCollectionModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSuccess: (collectionId: number) => void;
-}
-
-interface CollectionFormData {
-    name: string;
-    symbol: string;
-    description: string;
-    externalLink?: string;
-}
-
-interface NFTData {
-    id: string;
-    name: string;
-    description: string;
-    image: File | null;
-    imagePreview?: string;
-    imageData?: {
-        file: File;
-        name: string;
-        size: number;
-        type: string;
-        lastModified: number;
-    };
-    attributes: Array<{ trait_type: string; value: string }>;
-    // Fractionalization settings
-    shouldFractionalize: boolean;
-    totalShares: number;
-    sharePrice: string;
-    fractionalName: string;
-    fractionalSymbol: string;
-    // Deployment status
-    status: 'pending' | 'minting' | 'minted' | 'fractionalizing' | 'completed' | 'error';
-    tokenId?: number;
-    fractionalContract?: string;
-    error?: string;
-}
-
-interface DeploymentStep {
-    id: string;
-    name: string;
-    status: 'pending' | 'processing' | 'completed' | 'error';
-    description: string;
-}
+import { useNotifications } from '@/components/notifications/NotificationContext';
+import type { 
+    CreateCollectionModalProps, 
+    CollectionFormData, 
+    NFTData, 
+    DeploymentStep 
+} from '@/types';
 
 export default function CreateCollectionModal({isOpen, onClose, onSuccess}: CreateCollectionModalProps) {
+    const { showSuccess, showError, showWarning, showInfo, confirm } = useNotifications();
     const [step, setStep] = useState(1); // 1: Collection, 2: NFTs, 3: Deploy
     const [isDeploying, setIsDeploying] = useState(false);
     const [collectionImage, setCollectionImage] = useState<File | null>(null);
@@ -175,15 +137,19 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
         });
 
         if (!apiKey || !secretKey) {
-          alert(`Pinata credentials not configured!
+          const configureCredentials = await confirm({
+            title: 'Pinata credentials not configured!',
+            message: `Please create a .env.local file in your frontend directory with:
 
-    Please create a .env.local file in your frontend directory with:
+NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
+NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key
+NEXT_PUBLIC_PINATA_GATEWAY=https://gateway.pinata.cloud/ipfs/
 
-    NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
-    NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key
-    NEXT_PUBLIC_PINATA_GATEWAY=https://gateway.pinata.cloud/ipfs/
-
-    Get your credentials from: https://app.pinata.cloud/keys`);
+Get your credentials from: https://app.pinata.cloud/keys`,
+            confirmText: 'I understand',
+            cancelText: 'Cancel',
+            type: 'warning'
+          });
           return;
         }
 
@@ -198,7 +164,7 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
           console.log('Testing Pinata with test data:', testData);
           const result = await uploadJSONToIPFS(testData, 'pinata_test');
           console.log('Pinata test successful:', result);
-          alert(`Pinata connection successful! Test file uploaded to: ${result}`);
+          showSuccess('Pinata connection successful!', `Test file uploaded to: ${result}`);
         } catch (error) {
           console.error('Pinata test failed:', error);
 
@@ -207,19 +173,19 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
             if (error.message.includes('401')) {
               errorMessage = `Authentication failed (401 Unauthorized).
 
-    Please check your Pinata credentials:
-    1. Go to https://app.pinata.cloud/keys
-    2. Create a new API key with admin permissions
-    3. Update your .env.local file with the correct keys
+Please check your Pinata credentials:
+1. Go to https://app.pinata.cloud/keys
+2. Create a new API key with admin permissions
+3. Update your .env.local file with the correct keys
 
-    Current API key length: ${apiKey?.length}
-    Current secret key length: ${secretKey?.length}`;
+Current API key length: ${apiKey?.length}
+Current secret key length: ${secretKey?.length}`;
             } else {
               errorMessage = error.message;
             }
           }
 
-          alert(`Pinata connection failed: ${errorMessage}`);
+          showError('Pinata connection failed', errorMessage);
         }
 
         console.log('=== END PINATA TEST ===');
@@ -376,15 +342,14 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
         initializeDeploymentSteps();
 
         try {
-            // Step 1: Create Collection
-            console.log('Deploy Everything - Step 1: Creating collection');
+            // Step 1: Create collection metadata and deploy collection
             updateDeploymentStep('collection', 'processing', 'Uploading collection image...');
-
             console.log('Deploy Everything - Uploading collection image to IPFS...');
-            const collectionImageUrl = await uploadFileToIPFS(collectionImage, 'collection');
+            const collectionImageUrl = await uploadFileToIPFS(collectionImage!, 'collection');
             console.log('Deploy Everything - Collection image uploaded:', collectionImageUrl);
 
             updateDeploymentStep('collection', 'processing', 'Creating collection metadata...');
+            console.log('Deploy Everything - Creating collection metadata...');
             const collectionMetadata = createCollectionMetadata(
                 collectionData.name,
                 collectionData.symbol,
@@ -407,8 +372,6 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
             const collectionResult = await createCollection(
                 collectionData.name,
                 collectionData.symbol,
-                collectionData.description,
-                collectionImageUrl,
                 collectionMetadataUrl
             );
             console.log('Deploy Everything - Collection created:', collectionResult);
@@ -530,19 +493,19 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
     const onSubmit = async (data: CollectionFormData) => {
         if (step === 1) {
             if (!collectionImage) {
-                alert('Please upload a collection image');
+                showWarning('Collection image required', 'Please upload a collection image');
                 return;
             }
             setCollectionData(data);
             setStep(2);
         } else if (step === 2) {
             if (nfts.length === 0) {
-                alert('Please add at least one NFT');
+                showWarning('NFTs required', 'Please add at least one NFT');
                 return;
             }
 
             // Add a small delay to ensure state is fully updated
-            setTimeout(() => {
+            setTimeout(async () => {
                 console.log('NFTs validation - Current NFTs:', nfts);
                 // Validate NFTs
                 for (const nft of nfts) {
@@ -572,7 +535,7 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
                                 hasImageFile: !!nft.imageData?.file
                             }
                         });
-                        alert('Please fill in all required NFT fields (name, description, and image)');
+                        showError('Incomplete NFT data', 'Please fill in all required NFT fields (name, description, and image)');
                         return;
                     }
                     if (nft.shouldFractionalize && (!nft.fractionalName || !nft.fractionalSymbol)) {
@@ -580,14 +543,26 @@ export default function CreateCollectionModal({isOpen, onClose, onSuccess}: Crea
                             fractionalName: !nft.fractionalName ? 'missing' : 'ok',
                             fractionalSymbol: !nft.fractionalSymbol ? 'missing' : 'ok'
                         });
-                        alert('Please fill in fractional ownership details for all NFTs that will be fractionalized');
+                        showError('Incomplete fractionalization data', 'Please fill in fractional ownership details for all NFTs that will be fractionalized');
                         return;
                     }
                 }
 
                 console.log('All NFTs validated successfully, proceeding to deployment...');
-                setStep(3);
-                deployEverything();
+                
+                // Ask for confirmation before deployment
+                const shouldDeploy = await confirm({
+                    title: 'Deploy Collection?',
+                    message: `You're about to deploy a collection with ${nfts.length} NFT${nfts.length > 1 ? 's' : ''}. This will cost gas fees and cannot be undone. Are you sure you want to proceed?`,
+                    confirmText: 'Deploy',
+                    cancelText: 'Cancel',
+                    type: 'info'
+                });
+
+                if (shouldDeploy) {
+                    setStep(3);
+                    deployEverything();
+                }
             }, 100); // Small delay to ensure state is updated
         }
     };
