@@ -4,7 +4,7 @@ import SignIn from "@/components/auth/buttons/signin-button";
 import GlassModal from "@/components/auth/modal/glass-modal";
 import MainBackground from "@/components/auth/main-background";
 
-export default function LoginUI() {
+export default function LoginContent() {
     return (
         <>
             <MainBackground />

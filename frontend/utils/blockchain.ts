@@ -296,16 +296,12 @@ export async function fetchMetadata(metadataURI: string): Promise<any> {
  *  Creates a new NFT collection using the factory contract.
  *  @param {string} name - Name of the collection.
  *  @param {string} symbol - Symbol of the collection.
- *  @param {string} description - Description of the collection.
- *  @param {string} imageURI - IPFS URI of the collection image.
  *  @param {string} metadataURI - IPFS URI of the collection metadata.
  *  @returns {Promise<{ collectionId: number; txHash: string }>} - Collection ID and transaction hash.
  */
 export async function createCollection(
     name: string,
     symbol: string,
-    description: string,
-    imageURI: string,
     metadataURI: string
 ): Promise<{ collectionId: number; txHash: string }> {
     try {

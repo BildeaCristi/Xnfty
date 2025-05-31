@@ -608,23 +608,3 @@ export default function MainBackground() {
         <div ref={containerRef} className="fixed inset-0 -z-10"/>
     </>
 }
-/*
-"use client";
-
-import { useEffect, useRef } from "react";
-import { initScene } from "./setup/sceneSetup";
-
-export default function MainBackground() {
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        const { cleanup } = initScene(containerRef.current);
-
-        return cleanup;
-    }, []);
-
-    return <div ref={containerRef} className="fixed inset-0 -z-10" />;
-}
-*/

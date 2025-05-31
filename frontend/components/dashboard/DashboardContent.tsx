@@ -302,14 +302,14 @@ export default function DashboardContent({ session }: DashboardContentProps) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
                 <button
                   onClick={loadCollections}
-                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
                   title="Refresh all data"
                 >
                   <span>🔄</span>
@@ -317,7 +317,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                 </button>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Create Collection</span>
@@ -396,7 +396,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
             <div className="flex space-x-1 bg-white/10 rounded-lg p-1">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === 'all'
                     ? 'bg-white/20 text-white'
                     : 'text-blue-200 hover:text-white'
@@ -406,7 +406,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
               </button>
               <button
                 onClick={() => setActiveTab('owned')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === 'owned'
                     ? 'bg-white/20 text-white'
                     : 'text-blue-200 hover:text-white'
@@ -416,7 +416,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
               </button>
               <button
                 onClick={() => setActiveTab('shares')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === 'shares'
                     ? 'bg-white/20 text-white'
                     : 'text-blue-200 hover:text-white'
@@ -426,7 +426,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
               </button>
               <button
                 onClick={() => setActiveTab('marketplace')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === 'marketplace'
                     ? 'bg-white/20 text-white'
                     : 'text-blue-200 hover:text-white'
@@ -453,7 +453,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
               {(activeTab === 'owned' || activeTab === 'shares') && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
                 >
                   Create Your First Collection
                 </button>
@@ -470,7 +470,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                   <div
                     key={collection.collectionId}
                     onClick={() => handleCollectionClick(collection.collectionId)}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden hover:bg-white/20 transition-colors cursor-pointer"
+                    className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden cursor-pointer"
                   >
                     <img 
                       src={collection.imageURI || '/placeholder-collection.png'}
@@ -549,7 +549,7 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                               <button
                                 key={idx}
                                 onClick={(e) => handleAddToMetaMask(share.fractionalContract, e)}
-                                className={`text-xs px-2 py-1 rounded flex items-center transition-colors ${
+                                className={`text-xs px-2 py-1 rounded flex items-center ${
                                   share.isOwner || share.sharePercentage === 100
                                     ? 'bg-green-600 hover:bg-green-700 text-white'
                                     : 'bg-purple-600 hover:bg-purple-700 text-white'
