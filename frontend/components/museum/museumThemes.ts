@@ -48,12 +48,12 @@ export const museumThemes: Record<string, MuseumTheme> = {
       floorMetalness: 0.8,
     },
     lighting: {
-      ambientIntensity: 0.5,
+      ambientIntensity: 0.3,
       ambientColor: '#ffffff',
-      directionalIntensity: 0.7,
+      directionalIntensity: 0.4,
       directionalColor: '#ffffff',
       accentColor: '#4a90e2',
-      accentIntensity: 2,
+      accentIntensity: 1.2,
     },
     frame: {
       defaultColor: '#1a1a1a',
@@ -78,12 +78,12 @@ export const museumThemes: Record<string, MuseumTheme> = {
       floorMetalness: 0.1,
     },
     lighting: {
-      ambientIntensity: 0.3,
+      ambientIntensity: 0.2,
       ambientColor: '#ffe4b5',
-      directionalIntensity: 0.5,
+      directionalIntensity: 0.3,
       directionalColor: '#ffd700',
       accentColor: '#daa520',
-      accentIntensity: 1.5,
+      accentIntensity: 0.8,
     },
     frame: {
       defaultColor: '#8b4513',
@@ -113,12 +113,12 @@ export const museumThemes: Record<string, MuseumTheme> = {
       floorMetalness: 0.9,
     },
     lighting: {
-      ambientIntensity: 0.2,
+      ambientIntensity: 0.15,
       ambientColor: '#4169e1',
-      directionalIntensity: 0.3,
+      directionalIntensity: 0.2,
       directionalColor: '#00ffff',
       accentColor: '#ff00ff',
-      accentIntensity: 3,
+      accentIntensity: 1.5,
     },
     frame: {
       defaultColor: '#1e90ff',
@@ -148,12 +148,12 @@ export const museumThemes: Record<string, MuseumTheme> = {
       floorMetalness: 0,
     },
     lighting: {
-      ambientIntensity: 0.6,
+      ambientIntensity: 0.35,
       ambientColor: '#ffffe0',
-      directionalIntensity: 0.8,
+      directionalIntensity: 0.5,
       directionalColor: '#ffd700',
       accentColor: '#90ee90',
-      accentIntensity: 1,
+      accentIntensity: 0.6,
     },
     frame: {
       defaultColor: '#8b4513',

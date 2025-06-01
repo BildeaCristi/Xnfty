@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Placeholder NFT</title>
+</head>
+<body>
+    <h1>Placeholder NFT Generator</h1>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <br>
+    <a id="download" download="placeholder-nft.png" href="">Download Placeholder NFT</a>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+        gradient.addColorStop(0, '#2a2a2a');
+        gradient.addColorStop(1, '#4a4a4a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 512, 512);
+        
+        // Border
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(10, 10, 492, 492);
+        
+        // Center circle
+        ctx.beginPath();
+        ctx.arc(256, 256, 100, 0, Math.PI * 2);
+        ctx.fillStyle = '#555';
+        ctx.fill();
+        
+        // NFT text
+        ctx.font = 'bold 60px Arial';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('NFT', 256, 256);
+        
+        // Question mark
+        ctx.font = '30px Arial';
+        ctx.fillStyle = '#777';
+        ctx.fillText('?', 256, 350);
+        
+        // Convert to downloadable image
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            document.getElementById('download').href = url;
+        });
+    </script>
+</body>
+</html> 

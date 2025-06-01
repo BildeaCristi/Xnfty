@@ -7,7 +7,7 @@ import {useRouter} from 'next/navigation';
 import DashboardBackground from '@/components/dashboard/DashboardBackground';
 import GlassPanel from '@/components/dashboard/GlassPanel';
 import NFTDetailModal from './NFTDetailModal';
-import Museum3DView from '@/components/museum/Museum3DView';
+import Museum3DScene from '@/components/museum/Museum3DScene';
 import {
   formatAddress,
   getCollection,
@@ -128,7 +128,7 @@ export default function CollectionDetailContent({collectionId, session}: Collect
                     <ArrowLeft className="w-5 h-5"/>
                     <span>Exit 3D View</span>
                 </button>
-                <Museum3DView 
+                <Museum3DScene 
                     collection={collection} 
                     nfts={nfts} 
                     userAddress={walletAddress}

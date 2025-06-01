@@ -10,6 +10,8 @@ interface MuseumState {
   // Control modes
   controlMode: 'orbit' | 'firstPerson';
   setControlMode: (mode: 'orbit' | 'firstPerson') => void;
+  playerSpeed: number;
+  setPlayerSpeed: (speed: number) => void;
   
   // UI states
   showThemeSelector: boolean;
@@ -20,6 +22,10 @@ interface MuseumState {
   // Performance settings
   quality: 'low' | 'medium' | 'high';
   setQuality: (quality: 'low' | 'medium' | 'high') => void;
+  
+  // Camera settings
+  cameraPosition: [number, number, number];
+  setCameraPosition: (position: [number, number, number]) => void;
 }
 
 export const useMuseumStore = create<MuseumState>((set) => ({
@@ -44,4 +50,12 @@ export const useMuseumStore = create<MuseumState>((set) => ({
   // Initial quality
   quality: 'high',
   setQuality: (quality) => set({ quality }),
+  
+  // Initial player speed
+  playerSpeed: 10,
+  setPlayerSpeed: (speed) => set({ playerSpeed: speed }),
+  
+  // Initial camera position
+  cameraPosition: [0, 0, 0],
+  setCameraPosition: (position) => set({ cameraPosition: position }),
 })); 

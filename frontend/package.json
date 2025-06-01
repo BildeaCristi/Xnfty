@@ -11,8 +11,12 @@
   "dependencies": {
     "@headlessui/react": "^2.2.2",
     "@pinata/sdk": "^2.1.0",
+    "@react-spring/three": "^10.0.1",
+    "@react-spring/web": "^10.0.1",
     "@react-three/drei": "^10.0.3",
     "@react-three/fiber": "^9.0.4",
+    "@react-three/postprocessing": "^3.0.4",
+    "@react-three/rapier": "^2.1.0",
     "@wagmi/connectors": "^5.8.1",
     "@web3auth/base": "^9.7.0",
     "@web3auth/ethereum-provider": "^9.7.0",

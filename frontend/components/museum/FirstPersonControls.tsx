@@ -2,11 +2,11 @@
 
 import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, Euler, Quaternion } from 'three';
+import { Vector3, Euler, Quaternion, Raycaster } from 'three';
 import { PointerLockControls as PointerLockControlsImpl } from 'three/examples/jsm/controls/PointerLockControls';
+import { useMuseumStore } from '@/store/museumStore';
 
 interface FirstPersonControlsProps {
-  speed?: number;
   jumpHeight?: number;
   enabled?: boolean;
   onLockChange?: (locked: boolean) => void;
@@ -17,8 +17,9 @@ export interface FirstPersonControlsRef {
 }
 
 const FirstPersonControls = forwardRef<FirstPersonControlsRef, FirstPersonControlsProps>(
-  ({ speed = 10, jumpHeight = 2, enabled = true, onLockChange }, ref) => {
-    const { camera, gl } = useThree();
+  ({ jumpHeight = 2, enabled = true, onLockChange }, ref) => {
+    const { camera, gl, scene } = useThree();
+    const { playerSpeed } = useMuseumStore();
     const controlsRef = useRef<PointerLockControlsImpl | null>(null);
     
     // Movement state
@@ -29,6 +30,10 @@ const FirstPersonControls = forwardRef<FirstPersonControlsRef, FirstPersonContro
     const canJump = useRef(true);
     const velocity = useRef(new Vector3());
     const direction = useRef(new Vector3());
+    
+    // Collision detection
+    const raycaster = useRef(new Raycaster());
+    const collisionDistance = 0.5; // Distance to maintain from walls
     
     // Expose methods to parent
     useImperativeHandle(ref, () => ({
@@ -149,15 +154,54 @@ const FirstPersonControls = forwardRef<FirstPersonControlsRef, FirstPersonContro
       
       // Apply movement
       if (moveForward.current || moveBackward.current) {
-        velocity.current.z -= direction.current.z * speed * delta;
+        velocity.current.z -= direction.current.z * playerSpeed * delta;
       }
       if (moveLeft.current || moveRight.current) {
-        velocity.current.x -= direction.current.x * speed * delta;
+        velocity.current.x -= direction.current.x * playerSpeed * delta;
       }
+      
+      // Store current position for collision rollback
+      const oldPosition = camera.position.clone();
       
       // Move the camera
       controlsRef.current.moveRight(-velocity.current.x * delta);
       controlsRef.current.moveForward(-velocity.current.z * delta);
+      
+      // Check collisions in movement direction
+      const moveDirection = new Vector3();
+      camera.getWorldDirection(moveDirection);
+      
+      // Check forward/backward collision
+      if (moveForward.current || moveBackward.current) {
+        raycaster.current.set(camera.position, moveDirection.multiplyScalar(moveForward.current ? 1 : -1));
+        const intersects = raycaster.current.intersectObjects(scene.children, true);
+        
+        if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
+          // Collision detected, rollback position
+          camera.position.x = oldPosition.x;
+          camera.position.z = oldPosition.z;
+          velocity.current.x = 0;
+          velocity.current.z = 0;
+        }
+      }
+      
+      // Check side collision
+      if (moveLeft.current || moveRight.current) {
+        const sideDirection = new Vector3();
+        sideDirection.crossVectors(camera.up, moveDirection).normalize();
+        sideDirection.multiplyScalar(moveLeft.current ? 1 : -1);
+        
+        raycaster.current.set(camera.position, sideDirection);
+        const intersects = raycaster.current.intersectObjects(scene.children, true);
+        
+        if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
+          // Collision detected, rollback position
+          camera.position.x = oldPosition.x;
+          camera.position.z = oldPosition.z;
+          velocity.current.x = 0;
+          velocity.current.z = 0;
+        }
+      }
       
       // Apply vertical movement (jumping/falling)
       camera.position.y += velocity.current.y * delta;
