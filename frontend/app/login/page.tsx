@@ -15,5 +15,5 @@ export default async function LoginPage() {
         redirect("/dashboard");
     }
 
-    <LoginContent/>
+    return <LoginContent/>;
 }

@@ -9,3 +9,15 @@ export async function handleGoogleSignIn() {
 export async function handleSignOut() {
     await signOut();
 }
+
+export async function handleWalletSignIn(credentials: {
+    message: string;
+    signature: string;
+    walletAddress: string;
+}) {
+    await signIn("wallet-connect", {
+        ...credentials,
+        redirect: true,
+        redirectTo: "/dashboard"
+    });
+}

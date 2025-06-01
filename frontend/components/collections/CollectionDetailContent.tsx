@@ -2,20 +2,23 @@
 
 import {useEffect, useState} from 'react';
 import {Session} from 'next-auth';
-import {ArrowLeft, Calendar, Check, Coins, Copy, ExternalLink, Image, Share2, User as UserIcon} from 'lucide-react';
+import {ArrowLeft, Calendar, Check, Coins, Copy, ExternalLink, Image, Share2, User as UserIcon, Eye} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import DashboardBackground from '@/components/dashboard/DashboardBackground';
 import GlassPanel from '@/components/dashboard/GlassPanel';
 import NFTDetailModal from './NFTDetailModal';
+import Museum3DView from '@/components/museum/Museum3DView';
 import {
-  Collection,
-  CollectionStats,
   formatAddress,
   getCollection,
   getCollectionNFTs,
   getCollectionStats,
-  NFT
 } from '@/utils/blockchain';
+import type {
+  Collection,
+  CollectionStats,
+  NFT
+} from '@/types/blockchain';
 
 interface CollectionDetailContentProps {
     collectionId: number;
@@ -31,6 +34,7 @@ export default function CollectionDetailContent({collectionId, session}: Collect
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+    const [is3DView, setIs3DView] = useState(false);
 
     const walletAddress = session?.walletAddress;
 
@@ -114,19 +118,51 @@ export default function CollectionDetailContent({collectionId, session}: Collect
         );
     }
 
+    if (is3DView && collection && nfts) {
+        return (
+            <div className="min-h-screen relative">
+                <button
+                    onClick={() => setIs3DView(false)}
+                    className="absolute top-4 right-4 z-50 flex items-center space-x-2 bg-gray-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-gray-700/80 transition-colors"
+                >
+                    <ArrowLeft className="w-5 h-5"/>
+                    <span>Exit 3D View</span>
+                </button>
+                <Museum3DView 
+                    collection={collection} 
+                    nfts={nfts} 
+                    userAddress={walletAddress}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen relative overflow-hidden">
             <DashboardBackground/>
 
             <div className="relative z-10 p-6">
                 {/* Back Button */}
-                <button
-                    onClick={handleBackClick}
-                    className="flex items-center space-x-2 text-blue-200 hover:text-white mb-6 transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5"/>
-                    <span>Back to Dashboard</span>
-                </button>
+                <div className="flex items-center justify-between mb-6">
+                    <button
+                        onClick={handleBackClick}
+                        className="flex items-center space-x-2 text-blue-200 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5"/>
+                        <span>Back to Dashboard</span>
+                    </button>
+                    
+                    {/* 3D View Toggle Button */}
+                    {nfts.length > 0 && (
+                        <button
+                            onClick={() => setIs3DView(true)}
+                            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <Eye className="w-5 h-5"/>
+                            <span>View in 3D Museum</span>
+                        </button>
+                    )}
+                </div>
 
                 {/* Collection Header */}
                 <GlassPanel className="p-4 sm:p-6 mb-6 sm:mb-8">
