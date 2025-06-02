@@ -114,7 +114,7 @@ export function useIPFSImage(
             case 'high':
               newTexture.minFilter = THREE.LinearMipmapLinearFilter;
               newTexture.magFilter = THREE.LinearFilter;
-              newTexture.anisotropy = 8;
+              newTexture.anisotropy = 16;
               newTexture.generateMipmaps = true;
               break;
             case 'medium':
@@ -287,7 +287,11 @@ export function useIPFSImage(
         if (abortControllerRef.current?.signal.aborted) return;
         
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        console.error(`❌ Failed to load NFT image: ${errorMessage}`);
+        
+        // Don't log "Request aborted" as it's expected behavior during cleanup
+        if (!errorMessage.includes('Request aborted')) {
+          console.error(`❌ Failed to load NFT image: ${errorMessage}`);
+        }
         
         setError(errorMessage);
         

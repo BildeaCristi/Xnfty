@@ -29,3 +29,110 @@ body {
         text-wrap: balance;
     }
 }
+
+/* Custom animations for the museum loader */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(200%);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+    }
+    50% {
+        box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    }
+}
+
+@keyframes progress-pulse {
+    0%, 100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scaleY(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes museum-icon-pulse {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+    50% {
+        transform: scale(1.05) rotate(2deg);
+        filter: drop-shadow(0 0 20px currentColor);
+    }
+}
+
+/* Apply custom animations */
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+.animate-progress-pulse {
+    animation: progress-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-museum-icon {
+    animation: museum-icon-pulse 3s ease-in-out infinite;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .museum-loader-title {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+    
+    .museum-loader-message {
+        font-size: 1rem;
+    }
+}
+
+/* Smooth transitions for better UX */
+.museum-loader-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg-classic {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.gradient-bg-modern {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+}
+
+.gradient-bg-futuristic {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+}
+
+.gradient-bg-nature {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}

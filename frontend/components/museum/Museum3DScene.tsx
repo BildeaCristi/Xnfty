@@ -10,8 +10,7 @@ import {
   Preload, 
   PerformanceMonitor,
   AdaptiveDpr,
-  AdaptiveEvents,
-  Loader
+  AdaptiveEvents
 } from '@react-three/drei';
 import { EffectComposer, Bloom, SSAO, DepthOfField } from '@react-three/postprocessing';
 import { NFT, Collection } from '@/types/blockchain';
@@ -23,6 +22,7 @@ import NFTDetailModal from '../collections/NFTDetailModal';
 import SettingsPanel from './SettingsPanel';
 import * as THREE from 'three';
 import { useLightingSetup } from '@/hooks/useLightingSetup';
+import { useIPFSImage } from '@/hooks/useIPFSImage';
 
 // Lazy load heavy components
 const EnhancedMuseumRoom = lazy(() => import('./EnhancedMuseumRoom'));
@@ -37,6 +37,79 @@ interface Museum3DSceneProps {
   userAddress?: string;
 }
 
+// NFT Image Preloader Component
+function NFTImagePreloader({ nfts, onAllLoaded }: { nfts: NFT[], onAllLoaded: () => void }) {
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [loadingStates, setLoadingStates] = useState<boolean[]>(new Array(nfts.length).fill(true));
+  
+  // Track each NFT image loading
+  const imageHooks = nfts.map((nft, index) => {
+    const { texture, loading, error } = useIPFSImage(nft.imageURI, { quality: 'medium' });
+    
+    useEffect(() => {
+      if (!loading) {
+        setLoadingStates(prev => {
+          const newStates = [...prev];
+          if (newStates[index] === true) {
+            newStates[index] = false;
+            setLoadedCount(count => {
+              const newCount = count + 1;
+              console.log(`📸 NFT Image ${index + 1} loaded. Total: ${newCount}/${nfts.length}`);
+              return newCount;
+            });
+          }
+          return newStates;
+        });
+      }
+    }, [loading, index]);
+    
+    return { texture, loading, error };
+  });
+  
+  // Check if all images are loaded
+  useEffect(() => {
+    console.log(`🔍 Image loading check: ${loadedCount}/${nfts.length} loaded`);
+    if (loadedCount === nfts.length && nfts.length > 0) {
+      console.log(`✅ All ${nfts.length} NFT images loaded successfully!`);
+      // Add small delay to ensure smooth transition
+      setTimeout(() => {
+        onAllLoaded();
+      }, 500);
+    }
+  }, [loadedCount, nfts.length, onAllLoaded]);
+  
+  // Fallback timeout - show scene after 10 seconds regardless
+  useEffect(() => {
+    console.log(`⏰ Setting 5-second fallback timeout for ${nfts.length} NFTs`);
+    const fallbackTimeout = setTimeout(() => {
+      console.log(`⚠️ Fallback timeout reached - showing scene with ${loadedCount}/${nfts.length} images loaded`);
+      onAllLoaded();
+    }, 5000); // 5 second timeout (reduced from 10)
+    
+    return () => clearTimeout(fallbackTimeout);
+  }, [nfts.length, onAllLoaded, loadedCount]);
+  
+  // If no NFTs, immediately show scene
+  useEffect(() => {
+    if (nfts.length === 0) {
+      console.log(`📭 No NFTs to load - showing scene immediately`);
+      onAllLoaded();
+    }
+  }, [nfts.length, onAllLoaded]);
+  
+  // Calculate loading progress
+  const progress = nfts.length > 0 ? Math.round((loadedCount / nfts.length) * 100) : 100;
+  
+  // Update loading screen with image loading progress
+  useEffect(() => {
+    if (nfts.length > 0) {
+      console.log(`📊 NFT Images progress: ${loadedCount}/${nfts.length} (${progress}%)`);
+    }
+  }, [loadedCount, nfts.length, progress]);
+  
+  return null; // This component doesn't render anything
+}
+
 export default function Museum3DScene({ 
   collection, 
   nfts, 
@@ -46,6 +119,7 @@ export default function Museum3DScene({
   const [hoveredNFT, setHoveredNFT] = useState<number | null>(null);
   const [dpr, setDpr] = useState(1.5);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [allImagesLoaded, setAllImagesLoaded] = useState(true);
   
   const { 
     controlMode, 
@@ -87,6 +161,12 @@ export default function Museum3DScene({
     }
   }, [quality, updatePerformanceMetrics]);
 
+  // Handle when all images are loaded
+  const handleAllImagesLoaded = useCallback(() => {
+    console.log(`🎉 handleAllImagesLoaded called - setting allImagesLoaded to true`);
+    setAllImagesLoaded(true);
+  }, []);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -104,9 +184,32 @@ export default function Museum3DScene({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [controlMode, setControlMode]);
 
+  // Debug loading state
+  useEffect(() => {
+    console.log(`🎭 Museum scene state: allImagesLoaded=${allImagesLoaded}, NFTs=${nfts.length}`);
+  }, [allImagesLoaded, nfts.length]);
+
+  // Initialize loading state
+  useEffect(() => {
+    console.log(`🚀 Museum3DScene initialized with ${nfts.length} NFTs`);
+    if (nfts.length === 0) {
+      console.log(`�� No NFTs detected - keeping scene visible`);
+      setAllImagesLoaded(true);
+    } else {
+      console.log(`📸 Starting to load ${nfts.length} NFT images...`);
+      setAllImagesLoaded(false); // Hide scene while loading images
+    }
+  }, [nfts.length]); // Depend on nfts.length
+
   return (
     <>
-      <div className="w-full h-screen relative bg-gray-900">
+      {/* Preload NFT images */}
+      <NFTImagePreloader nfts={nfts} onAllLoaded={handleAllImagesLoaded} />
+      
+      {/* Show loading screen until all images are ready */}
+      {!allImagesLoaded && <MuseumLoadingScreen />}
+      
+      <div className={`w-full h-screen relative bg-gray-900 ${!allImagesLoaded ? 'invisible' : 'visible'}`}>
         <Canvas
           shadows={renderSettings.shadows}
           dpr={dpr}
@@ -270,74 +373,50 @@ export default function Museum3DScene({
           </Suspense>
         </Canvas>
 
-        {/* Loading screen */}
-        <Loader 
-          containerStyles={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: '#0a0a0a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          innerStyles={{
-            width: 200,
-            height: 200,
-            color: 'white',
-          }}
-          barStyles={{
-            height: 10,
-            background: '#4a90e2',
-          }}
-          dataStyles={{
-            color: 'white',
-            fontSize: '14px',
-            marginTop: '10px',
-          }}
-        />
-
         {/* HUD Overlay */}
-        <div className="absolute top-4 left-4 text-white pointer-events-none select-none">
-          <h2 className="text-2xl font-bold mb-2 drop-shadow-lg">
-            {collection.name}
-          </h2>
-          <p className="text-sm text-gray-300 drop-shadow">
-            {nfts.length} NFTs • {controlMode === 'orbit' ? 'Orbit Mode' : 'First Person Mode'}
-          </p>
-        </div>
+        {allImagesLoaded && (
+          <div className="absolute top-4 left-4 text-white pointer-events-none select-none">
+            <h2 className="text-2xl font-bold mb-2 drop-shadow-lg">
+              {collection.name}
+            </h2>
+            <p className="text-sm text-gray-300 drop-shadow">
+              {nfts.length} NFTs • {controlMode === 'orbit' ? 'Orbit Mode' : 'First Person Mode'}
+            </p>
+          </div>
+        )}
 
         {/* Controls hint */}
-        <div className="absolute bottom-4 left-4 text-white text-sm pointer-events-none select-none">
-          <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1">
-            <p>
-              <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">C</kbd>
-              Toggle camera mode
-            </p>
-            <p>
-              <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">ESC</kbd>
-              Settings / Exit
-            </p>
-            {controlMode === 'firstPerson' && (
+        {allImagesLoaded && (
+          <div className="absolute bottom-4 left-4 text-white text-sm pointer-events-none select-none">
+            <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1">
               <p>
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">WASD</kbd>
-                Move • 
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mx-1">SPACE</kbd>
-                Jump
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">C</kbd>
+                Toggle camera mode
               </p>
-            )}
+              <p>
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">ESC</kbd>
+                Settings / Exit
+              </p>
+              {controlMode === 'firstPerson' && (
+                <p>
+                  <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">WASD</kbd>
+                  Move • 
+                  <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mx-1">SPACE</kbd>
+                  Jump
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Quality indicator */}
-        <div className="absolute top-4 right-4 text-white text-sm">
-          <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1">
-            Quality: <span className="font-medium capitalize">{quality}</span>
+        {allImagesLoaded && (
+          <div className="absolute top-4 right-4 text-white text-sm">
+            <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1">
+              Quality: <span className="font-medium capitalize">{quality}</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Settings Panel */}

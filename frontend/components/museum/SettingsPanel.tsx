@@ -29,8 +29,6 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     setQuality,
     shadowsEnabled,
     setShadowsEnabled,
-    antialiasingEnabled,
-    setAntialiasingEnabled,
     postProcessingEnabled,
     setPostProcessingEnabled,
     physicsConfig,
@@ -108,8 +106,6 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   setQuality={setQuality}
                   shadowsEnabled={shadowsEnabled}
                   setShadowsEnabled={setShadowsEnabled}
-                  antialiasingEnabled={antialiasingEnabled}
-                  setAntialiasingEnabled={setAntialiasingEnabled}
                   postProcessingEnabled={postProcessingEnabled}
                   setPostProcessingEnabled={setPostProcessingEnabled}
                   performanceMetrics={performanceMetrics}
@@ -158,13 +154,11 @@ function DisplaySettings({
   setQuality,
   shadowsEnabled,
   setShadowsEnabled,
-  antialiasingEnabled,
-  setAntialiasingEnabled,
   postProcessingEnabled,
   setPostProcessingEnabled,
   performanceMetrics,
 }: any) {
-  const qualityLevels = ['low', 'medium', 'high', 'ultra'];
+  const qualityLevels = ['low', 'medium', 'high'];
 
   return (
     <div className="space-y-6">
@@ -214,13 +208,6 @@ function DisplaySettings({
           description="Dynamic shadows for objects"
           checked={shadowsEnabled}
           onChange={setShadowsEnabled}
-        />
-
-        <ToggleSwitch
-          label="Anti-aliasing"
-          description="Smooth edges (performance impact)"
-          checked={antialiasingEnabled}
-          onChange={setAntialiasingEnabled}
         />
 
         <ToggleSwitch

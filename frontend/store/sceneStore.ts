@@ -153,8 +153,8 @@ export const useSceneStore = create<SceneState>()(
             case 'high':
               return {
                 ...baseSettings,
-                shadowMapSize: 2048,
-                toneMappingExposure: 1.1,
+                shadowMapSize: 4096,
+                toneMappingExposure: 1.2,
               };
             default:
               return baseSettings;
