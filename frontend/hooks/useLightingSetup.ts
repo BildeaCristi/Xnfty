@@ -2,6 +2,15 @@ import { useMemo } from 'react';
 import { useMuseumStore } from '@/store/museumStore';
 import { useSceneStore } from '@/store/sceneStore';
 
+export interface RectAreaLightConfig {
+  color: string;
+  intensity: number;
+  width: number;
+  height: number;
+  position: [number, number, number];
+  rotation: [number, number, number];
+}
+
 export interface LightConfig {
   ambient: {
     intensity: number;
@@ -13,14 +22,7 @@ export interface LightConfig {
     position: [number, number, number];
     castShadow: boolean;
   };
-  ceiling: {
-    count: number;
-    intensity: number;
-    color: string;
-    distance: number;
-    decay: number;
-    positions: [number, number, number][];
-  };
+  rectAreaLights: RectAreaLightConfig[];
 }
 
 export function useLightingSetup() {
@@ -28,63 +30,117 @@ export function useLightingSetup() {
   const { shadowsEnabled, quality } = useSceneStore();
 
   const lightConfig = useMemo<LightConfig>(() => {
-    // Base lighting is very dim - only ceiling lights provide illumination
-    const baseAmbient = 0.02; // Barely visible
-    const baseDirectional = 0.01; // Almost nothing
+    // Minimal ambient lighting for realism
+    const baseAmbient = 0.01; // Very dim ambient
+    const baseDirectional = 0.05; // Minimal directional for subtle fill
     
-    // Ceiling light configuration based on theme
-    let ceilingIntensity = 0.15;
-    let ceilingColor = '#ffcc88';
-    let ceilingDistance = 8;
-    let ceilingDecay = 2;
+    // RectAreaLight configuration based on theme
+    let lightIntensity = 2.5;
+    let lightColor = '#ffcc88'; // Warm white
+    let lightWidth = 4;
+    let lightHeight = 4;
     
     switch (themeName) {
       case 'modern':
-        ceilingIntensity = 0.18;
-        ceilingColor = '#ffffff';
-        ceilingDistance = 10;
+        lightIntensity = 3.0;
+        lightColor = '#ffffff'; // Cool white
+        lightWidth = 6;
+        lightHeight = 6;
         break;
       case 'classic':
-        ceilingIntensity = 0.15;
-        ceilingColor = '#ffcc88';
-        ceilingDistance = 8;
+        lightIntensity = 2.2;
+        lightColor = '#ffcc88'; // Warm white
+        lightWidth = 4;
+        lightHeight = 4;
         break;
       case 'futuristic':
-        ceilingIntensity = 0.12;
-        ceilingColor = '#88ccff';
-        ceilingDistance = 12;
-        ceilingDecay = 1.5;
+        lightIntensity = 2.8;
+        lightColor = '#88ccff'; // Cool blue-white
+        lightWidth = 5;
+        lightHeight = 5;
         break;
       case 'nature':
-        ceilingIntensity = 0.2;
-        ceilingColor = '#ffffcc';
-        ceilingDistance = 10;
+        lightIntensity = 2.0;
+        lightColor = '#ffffcc'; // Soft yellow
+        lightWidth = 4;
+        lightHeight = 4;
         break;
     }
     
-    // Generate ceiling lamp positions
-    const positions: [number, number, number][] = [
-      [0, 5.5, 0],      // Center
-      [-5, 5.5, -5],    // Corners
-      [5, 5.5, -5],
-      [-5, 5.5, 5],
-      [5, 5.5, 5],
-      [0, 5.5, -7],     // Front/Back
-      [0, 5.5, 7],
-      [-7, 5.5, 0],     // Sides
-      [7, 5.5, 0],
-    ];
+    // Adjust intensity based on quality (lower quality needs slightly brighter lights)
+    if (quality === 'low') {
+      lightIntensity *= 1.3;
+    } else if (quality === 'medium') {
+      lightIntensity *= 1.1;
+    }
     
-    // Add extra lamps for larger rooms or lower quality
-    if (quality === 'low' || quality === 'medium') {
-      // Add more lamps to compensate for lack of other effects
-      positions.push(
-        [-3.5, 5.5, -3.5],
-        [3.5, 5.5, -3.5],
-        [-3.5, 5.5, 3.5],
-        [3.5, 5.5, 3.5]
+    // Generate ceiling RectAreaLight positions
+    const rectAreaLights: RectAreaLightConfig[] = [
+      // Main central light
+      {
+        color: lightColor,
+        intensity: lightIntensity,
+        width: lightWidth,
+        height: lightHeight,
+        position: [0, 5.5, 0],
+        rotation: [-Math.PI / 2, 0, 0] // Point downward
+      },
+      // Corner lights
+      {
+        color: lightColor,
+        intensity: lightIntensity * 0.8,
+        width: lightWidth * 0.7,
+        height: lightHeight * 0.7,
+        position: [-4, 5.5, -4],
+        rotation: [-Math.PI / 2, 0, 0]
+      },
+      {
+        color: lightColor,
+        intensity: lightIntensity * 0.8,
+        width: lightWidth * 0.7,
+        height: lightHeight * 0.7,
+        position: [4, 5.5, -4],
+        rotation: [-Math.PI / 2, 0, 0]
+      },
+      {
+        color: lightColor,
+        intensity: lightIntensity * 0.8,
+        width: lightWidth * 0.7,
+        height: lightHeight * 0.7,
+        position: [-4, 5.5, 4],
+        rotation: [-Math.PI / 2, 0, 0]
+      },
+      {
+        color: lightColor,
+        intensity: lightIntensity * 0.8,
+        width: lightWidth * 0.7,
+        height: lightHeight * 0.7,
+        position: [4, 5.5, 4],
+        rotation: [-Math.PI / 2, 0, 0]
+      }
+    ];
+
+    // Add accent lights for medium/high quality
+    if (quality !== 'low') {
+      rectAreaLights.push(
+        // Wall accent lights
+        {
+          color: lightColor,
+          intensity: lightIntensity * 0.3,
+          width: lightWidth * 0.5,
+          height: lightHeight * 0.5,
+          position: [0, 5.5, -6.5],
+          rotation: [-Math.PI / 2, 0, 0]
+        },
+        {
+          color: lightColor,
+          intensity: lightIntensity * 0.3,
+          width: lightWidth * 0.5,
+          height: lightHeight * 0.5,
+          position: [0, 5.5, 6.5],
+          rotation: [-Math.PI / 2, 0, 0]
+        }
       );
-      ceilingIntensity *= 1.2; // Slightly brighter for lower quality
     }
     
     return {
@@ -96,16 +152,9 @@ export function useLightingSetup() {
         intensity: baseDirectional,
         color: currentTheme.lighting.directionalColor,
         position: [10, 10, 5] as [number, number, number],
-        castShadow: false, // No shadows from weak directional light
+        castShadow: false, // RectAreaLights provide main illumination
       },
-      ceiling: {
-        count: positions.length,
-        intensity: ceilingIntensity,
-        color: ceilingColor,
-        distance: ceilingDistance,
-        decay: ceilingDecay,
-        positions,
-      },
+      rectAreaLights,
     };
   }, [themeName, currentTheme, quality]);
 

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import * as THREE from 'three';
 
-export type QualityLevel = 'low' | 'medium' | 'high' | 'ultra';
+export type QualityLevel = 'low' | 'medium' | 'high';
 
 interface PhysicsConfig {
   enabled: boolean;
@@ -104,13 +104,6 @@ export const useSceneStore = create<SceneState>()(
               set({
                 shadowsEnabled: true,
                 postProcessingEnabled: true,
-                reflectionsEnabled: false,
-              });
-              break;
-            case 'ultra':
-              set({
-                shadowsEnabled: true,
-                postProcessingEnabled: true,
                 reflectionsEnabled: true,
               });
               break;
@@ -161,12 +154,7 @@ export const useSceneStore = create<SceneState>()(
               return {
                 ...baseSettings,
                 shadowMapSize: 2048,
-              };
-            case 'ultra':
-              return {
-                ...baseSettings,
-                shadowMapSize: 4096,
-                toneMappingExposure: 1.2,
+                toneMappingExposure: 1.1,
               };
             default:
               return baseSettings;

@@ -11,12 +11,14 @@ import { useMuseumStore } from '@/store/museumStore';
 import { useSceneStore } from '@/store/sceneStore';
 import { PhysicsPresets } from '../providers/PhysicsProvider';
 import { useIPFSImage } from '@/hooks/useIPFSImage';
+import { useRectAreaLightMaterial } from './MuseumLighting';
 
 interface EnhancedNFTFrameProps {
   nft: NFT;
   position: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
+  interactive?: boolean;
   onClick?: () => void;
   onHover?: (hovered: boolean) => void;
   isHovered?: boolean;
@@ -28,6 +30,7 @@ export default function EnhancedNFTFrame({
   position,
   rotation = [0, 0, 0],
   scale = 1,
+  interactive = true,
   onClick,
   onHover,
   isHovered = false,
@@ -38,10 +41,10 @@ export default function EnhancedNFTFrame({
   const { quality, shadowsEnabled } = useSceneStore();
   
   // Use the new IPFS image hook
-  const { texture, loading, error, progress } = useIPFSImage(nft.imageURI, {
+  const { texture, loading, error, progress, originalUrl, resolvedUrl } = useIPFSImage(nft.imageURI, {
     quality,
     maxRetries: 3,
-    retryDelay: 1000,
+    timeout: 20000,
   });
 
   // Frame animation
@@ -89,6 +92,52 @@ export default function EnhancedNFTFrame({
     }
     return { width: 2, height: 2 };
   }, [texture]);
+
+  // Create NFT material with proper settings
+  const nftMaterial = useMemo(() => {
+    if (loading) {
+      // Loading state material
+      return new THREE.MeshStandardMaterial({
+        color: '#333333',
+        emissive: 0x000000,
+        roughness: 0.8,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.7,
+      });
+    }
+    
+    if (error || !texture) {
+      // Error state material
+      return new THREE.MeshStandardMaterial({
+        color: '#444444',
+        emissive: 0x220000,
+        emissiveIntensity: 0.1,
+        roughness: 0.9,
+        metalness: 0.0,
+        transparent: true,
+        opacity: 0.8,
+      });
+    }
+
+    // Successfully loaded texture
+    return new THREE.MeshStandardMaterial({
+      map: texture,
+      emissive: 0x000000,
+      roughness: 0.1,
+      metalness: 0.0,
+      transparent: false,
+    });
+  }, [texture, loading, error, quality]);
+
+  // Debug logging for IPFS URLs
+  useEffect(() => {
+    if (originalUrl && resolvedUrl && originalUrl !== resolvedUrl) {
+      console.log(`🔗 NFT ${nft.tokenId} URL mapping:`);
+      console.log(`   Original: ${originalUrl}`);
+      console.log(`   Resolved: ${resolvedUrl}`);
+    }
+  }, [originalUrl, resolvedUrl, nft.tokenId]);
 
   // Create frame content
   const frameContent = (
@@ -144,43 +193,108 @@ export default function EnhancedNFTFrame({
       {/* NFT Image */}
       <mesh position={[0, 0, 0.052]}>
         <planeGeometry args={[frameSize.width, frameSize.height]} />
-        {loading ? (
-          // Loading state with progress indicator
-          <meshBasicMaterial color="#444444">
-            {progress > 0 && (
-              <Text
-                position={[0, 0, 0.01]}
-                fontSize={0.2}
-                color="white"
-                anchorX="center"
-                anchorY="middle"
-              >
-                {progress}%
-              </Text>
-            )}
-          </meshBasicMaterial>
-        ) : texture && !error ? (
-          // Successfully loaded texture
-          <meshBasicMaterial map={texture} toneMapped={false} />
-        ) : (
-          // Error state
-          <meshBasicMaterial color="#222222">
-            <Text
-              position={[0, 0, 0.01]}
-              fontSize={0.15}
-              color="#ff4444"
-              anchorX="center"
-              anchorY="middle"
-              maxWidth={frameSize.width - 0.2}
-            >
-              Failed to load
-            </Text>
-          </meshBasicMaterial>
-        )}
+        <primitive object={nftMaterial} attach="material" />
       </mesh>
 
+      {/* Loading Progress Indicator */}
+      {loading && (
+        <group position={[0, 0, 0.053]}>
+          {/* Loading background */}
+          <mesh>
+            <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]} />
+            <meshBasicMaterial color="#000000" transparent opacity={0.8} />
+          </mesh>
+          
+          {/* Progress bar background */}
+          <mesh position={[0, -frameSize.height * 0.3, 0.001]}>
+            <planeGeometry args={[frameSize.width * 0.8, 0.05]} />
+            <meshBasicMaterial color="#333333" />
+          </mesh>
+          
+          {/* Progress bar fill */}
+          <mesh position={[
+            -(frameSize.width * 0.8) / 2 + (frameSize.width * 0.8 * progress) / 200, 
+            -frameSize.height * 0.3, 
+            0.002
+          ]}>
+            <planeGeometry args={[(frameSize.width * 0.8 * progress) / 100, 0.05]} />
+            <meshBasicMaterial color="#4a90e2" />
+          </mesh>
+          
+          {/* Loading text */}
+          <Text
+            position={[0, 0, 0.001]}
+            fontSize={0.12}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={frameSize.width - 0.2}
+          >
+            Loading NFT...
+          </Text>
+          
+          {/* Progress percentage */}
+          <Text
+            position={[0, -frameSize.height * 0.15, 0.001]}
+            fontSize={0.08}
+            color="#aaaaaa"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {progress}%
+          </Text>
+        </group>
+      )}
+
+      {/* Error State Indicator */}
+      {error && !loading && (
+        <group position={[0, 0, 0.053]}>
+          {/* Error background */}
+          <mesh>
+            <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]} />
+            <meshBasicMaterial color="#220000" transparent opacity={0.8} />
+          </mesh>
+          
+          {/* Error icon (simple X) */}
+          <group position={[0, frameSize.height * 0.1, 0.001]}>
+            <mesh rotation={[0, 0, Math.PI / 4]}>
+              <planeGeometry args={[0.3, 0.05]} />
+              <meshBasicMaterial color="#ff4444" />
+            </mesh>
+            <mesh rotation={[0, 0, -Math.PI / 4]}>
+              <planeGeometry args={[0.3, 0.05]} />
+              <meshBasicMaterial color="#ff4444" />
+            </mesh>
+          </group>
+          
+          {/* Error text */}
+          <Text
+            position={[0, -frameSize.height * 0.1, 0.001]}
+            fontSize={0.1}
+            color="#ff6666"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={frameSize.width - 0.2}
+          >
+            Failed to load
+          </Text>
+          
+          {/* Error details */}
+          <Text
+            position={[0, -frameSize.height * 0.25, 0.001]}
+            fontSize={0.06}
+            color="#888888"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={frameSize.width - 0.1}
+          >
+            {error.length > 50 ? `${error.substring(0, 47)}...` : error}
+          </Text>
+        </group>
+      )}
+
       {/* Glass cover (optional for high quality) */}
-      {(quality === 'ultra' || quality === 'high') && (
+      {quality === 'high' && (
         <mesh position={[0, 0, 0.06]}>
           <planeGeometry args={[frameSize.width, frameSize.height]} />
           <meshPhysicalMaterial

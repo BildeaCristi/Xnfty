@@ -1,215 +1,314 @@
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-// IPFS gateway fallbacks
+// Enhanced IPFS gateway configuration with better fallbacks
 const IPFS_GATEWAYS = [
   'https://ipfs.io/ipfs/',
-  'https://cloudflare-ipfs.com/ipfs/',
   'https://gateway.pinata.cloud/ipfs/',
+  'https://cloudflare-ipfs.com/ipfs/',
   'https://dweb.link/ipfs/',
-  'https://gateway.ipfs.io/ipfs/',
+  'https://ipfs.filebase.io/ipfs/',
+  'https://4everland.io/ipfs/',
+  'https://w3s.link/ipfs/',
 ];
 
 interface UseIPFSImageOptions {
-  quality?: 'low' | 'medium' | 'high' | 'ultra';
+  quality?: 'low' | 'medium' | 'high';
   maxRetries?: number;
-  retryDelay?: number;
+  timeout?: number;
+}
+
+interface UseIPFSImageResult {
+  texture: THREE.Texture | null;
+  loading: boolean;
+  error: string | null;
+  progress: number;
+  originalUrl: string | null;
+  resolvedUrl: string | null;
 }
 
 export function useIPFSImage(
   imageUri: string | undefined,
   options: UseIPFSImageOptions = {}
-) {
-  const { quality = 'high', maxRetries = 3, retryDelay = 1000 } = options;
+): UseIPFSImageResult {
+  const { 
+    quality = 'high', 
+    maxRetries = 2,
+    timeout = 15000 
+  } = options;
   
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
   const textureRef = useRef<THREE.Texture | null>(null);
 
-  // Convert IPFS URI to HTTP gateway URL
-  const convertIPFSUrl = (uri: string, gatewayIndex: number = 0): string => {
-    if (!uri) return '/placeholder-nft.png';
+  // Extract CID from various IPFS URL formats
+  const extractCID = (url: string): string | null => {
+    if (!url) return null;
     
-    // Handle IPFS protocol
-    if (uri.startsWith('ipfs://')) {
-      const cid = uri.replace('ipfs://', '');
-      return IPFS_GATEWAYS[gatewayIndex] + cid;
+    // Handle ipfs:// protocol
+    if (url.startsWith('ipfs://')) {
+      return url.replace('ipfs://', '');
     }
     
-    // Handle Pinata URLs with CORS issues
-    if (uri.includes('mypinata.cloud')) {
-      const match = uri.match(/\/ipfs\/(.+)$/);
-      if (match && match[1]) {
-        return IPFS_GATEWAYS[gatewayIndex] + match[1];
-      }
+    // Handle Pinata cloud URLs: https://blue-random-raven-153.mypinata.cloud/ipfs/QmXxx
+    const pinataCloudMatch = url.match(/https:\/\/[^\/]+\.mypinata\.cloud\/ipfs\/(.+)$/);
+    if (pinataCloudMatch && pinataCloudMatch[1]) {
+      return pinataCloudMatch[1];
     }
     
-    // Return as-is for other URLs
-    return uri;
+    // Handle standard gateway URLs: https://gateway.domain.com/ipfs/QmXxx
+    const gatewayMatch = url.match(/\/ipfs\/([a-zA-Z0-9]+)(?:\?|$|\/)/);
+    if (gatewayMatch && gatewayMatch[1]) {
+      return gatewayMatch[1];
+    }
+    
+    // Handle direct CID (if just a hash is provided)
+    const cidMatch = url.match(/^(Qm[a-zA-Z0-9]{44}|baf[a-zA-Z0-9]+)$/);
+    if (cidMatch) {
+      return cidMatch[0];
+    }
+    
+    return null;
   };
 
-  // Load image with retry logic
-  const loadImageWithRetry = async (
+  // Generate gateway URLs from CID
+  const generateGatewayUrls = (cid: string): string[] => {
+    return IPFS_GATEWAYS.map(gateway => `${gateway}${cid}`);
+  };
+
+  // Load image with comprehensive error handling and progress tracking
+  const loadImageFromUrl = async (
     url: string,
-    gatewayIndex: number = 0,
-    retryCount: number = 0
-  ): Promise<HTMLImageElement> => {
+    signal: AbortSignal
+  ): Promise<{ texture: THREE.Texture; resolvedUrl: string }> => {
     return new Promise((resolve, reject) => {
+      if (signal.aborted) {
+        reject(new Error('Request aborted'));
+        return;
+      }
+
       const img = new Image();
       img.crossOrigin = 'anonymous';
       
-      const timeout = setTimeout(() => {
-        img.src = '';
-        reject(new Error('Image load timeout'));
-      }, 30000); // 30 second timeout
-      
+      // Handle load success
       img.onload = () => {
-        clearTimeout(timeout);
-        resolve(img);
-      };
-      
-      img.onerror = async () => {
-        clearTimeout(timeout);
-        
-        // Try next gateway
-        if (gatewayIndex < IPFS_GATEWAYS.length - 1) {
-          console.log(`Gateway ${gatewayIndex} failed, trying next...`);
-          try {
-            const nextUrl = convertIPFSUrl(imageUri!, gatewayIndex + 1);
-            const result = await loadImageWithRetry(nextUrl, gatewayIndex + 1, retryCount);
-            resolve(result);
-          } catch (err) {
-            reject(err);
+        if (signal.aborted) {
+          reject(new Error('Request aborted'));
+          return;
+        }
+
+        try {
+          // Create and configure texture
+          const newTexture = new THREE.Texture(img);
+          newTexture.needsUpdate = true;
+          newTexture.colorSpace = THREE.SRGBColorSpace;
+          
+          // Set quality-based texture parameters
+          switch (quality) {
+            case 'high':
+              newTexture.minFilter = THREE.LinearMipmapLinearFilter;
+              newTexture.magFilter = THREE.LinearFilter;
+              newTexture.anisotropy = 8;
+              newTexture.generateMipmaps = true;
+              break;
+            case 'medium':
+              newTexture.minFilter = THREE.LinearMipmapNearestFilter;
+              newTexture.magFilter = THREE.LinearFilter;
+              newTexture.anisotropy = 4;
+              newTexture.generateMipmaps = true;
+              break;
+            case 'low':
+              newTexture.minFilter = THREE.NearestFilter;
+              newTexture.magFilter = THREE.NearestFilter;
+              newTexture.anisotropy = 1;
+              newTexture.generateMipmaps = false;
+              break;
           }
-        }
-        // Retry same gateway
-        else if (retryCount < maxRetries) {
-          console.log(`Retrying gateway ${gatewayIndex} (attempt ${retryCount + 1})...`);
-          setTimeout(async () => {
-            try {
-              const result = await loadImageWithRetry(url, 0, retryCount + 1);
-              resolve(result);
-            } catch (err) {
-              reject(err);
-            }
-          }, retryDelay * (retryCount + 1));
-        } else {
-          reject(new Error('All gateways failed'));
+          
+          resolve({ texture: newTexture, resolvedUrl: url });
+        } catch (err) {
+          reject(new Error(`Failed to create texture: ${err}`));
         }
       };
       
-      // Track progress
-      img.onprogress = (event) => {
-        if (event.lengthComputable) {
-          setProgress(Math.round((event.loaded / event.total) * 100));
-        }
+      // Handle load error
+      img.onerror = () => {
+        reject(new Error(`Failed to load image from ${url}`));
       };
       
+      // Handle timeout
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Timeout loading image from ${url}`));
+      }, timeout);
+      
+      // Cleanup timeout on success or error
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+      };
+      
+      img.addEventListener('load', cleanup, { once: true });
+      img.addEventListener('error', cleanup, { once: true });
+      
+      // Start loading
       img.src = url;
+      
+      // Handle abort
+      signal.addEventListener('abort', () => {
+        cleanup();
+        img.src = '';
+        reject(new Error('Request aborted'));
+      });
     });
   };
 
+  // Try loading from multiple gateways with fallbacks
+  const loadWithFallbacks = async (cid: string, signal: AbortSignal): Promise<{ texture: THREE.Texture; resolvedUrl: string }> => {
+    const gatewayUrls = generateGatewayUrls(cid);
+    let lastError: Error | null = null;
+    
+    console.log(`🔄 Attempting to load IPFS image with CID: ${cid}`);
+    console.log(`📋 Trying ${gatewayUrls.length} gateways...`);
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      for (let i = 0; i < gatewayUrls.length; i++) {
+        if (signal.aborted) {
+          throw new Error('Request aborted');
+        }
+        
+        const url = gatewayUrls[i];
+        const gatewayName = IPFS_GATEWAYS[i].replace('https://', '').replace('/ipfs/', '');
+        
+        try {
+          console.log(`🌐 Trying gateway ${i + 1}/${gatewayUrls.length} (attempt ${attempt + 1}/${maxRetries + 1}): ${gatewayName}`);
+          setProgress(Math.round(((i + attempt * gatewayUrls.length) / (gatewayUrls.length * (maxRetries + 1))) * 100));
+          
+          const result = await loadImageFromUrl(url, signal);
+          console.log(`✅ Successfully loaded from: ${gatewayName}`);
+          return result;
+        } catch (err) {
+          lastError = err as Error;
+          console.log(`❌ Failed ${gatewayName}: ${lastError.message}`);
+          
+          // Add small delay between attempts to avoid overwhelming gateways
+          if (i < gatewayUrls.length - 1 || attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+      }
+    }
+    
+    throw lastError || new Error('All gateways failed');
+  };
+
+  // Load fallback placeholder image
+  const loadFallbackImage = async (): Promise<THREE.Texture> => {
+    const placeholderImg = new Image();
+    placeholderImg.crossOrigin = 'anonymous';
+    
+    return new Promise((resolve, reject) => {
+      placeholderImg.onload = () => {
+        const fallbackTexture = new THREE.Texture(placeholderImg);
+        fallbackTexture.needsUpdate = true;
+        fallbackTexture.colorSpace = THREE.SRGBColorSpace;
+        resolve(fallbackTexture);
+      };
+      
+      placeholderImg.onerror = () => {
+        reject(new Error('Failed to load fallback image'));
+      };
+      
+      placeholderImg.src = '/placeholder-nft.png';
+    });
+  };
+
+  // Main effect to handle image loading
   useEffect(() => {
     if (!imageUri) {
+      setTexture(null);
       setLoading(false);
+      setError(null);
+      setProgress(0);
+      setOriginalUrl(null);
+      setResolvedUrl(null);
       return;
     }
 
-    // Cleanup previous load
+    // Cleanup previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
 
-    // Dispose previous texture
+    // Cleanup previous texture
     if (textureRef.current) {
       textureRef.current.dispose();
       textureRef.current = null;
     }
 
+    // Reset state
     setLoading(true);
     setError(null);
     setProgress(0);
+    setOriginalUrl(imageUri);
+    setResolvedUrl(null);
 
     const loadImage = async () => {
       try {
-        const url = convertIPFSUrl(imageUri);
-        console.log(`🔄 Loading NFT image: ${url}`);
+        const signal = abortControllerRef.current!.signal;
         
-        const img = await loadImageWithRetry(url);
-        
-        // Create texture
-        const newTexture = new THREE.Texture(img);
-        newTexture.needsUpdate = true;
-        
-        // Set quality-based texture parameters
-        switch (quality) {
-          case 'ultra':
-            newTexture.minFilter = THREE.LinearMipmapLinearFilter;
-            newTexture.magFilter = THREE.LinearFilter;
-            newTexture.anisotropy = 16;
-            break;
-          case 'high':
-            newTexture.minFilter = THREE.LinearMipmapLinearFilter;
-            newTexture.magFilter = THREE.LinearFilter;
-            newTexture.anisotropy = 8;
-            break;
-          case 'medium':
-            newTexture.minFilter = THREE.LinearMipmapNearestFilter;
-            newTexture.magFilter = THREE.LinearFilter;
-            newTexture.anisotropy = 4;
-            break;
-          case 'low':
-            newTexture.minFilter = THREE.NearestFilter;
-            newTexture.magFilter = THREE.NearestFilter;
-            newTexture.anisotropy = 1;
-            break;
+        // Extract CID from the provided URL
+        const cid = extractCID(imageUri);
+        if (!cid) {
+          throw new Error(`Invalid IPFS URL format: ${imageUri}`);
         }
         
-        newTexture.generateMipmaps = quality !== 'low';
-        newTexture.colorSpace = THREE.SRGBColorSpace;
+        console.log(`🎯 Extracted CID: ${cid} from URL: ${imageUri}`);
+        
+        // Try loading from multiple gateways
+        const { texture: newTexture, resolvedUrl: finalUrl } = await loadWithFallbacks(cid, signal);
+        
+        if (signal.aborted) return;
         
         textureRef.current = newTexture;
         setTexture(newTexture);
+        setResolvedUrl(finalUrl);
+        setProgress(100);
         setLoading(false);
-        console.log(`✅ Successfully loaded NFT image`);
+        
+        console.log(`🎉 Successfully loaded NFT image from: ${finalUrl}`);
         
       } catch (err) {
-        console.error(`❌ Failed to load NFT image:`, err);
-        setError(err instanceof Error ? err.message : 'Failed to load image');
-        setLoading(false);
+        if (abortControllerRef.current?.signal.aborted) return;
         
-        // Load fallback
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`❌ Failed to load NFT image: ${errorMessage}`);
+        
+        setError(errorMessage);
+        
+        // Try to load fallback image
         try {
-          const fallbackImg = new Image();
-          fallbackImg.crossOrigin = 'anonymous';
-          
-          await new Promise<void>((resolve, reject) => {
-            fallbackImg.onload = () => resolve();
-            fallbackImg.onerror = () => reject();
-            fallbackImg.src = '/placeholder-nft.png';
-          });
-          
-          const fallbackTexture = new THREE.Texture(fallbackImg);
-          fallbackTexture.needsUpdate = true;
-          fallbackTexture.colorSpace = THREE.SRGBColorSpace;
-          
+          const fallbackTexture = await loadFallbackImage();
           textureRef.current = fallbackTexture;
           setTexture(fallbackTexture);
-          console.log('✅ Loaded fallback image');
-        } catch {
-          console.error('❌ Failed to load fallback image');
+          setResolvedUrl('/placeholder-nft.png');
+          console.log('📸 Loaded fallback placeholder image');
+        } catch (fallbackErr) {
+          console.error('❌ Failed to load fallback image:', fallbackErr);
         }
+        
+        setLoading(false);
       }
     };
 
     loadImage();
 
-    // Cleanup
+    // Cleanup function
     return () => {
       if (textureRef.current) {
         textureRef.current.dispose();
@@ -219,7 +318,14 @@ export function useIPFSImage(
         abortControllerRef.current.abort();
       }
     };
-  }, [imageUri, quality, maxRetries, retryDelay]);
+  }, [imageUri, quality, maxRetries, timeout]);
 
-  return { texture, loading, error, progress };
+  return {
+    texture,
+    loading,
+    error,
+    progress,
+    originalUrl,
+    resolvedUrl,
+  };
 } 

@@ -27,11 +27,8 @@ export default function SceneObjects() {
       {/* Benches along the walls */}
       {themeName !== 'futuristic' && <Benches />}
       
-      {/* Futuristic sofa for futuristic theme */}
-      {themeName === 'futuristic' && (quality === 'medium' || quality === 'high' || quality === 'ultra') && <FuturisticSofa />}
-
       {/* Decorative plants */}
-      {(quality === 'high' || quality === 'ultra') && <Plants />}
+      {quality === 'high' && <Plants />}
 
       {/* Ceiling lamps */}
       <CeilingLamps />
@@ -309,35 +306,24 @@ function CeilingLamps() {
           scale={0.02}
         />
         <CuboidCollider args={[1, 0.3, 1]} position={[0, 0, 0]} />
-        <pointLight
-          intensity={lightConfig.ceiling.intensity}
-          color={lightConfig.ceiling.color}
-          distance={lightConfig.ceiling.distance}
-          decay={lightConfig.ceiling.decay}
-          castShadow={shadowsEnabled}
-        />
       </RigidBody>
     );
   }
 
   if (!lampModel || themeName === 'nature') return null;
 
+  // Get positions from rectAreaLights configuration
+  const lampPositions: [number, number, number][] = lightConfig.rectAreaLights.map(light => light.position);
+
   return (
     <>
-      {lightConfig.ceiling.positions.map((position, index) => (
+      {lampPositions.map((position, index) => (
         <RigidBody key={`lamp-${index}`} {...PhysicsPresets.static()} position={position}>
           <primitive 
             object={lampModel.clone()} 
             scale={themeName === 'modern' ? 0.01 : 1}
           />
           <CuboidCollider args={[0.3, 0.3, 0.3]} />
-          <pointLight
-            intensity={lightConfig.ceiling.intensity}
-            color={lightConfig.ceiling.color}
-            distance={lightConfig.ceiling.distance}
-            decay={lightConfig.ceiling.decay}
-            castShadow={shadowsEnabled}
-          />
         </RigidBody>
       ))}
     </>
@@ -382,59 +368,3 @@ function InteractiveSpheres() {
     </>
   );
 }
-
-// Futuristic sofa for futuristic theme
-function FuturisticSofa() {
-  const { shadowsEnabled } = useSceneStore();
-  const [sofaModel, setSofaModel] = useState<THREE.Group | null>(null);
-  
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.load(
-      '/models/futuristic_reddish_sofa.glb',
-      (gltf) => {
-        const model = gltf.scene.clone();
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = shadowsEnabled;
-            child.receiveShadow = shadowsEnabled;
-          }
-        });
-        setSofaModel(model);
-      },
-      undefined,
-      (error) => {
-        console.log('Futuristic sofa model not found');
-      }
-    );
-  }, [shadowsEnabled]);
-
-  if (!sofaModel) return null;
-
-  const sofaPositions: { position: [number, number, number]; rotation: number }[] = [
-    { position: [-6, 0, 0], rotation: Math.PI / 2 },
-    { position: [6, 0, 0], rotation: -Math.PI / 2 },
-    { position: [0, 0, 6], rotation: Math.PI },
-    { position: [0, 0, -6], rotation: 0 },
-  ];
-
-  return (
-    <>
-      {sofaPositions.map((config, index) => (
-        <RigidBody 
-          key={`sofa-${index}`}
-          {...PhysicsPresets.static()}
-          position={config.position}
-          rotation={[0, config.rotation, 0]}
-        >
-          <primitive 
-            object={sofaModel.clone()} 
-            scale={0.02}
-          />
-          {/* Add collider for sofa */}
-          <CuboidCollider args={[1.2, 0.4, 0.6]} position={[0, 0.4, 0]} />
-        </RigidBody>
-      ))}
-    </>
-  );
-} 

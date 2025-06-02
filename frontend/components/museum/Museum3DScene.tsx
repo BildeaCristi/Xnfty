@@ -30,7 +30,6 @@ const EnhancedNFTFrame = lazy(() => import('./EnhancedNFTFrame'));
 const FirstPersonCharacterController = lazy(() => import('./FirstPersonCharacterController'));
 const Cursor3D = lazy(() => import('./Cursor3D'));
 const SceneObjects = lazy(() => import('./SceneObjects'));
-const CustomPerformanceMonitor = lazy(() => import('./PerformanceMonitor'));
 
 interface Museum3DSceneProps {
   collection: Collection;
@@ -246,30 +245,20 @@ export default function Museum3DScene({
               )}
 
               {/* Post-processing effects */}
-              {postProcessingEnabled && quality !== 'low' && quality !== 'medium' && (
-                quality === 'ultra' ? (
-                  <EffectComposer>
-                    <Bloom 
-                      intensity={0.5}
-                      luminanceThreshold={0.9}
-                      luminanceSmoothing={0.9}
-                    />
-                    <DepthOfField
-                      focusDistance={0}
-                      focalLength={0.02}
-                      bokehScale={2}
-                      height={480}
-                    />
-                  </EffectComposer>
-                ) : (
-                  <EffectComposer>
-                    <Bloom 
-                      intensity={0.5}
-                      luminanceThreshold={0.9}
-                      luminanceSmoothing={0.9}
-                    />
-                  </EffectComposer>
-                )
+              {postProcessingEnabled && quality === 'high' && (
+                <EffectComposer>
+                  <Bloom 
+                    intensity={0.5}
+                    luminanceThreshold={0.9}
+                    luminanceSmoothing={0.9}
+                  />
+                  <DepthOfField
+                    focusDistance={0}
+                    focalLength={0.02}
+                    bokehScale={2}
+                    height={480}
+                  />
+                </EffectComposer>
               )}
             </PhysicsProvider>
 
@@ -310,11 +299,6 @@ export default function Museum3DScene({
             marginTop: '10px',
           }}
         />
-
-        {/* Performance monitoring - outside Canvas */}
-        <Suspense fallback={null}>
-          <CustomPerformanceMonitor />
-        </Suspense>
 
         {/* HUD Overlay */}
         <div className="absolute top-4 left-4 text-white pointer-events-none select-none">
