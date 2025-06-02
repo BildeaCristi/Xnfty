@@ -34,6 +34,8 @@ export default function Cursor3D({
   const raycaster = useRef(new THREE.Raycaster());
   const lastHoveredObject = useRef<THREE.Object3D | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const lastPosition = useRef<THREE.Vector3>(new THREE.Vector3());
+  const frameCount = useRef(0);
   
   // Animation springs for smooth cursor movement and scaling
   const [springs, api] = useSpring(() => ({
@@ -42,9 +44,9 @@ export default function Cursor3D({
     color: color,
     opacity: 0.8,
     config: {
-      mass: 0.5,
-      tension: 300,
-      friction: 20,
+      mass: 0.8,
+      tension: 200,
+      friction: 30,
     },
   }));
 
@@ -75,9 +77,6 @@ export default function Cursor3D({
       ],
     });
 
-    // Play click sound (optional)
-    // playSound('click');
-
     if (onClickObject) {
       onClickObject(lastHoveredObject.current);
     }
@@ -89,6 +88,10 @@ export default function Cursor3D({
       api.start({ opacity: 0 });
       return;
     }
+
+    // Only update every 3 frames to reduce wiggling
+    frameCount.current++;
+    if (frameCount.current % 3 !== 0) return;
 
     // Set raycaster from camera center (for first-person mode)
     raycaster.current.setFromCamera(new THREE.Vector2(0, 0), camera);
@@ -124,11 +127,17 @@ export default function Cursor3D({
         const offset = face ? face.normal.clone().multiplyScalar(0.05) : new THREE.Vector3(0, 0, 0.05);
         const cursorPosition = point.clone().add(offset);
         
-        // Update cursor position with smooth animation
-        api.start({
-          position: cursorPosition.toArray(),
-          opacity: 0.9,
-        });
+        // Only update position if it changed significantly (reduces wiggling)
+        const distanceFromLast = cursorPosition.distanceTo(lastPosition.current);
+        if (distanceFromLast > 0.01) { // 1cm threshold
+          lastPosition.current.copy(cursorPosition);
+          
+          // Update cursor position with smooth animation
+          api.start({
+            position: cursorPosition.toArray(),
+            opacity: 0.9,
+          });
+        }
 
         // Check if we're hovering over an interactive object
         let interactiveObject = object;

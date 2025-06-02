@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, lazy, useMemo, useState, useCallback, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, lazy, useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   OrbitControls, 
   PerspectiveCamera, 
@@ -28,7 +28,6 @@ import { useIPFSImage } from '@/hooks/useIPFSImage';
 const EnhancedMuseumRoom = lazy(() => import('./EnhancedMuseumRoom'));
 const EnhancedNFTFrame = lazy(() => import('./EnhancedNFTFrame'));
 const FirstPersonCharacterController = lazy(() => import('./FirstPersonCharacterController'));
-const Cursor3D = lazy(() => import('./Cursor3D'));
 const SceneObjects = lazy(() => import('./SceneObjects'));
 
 interface Museum3DSceneProps {
@@ -110,6 +109,157 @@ function NFTImagePreloader({ nfts, onAllLoaded }: { nfts: NFT[], onAllLoaded: ()
   return null; // This component doesn't render anything
 }
 
+// Helper functions
+function calculateNFTPositions(total: number): [number, number, number][] {
+  const positions: [number, number, number][] = [];
+  const wallSpacing = 3.5;
+  const height = 2;
+  const roomSize = 10; // Half of room width/depth (20/2 = 10)
+  
+  const perWall = Math.ceil(total / 4);
+  
+  for (let i = 0; i < total; i++) {
+    const wall = Math.floor(i / perWall);
+    const positionOnWall = i % perWall;
+    
+    const wallLength = roomSize * 2;
+    const totalWidth = (perWall - 1) * wallSpacing;
+    const startOffset = -totalWidth / 2;
+    const offset = startOffset + positionOnWall * wallSpacing;
+    
+    switch (wall) {
+      case 0: // Front wall
+        positions.push([offset, height, -(roomSize - 0.2)]); // Slightly off the wall
+        break;
+      case 1: // Right wall
+        positions.push([roomSize - 0.2, height, offset]);
+        break;
+      case 2: // Back wall
+        positions.push([-offset, height, roomSize - 0.2]);
+        break;
+      case 3: // Left wall
+        positions.push([-(roomSize - 0.2), height, -offset]);
+        break;
+      default:
+        positions.push([0, height, 0]);
+    }
+  }
+  
+  return positions;
+}
+
+function calculateNFTRotation(index: number, total: number): [number, number, number] {
+  const perWall = Math.ceil(total / 4);
+  const wall = Math.floor(index / perWall);
+  
+  switch (wall) {
+    case 0: return [0, 0, 0];        // Front wall
+    case 1: return [0, -Math.PI / 2, 0]; // Right wall
+    case 2: return [0, Math.PI, 0];      // Back wall
+    case 3: return [0, Math.PI / 2, 0];  // Left wall
+    default: return [0, 0, 0];
+  }
+}
+
+// Crosshair Raycaster Component - handles NFT detection for 2D crosshair
+function CrosshairRaycaster({ 
+  enabled, 
+  onHoverNFT, 
+  onClickNFT,
+  nfts,
+  interactionMode
+}: { 
+  enabled: boolean;
+  onHoverNFT: (tokenId: number | null) => void;
+  onClickNFT: (nft: NFT | null) => void;
+  nfts: NFT[];
+  interactionMode: boolean;
+}) {
+  const { camera, scene, gl } = useThree();
+  const raycaster = useRef(new THREE.Raycaster());
+  
+  useFrame(() => {
+    if (!enabled) {
+      onHoverNFT(null);
+      return;
+    }
+
+    // Only detect NFTs when in interaction mode (E key held)
+    if (!interactionMode) {
+      onHoverNFT(null);
+      return;
+    }
+
+    // Cast ray from camera center (where 2D crosshair is)
+    raycaster.current.setFromCamera(new THREE.Vector2(0, 0), camera);
+    
+    // Get all intersections
+    const intersects = raycaster.current.intersectObjects(scene.children, true);
+    
+    // Find the first NFT frame intersection
+    let foundNFT = false;
+    for (const intersect of intersects) {
+      let obj = intersect.object;
+      
+      // Traverse up to find NFT frame
+      while (obj) {
+        if (obj.userData?.tokenId) {
+          onHoverNFT(obj.userData.tokenId);
+          foundNFT = true;
+          break;
+        }
+        obj = obj.parent as THREE.Object3D;
+      }
+      
+      if (foundNFT) break;
+    }
+    
+    if (!foundNFT) {
+      onHoverNFT(null);
+    }
+  });
+
+  // Handle click events
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handleClick = () => {
+      // Only allow clicks when in interaction mode
+      if (!enabled || !interactionMode) return;
+
+      // Cast ray from camera center
+      raycaster.current.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const intersects = raycaster.current.intersectObjects(scene.children, true);
+      
+      // Find clicked NFT
+      for (const intersect of intersects) {
+        let obj = intersect.object;
+        
+        while (obj) {
+          if (obj.userData?.tokenId) {
+            // Find the actual NFT object from the nfts array
+            const nft = nfts.find(n => n.tokenId === obj.userData.tokenId);
+            onClickNFT(nft || null);
+            return;
+          }
+          obj = obj.parent as THREE.Object3D;
+        }
+      }
+      
+      onClickNFT(null);
+    };
+
+    const canvas = gl.domElement;
+    canvas.addEventListener('click', handleClick);
+    
+    return () => {
+      canvas.removeEventListener('click', handleClick);
+    };
+  }, [enabled, camera, scene, gl, onClickNFT, nfts, interactionMode]);
+
+  return null;
+}
+
 export default function Museum3DScene({ 
   collection, 
   nfts, 
@@ -120,6 +270,8 @@ export default function Museum3DScene({
   const [dpr, setDpr] = useState(1.5);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [allImagesLoaded, setAllImagesLoaded] = useState(true);
+  const [modalJustClosed, setModalJustClosed] = useState(false);
+  const [isInteractionKeyPressed, setIsInteractionKeyPressed] = useState(false);
   
   const { 
     controlMode, 
@@ -144,10 +296,31 @@ export default function Museum3DScene({
     return calculateNFTPositions(nfts.length);
   }, [nfts.length]);
 
-  // Handle NFT click
+  // Handle NFT click with cooldown to prevent immediate re-opening
   const handleNFTClick = useCallback((nft: NFT) => {
+    // Block if modal is open or just closed
+    if (modalJustClosed || selectedNFT) {
+      console.log('🚫 NFT click blocked - modal active or cooldown');
+      return;
+    }
+    
+    console.log('🖼️ Opening NFT modal:', nft.name);
     setSelectedNFT(nft);
     setHoveredNFT(null);
+  }, [modalJustClosed, selectedNFT]);
+
+  // Handle modal close with state clearing
+  const handleModalClose = useCallback(() => {
+    console.log('❌ Closing NFT modal');
+    setSelectedNFT(null);
+    setHoveredNFT(null); // Clear hover state
+    setModalJustClosed(true);
+    
+    // Clear the cooldown after a short delay
+    setTimeout(() => {
+      setModalJustClosed(false);
+      console.log('✅ Modal cooldown cleared');
+    }, 300); // 300ms cooldown
   }, []);
 
   // Handle performance changes
@@ -178,10 +351,28 @@ export default function Museum3DScene({
       if (e.key === 'Escape') {
         setSettingsOpen(prev => !prev);
       }
+      // Track 'E' key for interactions
+      if (e.key === 'e' || e.key === 'E') {
+        setIsInteractionKeyPressed(true);
+      }
+    };
+
+    const handleKeyRelease = (e: KeyboardEvent) => {
+      // Release 'E' key
+      if (e.key === 'e' || e.key === 'E') {
+        setIsInteractionKeyPressed(false);
+        // Clear hover state when exiting interaction mode
+        setHoveredNFT(null);
+      }
     };
 
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener('keyup', handleKeyRelease);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keyup', handleKeyRelease);
+    };
   }, [controlMode, setControlMode]);
 
   // Debug loading state
@@ -193,7 +384,7 @@ export default function Museum3DScene({
   useEffect(() => {
     console.log(`🚀 Museum3DScene initialized with ${nfts.length} NFTs`);
     if (nfts.length === 0) {
-      console.log(`�� No NFTs detected - keeping scene visible`);
+      console.log(`📭 No NFTs detected - keeping scene visible`);
       setAllImagesLoaded(true);
     } else {
       console.log(`📸 Starting to load ${nfts.length} NFT images...`);
@@ -294,9 +485,19 @@ export default function Museum3DScene({
                   nft={nft}
                   position={nftPositions[index]}
                   rotation={calculateNFTRotation(index, nfts.length)}
-                  onClick={() => handleNFTClick(nft)}
-                  onHover={(hovered) => setHoveredNFT(hovered ? nft.tokenId : null)}
-                  isHovered={hoveredNFT === nft.tokenId}
+                  onClick={() => {
+                    // Only allow direct clicks in orbit mode
+                    if (controlMode === 'orbit' && !modalJustClosed) {
+                      handleNFTClick(nft);
+                    }
+                  }}
+                  onHover={(hovered) => {
+                    // Only allow hover in orbit mode
+                    if (controlMode === 'orbit' && !modalJustClosed) {
+                      setHoveredNFT(hovered ? nft.tokenId : null);
+                    }
+                  }}
+                  isHovered={hoveredNFT === nft.tokenId && !modalJustClosed && controlMode === 'orbit'}
                   enablePhysics={false}
                 />
               ))}
@@ -306,32 +507,27 @@ export default function Museum3DScene({
                 <SceneObjects />
               </Suspense>
 
-              {/* 3D Cursor for first-person mode */}
+              {/* Crosshair Raycaster for First Person Mode */}
               {controlMode === 'firstPerson' && (
-                <Cursor3D
-                  enabled={!selectedNFT}
-                  onHoverObject={(obj) => {
-                    if (obj?.userData?.tokenId) {
-                      setHoveredNFT(obj.userData.tokenId);
-                    } else {
-                      setHoveredNFT(null);
+                <CrosshairRaycaster
+                  enabled={!selectedNFT && !modalJustClosed}
+                  onHoverNFT={(tokenId) => setHoveredNFT(tokenId)}
+                  onClickNFT={(nft) => {
+                    if (nft) {
+                      handleNFTClick(nft);
                     }
                   }}
-                  onClickObject={(obj) => {
-                    if (obj?.userData?.tokenId) {
-                      const nft = nfts.find(n => n.tokenId === obj.userData.tokenId);
-                      if (nft) handleNFTClick(nft);
-                    }
-                  }}
+                  nfts={nfts}
+                  interactionMode={isInteractionKeyPressed}
                 />
               )}
 
               {/* Camera Controls */}
               {controlMode === 'orbit' ? (
                 <OrbitControls
-                  enablePan={!selectedNFT}
-                  enableZoom={!selectedNFT}
-                  enableRotate={!selectedNFT}
+                  enablePan={!selectedNFT && !modalJustClosed}
+                  enableZoom={!selectedNFT && !modalJustClosed}
+                  enableRotate={!selectedNFT && !modalJustClosed}
                   minDistance={2}
                   maxDistance={20}
                   maxPolarAngle={Math.PI / 2 - 0.1}
@@ -342,7 +538,7 @@ export default function Museum3DScene({
                 />
               ) : (
                 <FirstPersonCharacterController 
-                  enabled={!selectedNFT} 
+                  enabled={!selectedNFT && !modalJustClosed} 
                   position={[0, 2.5, 5]}
                 />
               )}
@@ -381,6 +577,7 @@ export default function Museum3DScene({
             </h2>
             <p className="text-sm text-gray-300 drop-shadow">
               {nfts.length} NFTs • {controlMode === 'orbit' ? 'Orbit Mode' : 'First Person Mode'}
+              {modalJustClosed && <span className="text-yellow-400 ml-2">• Cooldown...</span>}
             </p>
           </div>
         )}
@@ -398,12 +595,18 @@ export default function Museum3DScene({
                 Settings / Exit
               </p>
               {controlMode === 'firstPerson' && (
-                <p>
-                  <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">WASD</kbd>
-                  Move • 
-                  <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mx-1">SPACE</kbd>
-                  Jump
-                </p>
+                <>
+                  <p>
+                    <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">WASD</kbd>
+                    Move • 
+                    <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mx-1">SPACE</kbd>
+                    Jump
+                  </p>
+                  <p>
+                    <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-1">E</kbd>
+                    Hold to interact with NFTs
+                  </p>
+                </>
               )}
             </div>
           </div>
@@ -414,6 +617,75 @@ export default function Museum3DScene({
           <div className="absolute top-4 right-4 text-white text-sm">
             <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1">
               Quality: <span className="font-medium capitalize">{quality}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Simple 2D Crosshair for First Person Mode */}
+        {allImagesLoaded && controlMode === 'firstPerson' && (
+          <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-30">
+            <div className="relative">
+              {/* Center dot */}
+              <div className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                hoveredNFT && !modalJustClosed && isInteractionKeyPressed 
+                  ? 'bg-green-400 scale-150' 
+                  : isInteractionKeyPressed 
+                    ? 'bg-yellow-400 scale-125'
+                    : 'bg-white/60'
+              }`} />
+              
+              {/* Crosshair lines */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                {/* Horizontal line */}
+                <div className={`absolute h-[1px] w-6 -left-3 top-1/2 -translate-y-1/2 transition-colors ${
+                  hoveredNFT && !modalJustClosed && isInteractionKeyPressed
+                    ? 'bg-green-400' 
+                    : isInteractionKeyPressed
+                      ? 'bg-yellow-400'
+                      : 'bg-white/40'
+                }`} />
+                {/* Vertical line */}
+                <div className={`absolute w-[1px] h-6 left-1/2 -top-3 -translate-x-1/2 transition-colors ${
+                  hoveredNFT && !modalJustClosed && isInteractionKeyPressed
+                    ? 'bg-green-400' 
+                    : isInteractionKeyPressed
+                      ? 'bg-yellow-400'
+                      : 'bg-white/40'
+                }`} />
+              </div>
+
+              {/* Interaction hints */}
+              {!modalJustClosed && (
+                <>
+                  {/* NFT detected - ready to click */}
+                  {hoveredNFT && isInteractionKeyPressed && (
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 text-white text-xs bg-black/70 px-3 py-1 rounded-full whitespace-nowrap">
+                      Click to view NFT
+                    </div>
+                  )}
+
+                  {/* E key instruction when looking at NFT */}
+                  {hoveredNFT && !isInteractionKeyPressed && (
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 text-yellow-400 text-xs bg-black/70 px-3 py-1 rounded-full whitespace-nowrap">
+                      Hold <kbd className="bg-gray-600 px-1 rounded">E</kbd> to interact
+                    </div>
+                  )}
+
+                  {/* Interaction mode active */}
+                  {!hoveredNFT && isInteractionKeyPressed && (
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 text-yellow-400 text-xs bg-black/70 px-3 py-1 rounded-full whitespace-nowrap">
+                      Interaction mode active
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Cooldown hint */}
+              {modalJustClosed && (
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 text-gray-400 text-xs bg-black/70 px-3 py-1 rounded-full whitespace-nowrap">
+                  Wait a moment...
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -431,61 +703,9 @@ export default function Museum3DScene({
           nft={selectedNFT}
           collection={collection}
           userAddress={userAddress}
-          onClose={() => setSelectedNFT(null)}
+          onClose={handleModalClose}
         />
       )}
     </>
   );
 }
-
-// Helper functions
-function calculateNFTPositions(total: number): [number, number, number][] {
-  const positions: [number, number, number][] = [];
-  const wallSpacing = 3.5;
-  const height = 2;
-  const roomSize = 10; // Half of room width/depth (20/2 = 10)
-  
-  const perWall = Math.ceil(total / 4);
-  
-  for (let i = 0; i < total; i++) {
-    const wall = Math.floor(i / perWall);
-    const positionOnWall = i % perWall;
-    
-    const wallLength = roomSize * 2;
-    const totalWidth = (perWall - 1) * wallSpacing;
-    const startOffset = -totalWidth / 2;
-    const offset = startOffset + positionOnWall * wallSpacing;
-    
-    switch (wall) {
-      case 0: // Front wall
-        positions.push([offset, height, -(roomSize - 0.2)]); // Slightly off the wall
-        break;
-      case 1: // Right wall
-        positions.push([roomSize - 0.2, height, offset]);
-        break;
-      case 2: // Back wall
-        positions.push([-offset, height, roomSize - 0.2]);
-        break;
-      case 3: // Left wall
-        positions.push([-(roomSize - 0.2), height, -offset]);
-        break;
-      default:
-        positions.push([0, height, 0]);
-    }
-  }
-  
-  return positions;
-}
-
-function calculateNFTRotation(index: number, total: number): [number, number, number] {
-  const perWall = Math.ceil(total / 4);
-  const wall = Math.floor(index / perWall);
-  
-  switch (wall) {
-    case 0: return [0, 0, 0];        // Front wall
-    case 1: return [0, -Math.PI / 2, 0]; // Right wall
-    case 2: return [0, Math.PI, 0];      // Back wall
-    case 3: return [0, Math.PI / 2, 0];  // Left wall
-    default: return [0, 0, 0];
-  }
-} 

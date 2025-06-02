@@ -84,7 +84,7 @@ function FuturisticThemeObjects() {
       
       {/* Holographic Elements */}
       {quality === 'high' && <HolographicElements />}
-      
+
       {/* Tech Installations */}
       <TechInstallations />
       
@@ -745,7 +745,7 @@ function MarbleDecorations() {
 
 function MinimalistDecorations() {
   const { shadowsEnabled } = useSceneStore();
-  
+
   return (
     <>
       {/* Modern geometric planters */}
