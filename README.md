@@ -1,355 +1,353 @@
-# 🚀 Xnfty - Fractional Ownership NFT Platform
+# 🏛️ Xnfty - 3D Virtual Museum for Fractional NFTs
 
-Xnfty is a cutting-edge 3D NFT ecommerce platform that enables fractional ownership of NFT collections. Built with Next.js, blockchain technology, and IPFS integration.
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.0-black)](https://nextjs.org/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636)](https://soliditylang.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-0.174.0-black)](https://threejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🌟 Features
+**Xnfty** este o platformă Web3 inovativă care combină un muzeu virtual 3D interactiv cu un sistem avansat de NFT-uri cu proprietate fracționată. Aplicația permite utilizatorilor să creeze, să desfășoare (deploy) și să tranzacționeze NFT-uri într-un mediu 3D imersiv, oferind o experiență unică în ecosistemul blockchain.
 
-- **Fractional Ownership**: Create NFT collections with share-based ownership
-- **3D Visualization**: Immersive 3D NFT viewing experience
-- **IPFS Integration**: Decentralized storage via Pinata
-- **Wallet Integration**: Support for MetaMask and Web3Auth
-- **Share Trading**: Buy and sell collection shares
-- **Real-time Updates**: Live ownership tracking and statistics
-- **Dark Theme UI**: Modern, sleek interface matching the dashboard design
+## 🎯 Ce este Xnfty?
 
-## 🏗️ Architecture
+Xnfty revoluționează modul în care interacționăm cu NFT-urile prin:
+
+- **🏛️ Muzeu Virtual 3D**: Experiență imersivă de vizualizare a NFT-urilor cu navigare first-person și orbit camera
+- **💎 Proprietate Fracționată**: Sistem inovativ care permite cumpărarea de shares ale unui NFT (ERC-20 + ERC-721)
+- **🚀 Deployment Automatizat**: Factory pattern pentru crearea automată de colecții NFT
+- **🔗 Multi-Blockchain**: Suport pentru Ethereum, Polygon și alte rețele Layer 2
+- **🎮 Fizică Realistă**: Integrare Rapier physics engine pentru interacțiuni autentice
+
+## ✨ Funcționalități Principale
+
+### 🎨 Creator Tools
+- **Automated Collection Deployment** - Factory pattern elimină procesele manuale
+- **NFT Minting** cu metadata IPFS și 3D asset support
+- **Fractional Configuration** - setare shares, pricing și governance
+- **Multi-format Support** - imagini, video, modele 3D, animații
+
+### 💰 Trading & Ownership
+- **Fractional NFT Trading** - cumpărare/vânzare shares individual
+- **Automatic Ownership Transfer** - la deținerea >50% shares
+- **Dynamic Pricing** - piață liberă pentru share pricing
+- **Real-time Portfolio Tracking** - monitoring investiții și returns
+
+### 🏛️ Museum Experience
+- **Immersive 3D Navigation** - first-person și orbit camera controls
+- **Physics-based Interactions** - coliziuni și manipulare obiecte
+- **Adaptive Quality Systems** - LOD pentru cross-platform performance
+- **Interactive NFT Displays** - hover effects, metadata integration
+- **Social Features** - multiplayer potential pentru experiențe shared
+
+### 🔐 Web3 Integration
+- **Multiple Authentication** - Web3Auth (social + wallet login)
+- **Cross-wallet Support** - MetaMask, WalletConnect, și altele
+- **Real-time Blockchain Sync** - live updates și notificări
+- **IPFS Decentralized Storage** - metadata și assets decentralizate
+
+## 🛠️ Stack Tehnologic
+
+### 🔗 Blockchain Layer
+- **Solidity 0.8.20** - Smart contracts cu optimizări avansate
+- **OpenZeppelin 4.9.6** - Security patterns și standardized contracts
+- **Hardhat 2.17.2** - Development environment și testing framework
+- **TypeChain 8.3.1** - Type-safe contract interactions
+- **Ethers.js 6.13.5** - Blockchain interaction library
+
+### 🎨 Frontend Stack
+- **Next.js 15.2.0** cu Turbopack pentru fast development
+- **React 19.0.0** cu concurrent features pentru performance
+- **TypeScript 5** pentru type safety și developer experience
+- **Tailwind CSS 4.0.15** pentru modern, responsive design
+- **Zustand 5.0.5** pentru predictable state management
+
+### 🎮 3D Graphics & Physics
+- **Three.js 0.174.0** - Core 3D rendering engine
+- **React Three Fiber 9.0.4** - Declarative 3D programming
+- **Rapier Physics 2.1.0** - WebAssembly-based physics simulation
+- **@react-three/drei 10.0.3** - Enhanced 3D components și helpers
+- **@react-three/postprocessing 3.0.4** - Advanced visual effects
+
+### 🌐 Web3 & Storage
+- **Wagmi 2.15.2** + **Viem 2.28.3** - Type-safe Web3 React hooks
+- **Web3Auth 9.7.0** - Social și wallet authentication
+- **IPFS + Pinata SDK 2.1.0** - Decentralized storage solution
+- **NextAuth 5.0.0-beta** - Session management și social login
+
+## 🏗️ Design Patterns Implementate
+
+### 🎭 Smart Contract Patterns
+
+#### 1. **Factory Pattern**
+```solidity
+// NFTFactory.sol - Automated contract deployment
+function createCollection(string memory name, string memory symbol, string memory metadataURI) 
+    external returns (uint256)
+```
+- **Eliminarea deployment-ului manual**
+- **Standardizarea interfețelor**
+- **Centralized tracking și discovery**
+
+#### 2. **Clone Factory Pattern**
+```solidity
+// CollectionFactory.sol - Gas-efficient contract cloning
+address clone = Clones.clone(implementation);
+FractionalNFT(clone).initialize(_name, _description);
+```
+- **Reduced deployment costs** prin shared bytecode
+- **Upgradeability** prin new implementation contracts
+
+#### 3. **Dual Token System**
+- **ERC-721** pentru NFT-uri unice cu metadata IPFS
+- **ERC-20** pentru shares și fractional ownership
+- **Cross-contract coordination** pentru ownership transfer
+
+#### 4. **State Machine Pattern**
+```solidity
+// NFT state transitions: Normal → Fractionalized → Complete Ownership
+bool isfractionalized;
+function _checkOwnershipChange() internal // Automatic state transitions
+```
+
+#### 5. **Access Control Patterns**
+- **Ownable** pentru creator permissions
+- **ReentrancyGuard** pentru attack prevention
+- **Role-based access** cu multiple authorization levels
+
+### 🎨 Frontend Patterns
+
+#### 1. **Provider Pattern**
+```typescript
+// Web3 context management
+<Web3Provider>
+  <AuthProvider>
+    <MuseumProvider>
+```
+
+#### 2. **Custom Hooks Pattern**
+```typescript
+// hooks/useNFTCollection.ts
+// hooks/useWeb3Auth.ts
+// hooks/useMuseumControls.ts
+```
+
+#### 3. **Observer Pattern**
+- **Zustand stores** pentru state synchronization
+- **Event-driven architecture** pentru blockchain updates
+- **Real-time UI updates** prin WebSocket-like connections
+
+#### 4. **Strategy Pattern**
+- **Multiple authentication strategies** (social + wallet)
+- **Adaptive quality rendering** based pe device capabilities
+- **Cross-platform asset loading** strategies
+
+## 📁 Arhitectura Proiectului
 
 ```
-Xnfty/
-├── frontend/           # Next.js frontend application
-├── smart-contracts/    # Solidity smart contracts
-└── README.md          # This file
+xnfty/
+├── 🎨 frontend/                     # Next.js application
+│   ├── 📱 app/                      # App Router pages
+│   │   ├── museum/                  # 3D museum interface
+│   │   ├── marketplace/             # NFT trading platform
+│   │   ├── dashboard/               # User management
+│   │   ├── collections/             # Collection management
+│   │   └── api/                     # API routes
+│   ├── 🧩 components/               # Reusable components
+│   │   ├── museum/                  # 3D scene components
+│   │   ├── auth/                    # Authentication UI
+│   │   ├── collections/             # Collection management
+│   │   ├── ui/                      # Base UI components
+│   │   └── providers/               # Context providers
+│   ├── 🔗 hooks/                    # Custom React hooks
+│   ├── 🗄️ store/                    # Zustand state management
+│   │   ├── sceneStore.ts            # 3D scene state
+│   │   ├── museumStore.ts           # Museum specific state
+│   │   └── walletStore.ts           # Wallet connection state
+│   ├── 🎭 types/                    # TypeScript definitions
+│   └── 🛠️ utils/                    # Helper functions
+├── 🔗 smart-contracts/              # Blockchain layer
+│   ├── 📜 contracts/                # Smart contracts
+│   │   ├── NFTFactory.sol           # Factory pattern implementation
+│   │   ├── NFTCollection.sol        # ERC-721 with fractional support
+│   │   ├── FractionalNFT.sol        # ERC-20 shares contract
+│   │   └── CollectionFactory.sol    # Clone factory implementation
+│   ├── 🧪 test/                     # Contract tests
+│   ├── 📝 scripts/                  # Deployment scripts
+│   └── 🔧 typechain-types/          # Generated TypeScript types
+└── 📖 docs/                         # Documentation
 ```
-
-### Smart Contract Architecture
-
-1. **NFTFactory** - Factory contract for creating new NFT collections
-2. **NFTCollection** - ERC721 contract with fractional ownership capabilities
-3. **ShareToken** - ERC20 token representing shares in an NFT collection
-
-### Data Structure
-
-- **Collections**: Store name, image URL, description, and collection address
-- **NFTs**: Store only metadata URI (IPFS) containing all NFT data (image, name, description, attributes)
-- **Factory**: Holds array of collection addresses for easy iteration
-- **Shares**: Track ownership percentages and automatic ownership transfer at >50% shares
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 📋 Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
-- MetaMask wallet
-- Sepolia testnet ETH
+- **Node.js** v18+ și npm/yarn
+- **Git** pentru version control
+- **MetaMask** sau alt Web3 wallet
+- **Sepolia ETH** pentru testing (free din faucet)
 
-### 1. Clone the Repository
+### 🔧 Installation
 
 ```bash
-git clone <repository-url>
-cd Xnfty
+# Clone repository
+git clone https://github.com/your-username/xnfty.git
+cd xnfty
+
+# Install dependencies
+npm install
+
+# Setup smart contracts
+cd smart-contracts
+npm install
+npx hardhat compile
+
+# Setup frontend
+cd ../frontend
+npm install
 ```
 
-### 2. Smart Contract Deployment
+### ⚙️ Environment Configuration
 
+#### Smart Contracts `.env`:
+```env
+PRIVATE_KEY=your_private_key_here
+INFURA_API_KEY=your_infura_api_key_here
+ETHERSCAN_API_KEY=your_etherscan_api_key_here
+```
+
+#### Frontend `.env.local`:
+```env
+NEXT_PUBLIC_NFT_FACTORY_ADDRESS=deployed_factory_address
+NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_token
+NEXT_PUBLIC_WEB3AUTH_CLIENT_ID=your_web3auth_client_id
+NEXT_PUBLIC_CHAIN_ID=11155111
+```
+
+### 🚀 Deployment
+
+#### 1. Deploy Smart Contracts
 ```bash
 cd smart-contracts
 
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-# Add your PRIVATE_KEY and INFURA_API_KEY
-
-# Compile contracts
-npx hardhat compile
-
-# Deploy to Sepolia
+# Deploy to Sepolia testnet
 npx hardhat run scripts/deploy.ts --network sepolia
+
+# Verify on Etherscan (optional)
+npx hardhat verify --network sepolia <FACTORY_ADDRESS>
 ```
 
-**Important**: Copy the deployed factory address from the output.
-
-### 3. Frontend Setup
-
-```bash
-cd ../frontend
-
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-# Add all required environment variables (see below)
-
-# Start development server
-npm run dev
-```
-
-## 🔧 Environment Configuration
-
-### Smart Contracts (.env)
-
-```env
-PRIVATE_KEY=your_private_key_without_0x_prefix
-INFURA_API_KEY=your_infura_api_key
-```
-
-### Frontend (.env)
-
-```env
-# Authentication
-AUTH_SECRET=your_random_secret_key
-NEXT_PUBLIC_WEB3AUTH_CLIENT_ID=your_web3auth_client_id
-NEXT_PUBLIC_WEB3AUTH_VERIFIER=Xnfty
-NEXT_PRIVATE_KEY=your_private_key_for_server_side
-AUTH_GOOGLE_ID=your_google_oauth_client_id
-AUTH_GOOGLE_SECRET=your_google_oauth_secret
-NEXT_AUTH_URL=http://localhost:3000
-
-# Blockchain
-NEXT_PUBLIC_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/your_alchemy_key
-NEXT_PUBLIC_NFT_FACTORY_ADDRESS=deployed_factory_address_from_step_2
-
-# IPFS (Pinata)
-NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
-NEXT_PUBLIC_PINATA_SECRET_KEY=your_pinata_secret_key
-PINATA_GATEWAY=https://your-gateway.mypinata.cloud/ipfs/
-```
-
-## 📋 Setup Guide
-
-### 1. Get Sepolia ETH
-
-- Visit [Sepolia Faucet](https://sepoliafaucet.com/)
-- Request test ETH for deployment
-
-### 2. Create Pinata Account
-
-- Sign up at [Pinata](https://pinata.cloud/)
-- Create API keys
-- Set up your gateway
-
-### 3. Configure Web3Auth
-
-- Create account at [Web3Auth](https://web3auth.io/)
-- Create a new project
-- Get your client ID
-
-### 4. Setup Google OAuth
-
-- Go to [Google Cloud Console](https://console.cloud.google.com/)
-- Create OAuth 2.0 credentials
-- Add authorized redirect URIs
-
-## 🎯 Usage
-
-### Creating a Collection
-
-1. Connect your wallet
-2. Click "Create Collection"
-3. Fill in collection details:
-   - Name and symbol
-   - Description and image
-   - Total shares and share price
-4. Add NFTs to your collection (optional during creation)
-5. Deploy to blockchain
-
-### Adding NFTs to Collection
-
-1. Open collection manager
-2. Click "Add NFT" (owner only)
-3. Upload image and fill metadata
-4. Add attributes (optional)
-5. Mint NFT with IPFS metadata
-
-### Buying Shares
-
-1. Browse available collections
-2. Click on a collection
-3. Go to "Shares" tab
-4. Enter number of shares to buy
-5. Confirm transaction
-
-### Managing Collections
-
-- **Owners**: Add NFTs, update metadata, set share prices
-- **Shareholders**: View holdings, buy/sell shares
-- **Public**: Browse collections, view statistics
-
-## 🔧 Development
-
-### Frontend Development
-
+#### 2. Start Frontend
 ```bash
 cd frontend
 
-# Start development server
+# Development mode
 npm run dev
 
-# Build for production
+# Production build
 npm run build
-
-# Start production server
 npm start
 ```
 
-### Smart Contract Development
+### 🌐 Access Application
+- **Local Development**: http://localhost:3000
+- **3D Museum**: http://localhost:3000/museum
+- **Marketplace**: http://localhost:3000/marketplace
+- **Dashboard**: http://localhost:3000/dashboard
 
-```bash
-cd smart-contracts
+## 🎮 User Guide
 
-# Compile contracts
-npx hardhat compile
+### 👤 Pentru Creators
 
-# Run tests
-npx hardhat test
+1. **Connect Wallet** - Web3Auth sau MetaMask
+2. **Create Collection** - Factory deployment cu custom metadata
+3. **Mint NFTs** - Upload assets la IPFS și mint pe blockchain
+4. **Setup Fractional Ownership** - Configure shares și pricing
+5. **Launch în Museum** - 3D gallery cu custom layout
 
-# Deploy locally
-npx hardhat node
-npx hardhat run scripts/deploy.ts --network localhost
-```
+### 💰 Pentru Investors
 
-## 📖 Smart Contract Details
+1. **Browse Museum** - Explorare 3D collection gallery
+2. **Discover NFTs** - Interactive browsing cu metadata details
+3. **Buy Shares** - Fractional investment cu dynamic pricing
+4. **Track Portfolio** - Real-time monitoring returns
+5. **Trade Shares** - Secondary market cu instant settlement
 
-### NFTFactory
+### 🏛️ Pentru Visitors
 
-Main factory contract for creating collections:
+1. **Explore Museum** - First-person navigation prin galleries
+2. **Interactive Experiences** - Physics-based object manipulation
+3. **Educational Content** - Artist stories și collection context
+4. **Social Features** - Share discoveries și favorite pieces
+5. **Cross-platform Access** - Desktop, mobile, și VR ready
 
-```solidity
-function createCollection(
-    string memory name,
-    string memory symbol,
-    string memory description,
-    string memory imageURI,
-    string memory metadataURI,
-    uint256 totalShares,
-    uint256 sharePrice
-) external returns (uint256)
-```
+## 🔒 Security Features
 
-### NFTCollection
-
-ERC721 contract with fractional ownership:
-
-```solidity
-function mintNFT(string memory metadataURI) external returns (uint256)
-function buyShares(uint256 shareAmount) external payable
-```
-
-### ShareToken
-
-ERC20 token for collection shares:
-
-```solidity
-function getSharePercentage(address holder) external view returns (uint256)
-```
-
-## 🔐 Security
-
-- All contracts use OpenZeppelin libraries
-- ReentrancyGuard on critical functions
-- Access control with Ownable pattern
-- Input validation on all functions
+- **🛡️ Smart Contract Security**: OpenZeppelin patterns, reentrancy protection
+- **🔐 Wallet Security**: Non-custodial approach, private key management
+- **📁 Decentralized Storage**: IPFS pentru censorship resistance
+- **🔍 Transparent Transactions**: Open-source contracts cu public verification
+- **⚡ Gas Optimization**: Efficient contract design pentru reduced costs
 
 ## 🧪 Testing
 
 ### Smart Contracts
-
 ```bash
 cd smart-contracts
 npx hardhat test
+npx hardhat coverage
 ```
 
 ### Frontend
-
 ```bash
 cd frontend
 npm test
+npm run test:e2e
 ```
 
-## 🚀 Deployment
-
-### Production Deployment
-
-1. **Smart Contracts**: Deploy to mainnet
-2. **Frontend**: Deploy to Vercel/Netlify
-3. **Environment**: Update production environment variables
-
-### Vercel Deployment
-
+### Integration Tests
 ```bash
-cd frontend
-npm install -g vercel
-vercel --prod
+npm run test:integration
 ```
 
-## 📊 Key Features Explained
+## 📈 Performance Optimizations
 
-### Fractional Ownership
-
-- Collections divided into shares (ERC20 tokens)
-- Share prices set by creators
-- Automatic ownership transfer at >50% shares
-- Real-time ownership tracking
-
-### IPFS Integration
-
-- Images uploaded to Pinata
-- Metadata stored on IPFS
-- Decentralized and permanent storage
-- Fast retrieval via gateways
-
-### Optimized Data Structure
-
-- Collections store only essential data on-chain
-- NFTs store only metadata URI (IPFS)
-- Factory holds collection addresses array
-- Efficient gas usage and storage
-
-### Dark Theme UI
-
-- Modern dark interface matching dashboard
-- Improved text visibility and contrast
-- Consistent styling across all components
-- Enhanced user experience
-
-## 🔄 Workflow
-
-1. **Collection Creation**: Factory deploys new collection and share token contracts
-2. **NFT Minting**: Owner uploads image to IPFS, creates metadata, mints with metadata URI
-3. **Share Trading**: Users buy/sell shares, automatic ownership transfer
-4. **Metadata Fetching**: Frontend fetches NFT metadata from IPFS for display
+- **🎮 Adaptive Quality Systems** - Dynamic LOD based pe device capabilities
+- **⚡ Code Splitting** - Lazy loading pentru 3D components
+- **🗄️ Efficient State Management** - Zustand pentru minimal re-renders
+- **📦 Asset Optimization** - Compressed textures și model optimization
+- **🔗 Blockchain Efficiency** - Batched transactions și gas optimization
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+Welcomem contribuții! Vedeți [CONTRIBUTING.md](CONTRIBUTING.md) pentru guidelines.
+
+### Development Workflow
+1. Fork repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+Acest proiect este licensed sub [MIT License](LICENSE).
+
+## 🔗 Links & Resources
+
+- **📖 Documentation**: [docs.xnfty.com](https://docs.xnfty.com)
+- **🐦 Twitter**: [@XnftyPlatform](https://twitter.com/XnftyPlatform)
+- **💬 Discord**: [discord.gg/xnfty](https://discord.gg/xnfty)
+- **🐛 Issues**: [GitHub Issues](https://github.com/your-username/xnfty/issues)
 
 ## 🆘 Support
 
-For questions or issues:
-
-1. Check the documentation
-2. Review existing issues
-3. Create a new issue with detailed information
-
-## 🔗 Useful Links
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Hardhat Documentation](https://hardhat.org/docs)
-- [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts)
-- [Pinata Documentation](https://docs.pinata.cloud/)
-- [Web3Auth Documentation](https://web3auth.io/docs/)
+Pentru întrebări sau support:
+1. Verificați [Documentation](https://docs.xnfty.com)
+2. Căutați în [GitHub Issues](https://github.com/your-username/xnfty/issues)
+3. Alăturați-vă [Discord Community](https://discord.gg/xnfty)
+4. Creați un [New Issue](https://github.com/your-username/xnfty/issues/new)
 
 ---
 
-**Built with ❤️ for the future of NFTs**
+**Built with ❤️ for the future of digital art and fractional ownership.**
+
+*Xnfty - Where Art Meets Innovation în Web3 Era*
