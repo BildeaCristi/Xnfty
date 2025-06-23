@@ -17,11 +17,9 @@ contract NFTCollection is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     Counters.Counter private _tokenIdCounter;
     
-    // Collection metadata stored on IPFS
     string public collectionMetadataURI;
     address public nftFactory;
 
-    // NFT data with fractional ownership info
     struct NFTInfo {
         uint256 tokenId;
         string metadataURI;
@@ -110,11 +108,8 @@ contract NFTCollection is ERC721URIStorage, Ownable, ReentrancyGuard {
             msg.sender
         );
 
-        // CRITICAL FIX: Grant approval to the fractional contract to transfer the NFT
-        // This allows the fractional contract to transfer the NFT when someone buys all shares
         _approve(address(fractionalContract), tokenId);
 
-        // Update NFT info
         nfts[tokenId].fractionalContract = address(fractionalContract);
         nfts[tokenId].isfractionalized = true;
 
@@ -144,7 +139,6 @@ contract NFTCollection is ERC721URIStorage, Ownable, ReentrancyGuard {
      * @dev Get fractionalized NFTs only
      */
     function getFractionalizedNFTs() external view returns (NFTInfo[] memory) {
-        // Count fractionalized NFTs first
         uint256 fractionalizedCount = 0;
         for (uint256 i = 0; i < _tokenIdCounter.current(); i++) {
             if (nfts[i].isfractionalized) {

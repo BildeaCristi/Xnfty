@@ -23,15 +23,6 @@ export interface NftModalProps {
 }
 
 // Dashboard component props
-export interface DashboardContentProps {
-    session: {
-        user?: {
-            walletAddress?: string;
-        };
-        walletAddress?: string;
-    };
-}
-
 export interface UserSharesSummaryProps {
     userNFTShares: UserNFTShare[];
 }

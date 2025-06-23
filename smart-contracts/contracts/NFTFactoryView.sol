@@ -13,7 +13,6 @@ import "./FractionalNFT.sol";
 contract NFTFactoryView {
     NFTFactory public immutable factory;
 
-    // Simplified NFT info for user queries
     struct UserNFTInfo {
         uint256 collectionId;
         address collectionAddress;
@@ -26,7 +25,6 @@ contract NFTFactoryView {
         bool isOwner;
     }
 
-    // NFT info for collection queries
     struct NFTInfo {
         uint256 tokenId;
         address fractionalContract;
@@ -38,7 +36,6 @@ contract NFTFactoryView {
         uint256 creationTime;
     }
 
-    // Collection info with NFT count
     struct CollectionNFTInfo {
         uint256 collectionId;
         string metadataURI;
@@ -127,7 +124,6 @@ contract NFTFactoryView {
     function getUserNFTShares(address user) external view returns (UserNFTInfo[] memory) {
         address[] memory collectionAddresses = factory.getAllCollectionAddresses();
         
-        // Count user NFTs first
         uint256 userNFTCount = 0;
         
         for (uint256 i = 0; i < collectionAddresses.length; i++) {
@@ -146,7 +142,6 @@ contract NFTFactoryView {
             } catch {}
         }
 
-        // Create result array
         UserNFTInfo[] memory userNFTs = new UserNFTInfo[](userNFTCount);
         uint256 index = 0;
 
@@ -210,7 +205,6 @@ contract NFTFactoryView {
     function getAllFractionalizedNFTs() external view returns (UserNFTInfo[] memory) {
         address[] memory collectionAddresses = factory.getAllCollectionAddresses();
         
-        // Count fractionalized NFTs first
         uint256 fractionalizedCount = 0;
         
         for (uint256 i = 0; i < collectionAddresses.length; i++) {
@@ -225,7 +219,6 @@ contract NFTFactoryView {
             } catch {}
         }
 
-        // Create result array
         UserNFTInfo[] memory fractionalizedNFTs = new UserNFTInfo[](fractionalizedCount);
         uint256 index = 0;
 
@@ -313,7 +306,6 @@ contract NFTFactoryView {
 
         for (uint256 i = 0; i < collectionAddresses.length && index < collectionsWithSharesCount; i++) {
             if (hasSharesInCollection[i]) {
-                // Find collection info
                 for (uint256 k = 0; k < factory.getCollectionCount(); k++) {
                     NFTFactory.CollectionInfo memory collectionInfo = factory.getCollection(k);
                     if (collectionInfo.collectionAddress == collectionAddresses[i]) {
@@ -329,7 +321,7 @@ contract NFTFactoryView {
     }
 
     /**
-     * @dev Get enhanced collection info with NFT statistics
+     * @dev Get collection info with NFT statistics
      * @return CollectionNFTInfo[] Array of collections with NFT counts
      */
     function getCollectionsWithNFTInfo() external view returns (CollectionNFTInfo[] memory) {

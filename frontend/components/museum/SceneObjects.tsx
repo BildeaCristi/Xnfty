@@ -7,7 +7,7 @@ import { Float, useGLTF, Clone } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSceneStore } from '@/store/sceneStore';
 import { useMuseumStore } from '@/store/museumStore';
-import { PhysicsPresets } from '../providers/PhysicsProvider';
+import { PhysicsPresets } from '@/providers/PhysicsProvider';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { useLightingSetup } from '@/hooks/useLightingSetup';
 

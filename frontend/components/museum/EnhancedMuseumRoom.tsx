@@ -6,7 +6,7 @@ import { useSceneStore } from '@/store/sceneStore';
 import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { MeshReflectorMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-import { PhysicsPresets } from '../providers/PhysicsProvider';
+import { PhysicsPresets } from '@/providers/PhysicsProvider';
 
 // PBR Material interface
 interface PBRTextures {

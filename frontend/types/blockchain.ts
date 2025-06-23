@@ -1,5 +1,3 @@
-// Blockchain-related interfaces and types
-
 export interface Collection {
     collectionId: number;
     metadataURI: string;
@@ -61,21 +59,6 @@ export interface UserNFTShare {
     imageURI?: string;
 }
 
-export interface CollectionNFTInfo {
-    tokenId: number;
-    fractionalContract: string;
-    metadataURI: string;
-    totalShares: number;
-    currentOwner: string;
-    sharePrice: number;
-    isfractionalized: boolean;
-    creationTime: number;
-    name?: string;
-    description?: string;
-    imageURI?: string;
-}
-
-// Extended collection interface for shared collections
 export interface CollectionWithShares extends Collection {
     userNFTShares?: UserNFTShare[];
     totalUserShares?: number;

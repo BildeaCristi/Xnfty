@@ -1,5 +1,3 @@
-// IPFS and metadata-related interfaces and types
-
 export interface NFTMetadata {
     name: string;
     description: string;
@@ -10,7 +8,7 @@ export interface NFTMetadata {
     }>;
     external_url?: string;
     animation_url?: string;
-    price?: string; // Additional field from nft.ts
+    price?: string;
 }
 
 export interface CollectionMetadata {

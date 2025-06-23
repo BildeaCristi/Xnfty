@@ -1,6 +1,3 @@
-// Central types export file
-// Re-export all types from different modules
-
 // Blockchain types
 export type * from './blockchain';
 
@@ -13,7 +10,7 @@ export type * from './components';
 // Form types
 export type * from './forms';
 
-// Search types
+// SearchComponent types
 export type * from './search';
 
 // Form types
@@ -33,7 +30,6 @@ export type {
     GlassModalProps,
     GlassPanelProps,
     NftModalProps,
-    DashboardContentProps,
     UserSharesSummaryProps,
     CollectionDetailContentProps,
     CollectionPageProps,

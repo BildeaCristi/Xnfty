@@ -14,7 +14,6 @@ contract NFTFactory is ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _collectionIdCounter;
 
-    // Collection info - metadata on IPFS
     struct CollectionInfo {
         uint256 collectionId;
         string metadataURI;
@@ -23,7 +22,6 @@ contract NFTFactory is ReentrancyGuard {
         uint256 creationTime;
     }
 
-    // Mappings
     mapping(uint256 => CollectionInfo) public collections;
     mapping(address => uint256[]) public userCollections;
     address[] public collectionAddresses;
@@ -43,7 +41,6 @@ contract NFTFactory is ReentrancyGuard {
         uint256 collectionId = _collectionIdCounter.current();
         _collectionIdCounter.increment();
 
-        // Deploy NFT Collection contract
         NFTCollection nftCollection = new NFTCollection(
             name,
             symbol,
@@ -52,7 +49,6 @@ contract NFTFactory is ReentrancyGuard {
             address(this)
         );
 
-        // Store collection info
         collections[collectionId] = CollectionInfo({
             collectionId: collectionId,
             metadataURI: metadataURI,
@@ -74,7 +70,6 @@ contract NFTFactory is ReentrancyGuard {
         return collectionId;
     }
 
-    // Basic getters
     function getUserCollections(address user) external view returns (uint256[] memory) {
         return userCollections[user];
     }

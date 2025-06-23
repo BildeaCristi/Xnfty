@@ -1,24 +1,21 @@
 import type {NextRequest} from "next/server";
 import {NextResponse} from "next/server";
 import {auth} from "@/auth";
-
-export const publicRoutes = ["/login"];
-export const authRoutes = ["/login"];
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+import { AUTH_ROUTES, PUBLIC_ROUTES, ROUTES } from "./config/routes";
 
 export async function middleware(request: NextRequest) {
     const session = await auth();
     const {pathname} = request.nextUrl;
 
-    const isAuthRoute = authRoutes.includes(pathname);
-    const isPublicRoute = publicRoutes.includes(pathname);
+    const isAuthRoute = AUTH_ROUTES.includes(pathname as ROUTES);
+    const isPublicRoute = PUBLIC_ROUTES.includes(pathname as ROUTES);
 
     if (session && isAuthRoute) {
-        return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, request.url));
+        return NextResponse.redirect(new URL(ROUTES.LOGIN, request.url));
     }
 
     if (!session && !isPublicRoute) {
-        return NextResponse.redirect(new URL("/login", request.url));
+        return NextResponse.redirect(new URL(ROUTES.LOGIN, request.url));
     }
 
     return NextResponse.next();

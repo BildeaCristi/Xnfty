@@ -22,6 +22,18 @@ export interface CollectionFormData {
     externalLink?: string;
 }
 
+// Image data interface for better file handling
+export interface ImageData {
+    file: File;
+    name: string;
+    size: number;
+    type: string;
+    lastModified: number;
+}
+
+// NFT status types
+export type NFTStatus = 'pending' | 'minting' | 'minted' | 'fractionalizing' | 'completed' | 'error';
+
 // NFT form data for collection creation
 export interface NFTData {
     id: string;
@@ -29,13 +41,7 @@ export interface NFTData {
     description: string;
     image: File | null;
     imagePreview?: string;
-    imageData?: {
-        file: File;
-        name: string;
-        size: number;
-        type: string;
-        lastModified: number;
-    };
+    imageData?: ImageData;
     attributes: Array<{ trait_type: string; value: string }>;
     // Fractionalization settings
     shouldFractionalize: boolean;
@@ -44,7 +50,7 @@ export interface NFTData {
     fractionalName: string;
     fractionalSymbol: string;
     // Deployment status
-    status: 'pending' | 'minting' | 'minted' | 'fractionalizing' | 'completed' | 'error';
+    status: NFTStatus;
     tokenId?: number;
     fractionalContract?: string;
     error?: string;
@@ -72,12 +78,27 @@ export interface CollectionManagerProps {
     onClose: () => void;
 }
 
+// Deployment step status types
+export type DeploymentStepStatus = 'pending' | 'processing' | 'completed' | 'error';
+
 // Deployment step interface
 export interface DeploymentStep {
     id: string;
     name: string;
-    status: 'pending' | 'processing' | 'completed' | 'error';
+    status: DeploymentStepStatus;
     description: string;
+}
+
+// NFT validation result
+export interface NFTValidationResult {
+    isValid: boolean;
+    errors: string[];
+}
+
+// Collection validation result
+export interface CollectionValidationResult {
+    isValid: boolean;
+    errors: string[];
 }
 
 // Re-export Attribute for convenience

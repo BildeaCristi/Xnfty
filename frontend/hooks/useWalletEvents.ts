@@ -2,30 +2,30 @@
 
 import { useEffect } from 'react';
 import { useWalletStore } from '@/store/walletStore';
-import { useNotifications } from '@/components/notifications/NotificationContext';
+import { useNotifications } from '@/providers/NotificationContext';
 import { signOut } from 'next-auth/react';
 
 export const useWalletEvents = () => {
   const { setWalletData, disconnect } = useWalletStore();
-  const { showInfo, showWarning } = useNotifications();
+  const notifications = useNotifications();
 
   useEffect(() => {
-    if (!window.ethereum) return;
+    // Ensure we're in the browser environment and have required dependencies
+    if (typeof window === 'undefined' || !window.ethereum || !notifications) return;
+    
+    const { showInfo, showWarning } = notifications;
 
     const handleAccountsChanged = async (accounts: string[]) => {
       if (accounts.length === 0) {
-        // User disconnected wallet
         showWarning("Wallet Disconnected", "Your wallet has been disconnected");
         disconnect();
         await signOut({ redirect: false });
       } else if (accounts[0]) {
-        // User switched accounts
         showInfo("Account Changed", `Switched to ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`);
         setWalletData({
           isConnected: true,
           walletAddress: accounts[0],
         });
-        // Force re-authentication with new account
         await signOut({ redirect: false });
         window.location.reload();
       }
@@ -39,7 +39,6 @@ export const useWalletEvents = () => {
         walletAddress: null,
         chainId: chainIdNumber,
       });
-      // Reload to ensure proper network state
       window.location.reload();
     };
 
@@ -49,18 +48,31 @@ export const useWalletEvents = () => {
       await signOut({ redirect: false });
     };
 
-    // Add event listeners
-    window.ethereum.on('accountsChanged', handleAccountsChanged);
-    window.ethereum.on('chainChanged', handleChainChanged);
-    window.ethereum.on('disconnect', handleDisconnect);
+    try {
+      // @ts-ignore
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      // @ts-ignore
+      window.ethereum.on('chainChanged', handleChainChanged);
+      // @ts-ignore
+      window.ethereum.on('disconnect', handleDisconnect);
+    } catch (error) {
+      console.warn('Failed to attach wallet event listeners:', error);
+    }
 
-    // Cleanup
     return () => {
-      if (window.ethereum?.removeListener) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-        window.ethereum.removeListener('disconnect', handleDisconnect);
+      try {
+        // @ts-ignore
+        if (window.ethereum?.removeListener) {
+          // @ts-ignore
+          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+          // @ts-ignore
+          window.ethereum.removeListener('chainChanged', handleChainChanged);
+          // @ts-ignore
+          window.ethereum.removeListener('disconnect', handleDisconnect);
+        }
+      } catch (error) {
+        console.warn('Failed to remove wallet event listeners:', error);
       }
     };
-  }, [setWalletData, disconnect, showInfo, showWarning]);
+  }, [setWalletData, disconnect, notifications]);
 }; 

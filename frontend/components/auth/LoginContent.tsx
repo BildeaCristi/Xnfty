@@ -1,18 +1,17 @@
 "use client";
 
-import SignIn from "@/components/auth/buttons/signin-button";
-import GlassModal from "@/components/auth/modal/glass-modal";
-import MainBackground from "@/components/auth/main-background";
+import WalletLogin from "./WalletLoginButton";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function LoginContent() {
     return (
-        <>
-            <MainBackground />
-            <div className="relative min-h-screen flex items-center justify-center">
-                <GlassModal>
-                    <SignIn />
-                </GlassModal>
-            </div>
-        </>
+     <div className="flex flex-col gap-8 justify-center items-center py-4">
+         <div className="flex flex-col gap-4 justify-center items-center w-full">
+             <span className="text-lg font-medium">Connect as guest</span>
+             <GoogleLoginButton />
+             <span className="text-lg font-medium">Connect as user</span>
+             <WalletLogin />
+         </div>
+     </div>
     );
 }

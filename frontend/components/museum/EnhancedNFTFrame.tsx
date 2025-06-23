@@ -9,9 +9,8 @@ import { animated, useSpring } from '@react-spring/three';
 import { NFT } from '@/types/blockchain';
 import { useMuseumStore } from '@/store/museumStore';
 import { useSceneStore } from '@/store/sceneStore';
-import { PhysicsPresets } from '../providers/PhysicsProvider';
+import { PhysicsPresets } from '@/providers/PhysicsProvider';
 import { useIPFSImage } from '@/hooks/useIPFSImage';
-import { useRectAreaLightMaterial } from './MuseumLighting';
 
 interface EnhancedNFTFrameProps {
   nft: NFT;

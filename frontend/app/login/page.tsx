@@ -1,6 +1,6 @@
-import {auth} from "@/auth";
-import {redirect} from "next/navigation";
 import {Metadata} from "next";
+import LoginScene from "@/components/auth/LoginScene";
+import LoginGlassModal from "@/components/auth/LoginGlassModal";
 import LoginContent from "@/components/auth/LoginContent";
 
 export const metadata: Metadata = {
@@ -9,11 +9,14 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage() {
-    const session = await auth();
-
-    if (session) {
-        redirect("/dashboard");
-    }
-
-    return <LoginContent/>;
+    return (
+        <>
+            <LoginScene/>
+            <div className="relative min-h-screen flex items-center justify-center">
+                <LoginGlassModal>
+                    <LoginContent/>
+                </LoginGlassModal>
+            </div>
+        </>
+    )
 }

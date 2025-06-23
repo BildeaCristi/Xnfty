@@ -5,7 +5,7 @@ import {useFrame, useThree} from '@react-three/fiber';
 import {Text, Html} from '@react-three/drei';
 import * as THREE from 'three';
 import {NFT} from '@/types/blockchain';
-import TextureManager from '@/utils/textureManager';
+import TextureManagerService from '@/services/TextureManagerService';
 
 interface NFTFrameProps {
     nft: NFT;
@@ -29,7 +29,7 @@ export default function NFTFrame({
     const meshRef = useRef<THREE.Mesh>(null);
     const [texture, setTexture] = useState<THREE.Texture | null>(null);
     const [loading, setLoading] = useState(true);
-    const textureManager = TextureManager.getInstance();
+    const textureManager = TextureManagerService.getInstance();
     
     // Convert IPFS URL to HTTP gateway URL
     const getImageUrl = (uri: string | undefined): string => {
@@ -78,7 +78,7 @@ export default function NFTFrame({
         return texture;
     }, [nft.tokenId]);
     
-    // Load texture using TextureManager
+    // Load texture using TextureManagerService
     useEffect(() => {
         let isMounted = true;
         let loadedUrl: string | null = null;

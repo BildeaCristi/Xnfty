@@ -1,42 +1,91 @@
 'use client';
 
-import {useSession} from 'next-auth/react';
-import {useRouter} from 'next/navigation';
-import {useEffect} from 'react';
-import DashboardContent from '@/components/dashboard/DashboardContent';
-import '@/utils/debug'; // Import debug utilities
+import {useState} from 'react';
+import {DashboardBackground, DashboardCollections, LoadingState} from '@/components/dashboard';
+import CreateCollectionModal from '@/components/create-collection/CreateCollectionModal';
+import Navbar from '@/components/shared/Navbar';
+import {useDashboardData} from '@/hooks/useDashboardData';
+import {useDashboardActions} from '@/hooks/useDashboardActions';
+import {DASHBOARD_MESSAGES} from '@/utils/constants/dashboard';
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (!session) {
-      router.push('/');
-      return;
+    // Custom hooks for data and actions
+    const {
+        allCollections,
+        userCollections,
+        sharedCollections,
+        collectionStats,
+        isLoading,
+        walletAddress,
+        getCollectionsToShow,
+        loadCollections,
+        session,
+        status
+    } = useDashboardData();
+
+    const {
+        handleCreateSuccess,
+        handleCollectionClick,
+        handleAddToMetaMask,
+        formatAddress
+    } = useDashboardActions();
+
+    // Handle create collection success
+    const onCreateSuccess = (collectionId: number) => {
+        loadCollections(); // Refresh data
+        handleCreateSuccess(collectionId); // Navigate to collection
+        setShowCreateModal(false); // Close modal
+    };
+
+    // Loading state for authentication
+    if (status === 'loading') {
+        return (
+            <div
+                className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+                <LoadingState message={DASHBOARD_MESSAGES.LOADING} className="text-center"/>
+            </div>
+        );
     }
-  }, [session, status, router]);
 
-  if (status === 'loading') {
+    // Main dashboard layout
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="text-white mt-4">Loading...</p>
+        <div className="min-h-screen relative overflow-hidden">
+            <DashboardBackground/>
+
+            {/* Navbar */}
+            <Navbar
+                session={session!}
+                collections={allCollections}
+                onCreateCollection={() => setShowCreateModal(true)}
+            />
+
+            {/* Main Content */}
+            <div className="relative z-10 pt-20 p-6">
+                <DashboardCollections
+                    allCollections={allCollections}
+                    userCollections={userCollections}
+                    sharedCollections={sharedCollections}
+                    collectionStats={collectionStats}
+                    isLoading={isLoading}
+                    walletAddress={walletAddress}
+                    onCollectionClick={handleCollectionClick}
+                    onAddToMetaMask={handleAddToMetaMask}
+                    onCreateCollection={() => setShowCreateModal(true)}
+                    formatAddress={formatAddress}
+                    getCollectionsToShow={getCollectionsToShow}
+                />
+            </div>
+
+            {/* Create Collection Modal */}
+            {showCreateModal && (
+                <CreateCollectionModal
+                    isOpen={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={onCreateSuccess}
+                />
+            )}
         </div>
-      </div>
     );
-  }
-
-  if (!session) {
-    return null;
-  }
-
-  if (!session.user) {
-    return null;
-  }
-
-  return <DashboardContent session={session} />;
 }

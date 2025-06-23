@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { uploadJsonToPinata } from '@/utils/pinata';
+import { uploadJsonToPinata } from '@/services/IpfsService';
 
 export async function POST(request: Request) {
   try {

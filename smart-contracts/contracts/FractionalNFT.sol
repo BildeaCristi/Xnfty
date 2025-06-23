@@ -16,13 +16,13 @@ contract FractionalNFT is ERC20, Ownable, ReentrancyGuard {
     uint256 public sharePrice;
     string public nftMetadataURI;
     uint256 public creationTime;
-    address public creator; // Original creator of the NFT
-    
+    address public creator;
+
     // Share tracking
     mapping(address => uint256) public userShares;
     address[] public shareHolders;
-    uint256 public totalSharesAmount; // Total shares as regular number (not with decimals)
-    
+    uint256 public totalSharesAmount;
+
     event SharesPurchased(address indexed buyer, uint256 amount, uint256 totalPaid);
     event SharesTransferred(address indexed from, address indexed to, uint256 amount);
     event SharePriceUpdated(uint256 newPrice);
@@ -44,7 +44,7 @@ contract FractionalNFT is ERC20, Ownable, ReentrancyGuard {
         sharePrice = _sharePrice;
         nftMetadataURI = _nftMetadataURI;
         creationTime = block.timestamp;
-        creator = initialOwner; // Store the original creator
+        creator = initialOwner;
         totalSharesAmount = totalShares;
         
         // Mint all tokens to the creator initially

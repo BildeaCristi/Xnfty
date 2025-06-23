@@ -14,7 +14,6 @@ import {
     Zap
 } from 'lucide-react';
 import {
-    addTokenToMetaMask,
     buyNFTSharesEnhanced,
     formatAddress,
     getAvailableSharesForBuyer,
@@ -23,9 +22,9 @@ import {
     getNFTShareHolders,
     getUserNFTSharePercentage,
     isAllSharesWithOwner
-} from '@/utils/blockchain';
+} from '@/services/BlockchainService';
 import type { Collection, NFT, ShareHolder, FractionalNFTInfo } from '@/types';
-import { useNotifications } from '@/components/notifications/NotificationContext';
+import { useNotifications } from '@/providers/NotificationContext';
 import { ethers } from 'ethers';
 
 interface NFTDetailModalProps {
@@ -41,6 +40,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
     const [shareHolders, setShareHolders] = useState<ShareHolder[]>([]);
     const [userSharePercentage, setUserSharePercentage] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [showShareholders, setShowShareholders] = useState(false);
     const [buyAmount, setBuyAmount] = useState<number>(1);
     const [isBuying, setIsBuying] = useState(false);
@@ -52,9 +52,15 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
     const [maxBuyAmount, setMaxBuyAmount] = useState<number>(1);
 
     useEffect(() => {
-        if (nft.isfractionalized && nft.fractionalContract) {
-            loadFractionalData();
-        }
+        const initializeModal = async () => {
+            setIsInitialLoading(true);
+            if (nft.isfractionalized && nft.fractionalContract) {
+                await loadFractionalData();
+            }
+            setIsInitialLoading(false);
+        };
+        
+        initializeModal();
     }, [nft]);
 
     useEffect(() => {
@@ -67,7 +73,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
         if (!userAddress) return;
 
         try {
-            const {getSigner} = await import('@/utils/blockchain');
+            const {getSigner} = await import('@/services/BlockchainService');
             const signer = await getSigner();
 
             if (!signer.provider) {
@@ -188,7 +194,6 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             
             let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
             
-            // Check if user bought all shares
             const remainingShares = availableShares - buyAmount;
             if (remainingShares === 0) {
                 successMessage += ' You now own the entire NFT!';
@@ -196,7 +201,6 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
 
             showSuccess('Shares purchased successfully', successMessage);
 
-            // Refresh data
             await loadFractionalData();
             setBuyAmount(1);
         } catch (error) {
@@ -218,18 +222,6 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             showError('Purchase failed', errorMessage);
         } finally {
             setIsBuying(false);
-        }
-    };
-
-    const handleAddToMetaMask = async () => {
-        if (!nft.fractionalContract) return;
-        
-        try {
-            await addTokenToMetaMask(nft.fractionalContract);
-            showSuccess('Token added to MetaMask', 'The fractional token has been added to your MetaMask wallet.');
-        } catch (error) {
-            console.error('Error adding token to MetaMask:', error);
-            showError('Failed to add token', 'Failed to add token to MetaMask. Please try again.');
         }
     };
 
@@ -260,7 +252,18 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                 </div>
 
                 {/* Content */}
-                <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(90vh-120px)]">
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(90vh-120px)] relative">
+                    {/* Loading Overlay */}
+                    {isInitialLoading && (
+                        <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                                <div className="text-white text-lg font-medium mb-2">Loading NFT Details</div>
+                                <div className="text-gray-400 text-sm">Fetching fractional ownership data...</div>
+                            </div>
+                        </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
                         {/* Left Column - Image */}
                         <div className="order-1 xl:order-1">
@@ -368,10 +371,10 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                             {/* Fractional Contract Info */}
                             {nft.fractionalContract && (
                                 <div className="bg-purple-900/30 rounded-lg p-4 border border-purple-500/30">
-                                    <h3 className="text-lg font-semibold text-white mb-3">Fractional Contract</h3>
+                                    <h3 className="text-lg font-semibold text-white mb-3">Fractional Contract (ERC-20)</h3>
                                     <div className="space-y-3">
                                         <div>
-                                            <span className="text-gray-400 text-sm">Contract Address</span>
+                                            <span className="text-gray-400 text-sm">Shares Contract Address</span>
                                             <div className="flex items-center space-x-2 mt-1">
                                                 <p className="text-white font-mono text-xs break-all">{nft.fractionalContract}</p>
                                                 <button
@@ -389,22 +392,14 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
 
                                         <div className="flex justify-between items-center">
                                             <a
-                                                href={`https://etherscan.io/address/${nft.fractionalContract}`}
+                                                href={`https://sepolia.etherscan.io/address/${nft.fractionalContract}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-purple-300 hover:text-purple-200 text-sm flex items-center space-x-1"
                                             >
-                                                <span>View on Etherscan</span>
-                                                <ArrowUpRight className="w-3 h-3"/>
-                                            </a>
-
-                                            <button
-                                                onClick={handleAddToMetaMask}
-                                                className="text-purple-300 hover:text-purple-200 text-sm flex items-center space-x-1"
-                                            >
-                                                <span>Add to MetaMask</span>
+                                                <span>View Shares on Etherscan</span>
                                                 <ExternalLink className="w-3 h-3"/>
-                                            </button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
