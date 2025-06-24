@@ -31,26 +31,11 @@ function generateUniqueFileName(originalName: string, prefix?: string): string {
  * Upload a file to IPFS via Pinata
  */
 export async function uploadFileToIPFS(file: File, prefix?: string): Promise<string> {
-  console.log('IPFS File Upload - Starting file upload:', {
-    name: file.name,
-    size: file.size,
-    type: file.type,
-    prefix: prefix
-  });
-
-  console.log('IPFS File Upload - Environment check:', {
-    hasApiKey: !!PINATA_API_KEY,
-    hasSecretKey: !!PINATA_SECRET_KEY,
-    hasGateway: !!PINATA_GATEWAY
-  });
-
   if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-    console.error('IPFS File Upload - Missing Pinata credentials');
     throw new Error('Pinata credentials not configured. Please check your environment variables.');
   }
 
   if (!file) {
-    console.error('IPFS File Upload - No file provided');
     throw new Error('No file provided for upload');
   }
 
@@ -79,7 +64,6 @@ export async function uploadFileToIPFS(file: File, prefix?: string): Promise<str
     });
     formData.append('pinataOptions', options);
 
-    console.log('IPFS File Upload - Making request to Pinata with filename:', uniqueFileName);
     const response = await axios.post(
       'https://api.pinata.cloud/pinning/pinFileToIPFS',
       formData,
@@ -97,15 +81,10 @@ export async function uploadFileToIPFS(file: File, prefix?: string): Promise<str
       throw new Error('Invalid response from Pinata API');
     }
 
-    console.log('IPFS File Upload - Success:', response.data);
     const ipfsUrl = `${PINATA_GATEWAY}${response.data.IpfsHash}`;
-    console.log('IPFS File Upload - Generated URL:', ipfsUrl);
     return ipfsUrl;
   } catch (error) {
-    console.error('IPFS File Upload - Error:', error);
     if (axios.isAxiosError(error)) {
-      console.error('IPFS File Upload - Response data:', error.response?.data);
-      console.error('IPFS File Upload - Response status:', error.response?.status);
       
       if (error.response?.status === 401) {
         throw new Error('Invalid Pinata API credentials. Please check your API keys.');
@@ -126,26 +105,11 @@ export async function uploadJSONToIPFS(jsonData: any, baseName: string, prefix?:
     ? `${prefix}_${baseName}_${timestamp}`
     : `${baseName}_${timestamp}`;
 
-  console.log('IPFS JSON Upload - Starting JSON upload:', {
-    name: uniqueName,
-    dataSize: JSON.stringify(jsonData).length,
-    data: jsonData,
-    prefix: prefix
-  });
-
-  console.log('IPFS JSON Upload - Environment check:', {
-    hasApiKey: !!PINATA_API_KEY,
-    hasSecretKey: !!PINATA_SECRET_KEY,
-    hasGateway: !!PINATA_GATEWAY
-  });
-
   if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-    console.error('IPFS JSON Upload - Missing Pinata credentials');
     throw new Error('Pinata credentials not configured. Please check your environment variables.');
   }
 
   if (!jsonData) {
-    console.error('IPFS JSON Upload - No data provided');
     throw new Error('No JSON data provided for upload');
   }
 
@@ -167,14 +131,6 @@ export async function uploadJSONToIPFS(jsonData: any, baseName: string, prefix?:
       }
     };
 
-    console.log('IPFS JSON Upload - Request data structure:', {
-      hasPinataContent: !!requestData.pinataContent,
-      hasPinataMetadata: !!requestData.pinataMetadata,
-      hasPinataOptions: !!requestData.pinataOptions,
-      metadataName: requestData.pinataMetadata.name
-    });
-
-    console.log('IPFS JSON Upload - Making request to Pinata with name:', uniqueName);
     const response = await axios.post(
       'https://api.pinata.cloud/pinning/pinJSONToIPFS',
       requestData,
@@ -191,15 +147,10 @@ export async function uploadJSONToIPFS(jsonData: any, baseName: string, prefix?:
       throw new Error('Invalid response from Pinata API');
     }
 
-    console.log('IPFS JSON Upload - Success:', response.data);
     const ipfsUrl = `${PINATA_GATEWAY}${response.data.IpfsHash}`;
-    console.log('IPFS JSON Upload - Generated URL:', ipfsUrl);
     return ipfsUrl;
   } catch (error) {
-    console.error('IPFS JSON Upload - Error:', error);
     if (axios.isAxiosError(error)) {
-      console.error('IPFS JSON Upload - Response data:', error.response?.data);
-      console.error('IPFS JSON Upload - Response status:', error.response?.status);
       
       if (error.response?.status === 401) {
         throw new Error('Invalid Pinata API credentials. Please check your API keys.');
@@ -220,8 +171,6 @@ export function createNFTMetadata(
   imageUrl: string,
   attributes?: Array<{ trait_type: string; value: string | number }>
 ): NFTMetadata {
-  console.log('Creating NFT metadata:', { name, description, imageUrl, attributes });
-  
   if (!name || !description || !imageUrl) {
     throw new Error('Name, description, and image URL are required for NFT metadata');
   }
@@ -244,8 +193,6 @@ export function createCollectionMetadata(
   description: string,
   imageUrl: string
 ): CollectionMetadata {
-  console.log('Creating collection metadata:', { name, symbol, description, imageUrl });
-  
   if (!name || !symbol || !description || !imageUrl) {
     throw new Error('Name, symbol, description, and image URL are required for collection metadata');
   }

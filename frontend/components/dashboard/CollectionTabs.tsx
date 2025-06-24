@@ -7,19 +7,23 @@ interface CollectionTabsProps {
   onTabChange: (tab: DashboardTab) => void;
   sharesCount: number;
   ownedCount: number;
+  isGuest?: boolean;
 }
 
 export default function CollectionTabs({
   activeTab,
   onTabChange,
   sharesCount,
-  ownedCount
+  ownedCount,
+  isGuest = false
 }: CollectionTabsProps) {
-  const tabs = [
+  const allTabs = [
     { id: 'all' as const, label: DASHBOARD_LABELS.ALL_COLLECTIONS, count: null },
     { id: 'owned' as const, label: DASHBOARD_LABELS.OWNED, count: ownedCount },
     { id: 'shares' as const, label: DASHBOARD_LABELS.YOUR_SHARES, count: sharesCount }
   ];
+
+  const tabs = isGuest ? allTabs.filter(tab => tab.id === 'all') : allTabs;
 
   return (
     <div className="flex space-x-1 bg-white/10 rounded-lg p-1">

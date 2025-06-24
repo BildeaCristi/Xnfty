@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MuseumTheme, museumThemes } from '@/components/museum/museumThemes';
+import { MuseumTheme, museumThemes } from '@/config/museumThemes';
 
 interface MuseumState {
   // Theme management

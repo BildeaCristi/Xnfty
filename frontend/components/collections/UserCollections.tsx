@@ -118,9 +118,9 @@ export default function UserCollections() {
                             nft.totalShares = fractionalData.totalShares ? Number(fractionalData.totalShares) : undefined;
                             nft.availableShares = fractionalData.availableShares ? Number(fractionalData.availableShares) : undefined;
                             nft.pricePerShare = fractionalData.pricePerShare ? ethers.formatEther(fractionalData.pricePerShare) : undefined;
-                        } catch (err) {
-                            console.error(`Error fetching fractional data for token ${nft.tokenId}:`, err);
-                        }
+                                            } catch (err) {
+                        // Handle error silently
+                    }
 
                         return {
                             ...nft,

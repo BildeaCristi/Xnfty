@@ -25,17 +25,21 @@ import {
 } from '@/services/BlockchainService';
 import type { Collection, NFT, ShareHolder, FractionalNFTInfo } from '@/types';
 import { useNotifications } from '@/providers/NotificationContext';
+import { canBuyNFTs } from '@/utils/auth';
+import GuestWarning from '@/components/shared/GuestWarning';
 import { ethers } from 'ethers';
 
 interface NFTDetailModalProps {
     nft: NFT;
     collection: Collection;
     userAddress?: string;
+    session?: any;
     onClose: () => void;
 }
 
-export default function NFTDetailModal({nft, collection, userAddress, onClose}: NFTDetailModalProps) {
+export default function NFTDetailModal({nft, collection, userAddress, session, onClose}: NFTDetailModalProps) {
     const { showSuccess, showError, showWarning, showInfo, confirm } = useNotifications();
+    const canBuy = canBuyNFTs(session);
     const [fractionalInfo, setFractionalInfo] = useState<FractionalNFTInfo & { creator?: string } | null>(null);
     const [shareHolders, setShareHolders] = useState<ShareHolder[]>([]);
     const [userSharePercentage, setUserSharePercentage] = useState<number>(0);
@@ -77,7 +81,6 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             const signer = await getSigner();
 
             if (!signer.provider) {
-                console.error('Provider not available');
                 return;
             }
 
@@ -85,7 +88,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             const balanceInEth = (Number(balance) / 1e18).toFixed(4);
             setUserBalance(balanceInEth);
         } catch (error) {
-            console.error('Error loading user balance:', error);
+            // Handle error silently
         }
     };
 
@@ -95,7 +98,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             setCopiedAddress(type);
             setTimeout(() => setCopiedAddress(null), 2000);
         } catch (err) {
-            console.error('Failed to copy text: ', err);
+            // Handle error silently
         }
     };
 
@@ -137,7 +140,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                 setMaxBuyAmount(Math.max(1, maxPossible));
             }
         } catch (error) {
-            console.error('Error loading fractional data:', error);
+            // Handle error silently
         } finally {
             setIsLoading(false);
         }
@@ -181,16 +184,7 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
 
         setIsBuying(true);
         try {
-            console.log('Starting share purchase...', {
-                fractionalContract: nft.fractionalContract,
-                shareAmount: buyAmount,
-                sharePrice: fractionalInfo.sharePrice,
-                totalCost: totalCostEth
-            });
-
             const txHash = await buyNFTSharesEnhanced(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
-
-            console.log('Share purchase successful:', txHash);
             
             let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
             
@@ -204,7 +198,6 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
             await loadFractionalData();
             setBuyAmount(1);
         } catch (error) {
-            console.error('Error buying shares:', error);
             
             let errorMessage = 'Failed to buy shares. Please try again.';
             if (error instanceof Error) {
@@ -435,18 +428,26 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                                     </div>
 
                                     {/* Buy Shares */}
-                                    {userAddress ? (
+                                    {session ? (
                                         <div className="border-t border-purple-500/30 pt-4">
+                                            {!canBuy && (
+                                                <GuestWarning 
+                                                    message="Connect your wallet to buy NFT shares and start building your digital art collection."
+                                                    className="mb-4"
+                                                />
+                                            )}
                                             <div className="flex items-center justify-between mb-3">
                                                 <h4 className="text-base sm:text-lg font-medium text-white">Buy
                                                     Shares</h4>
-                                                <div className="text-right text-xs sm:text-sm">
-                                                    <div className="text-gray-400">Your Balance</div>
-                                                    <div className="text-white font-medium">{userBalance} ETH</div>
-                                                </div>
+                                                {canBuy && (
+                                                    <div className="text-right text-xs sm:text-sm">
+                                                        <div className="text-gray-400">Your Balance</div>
+                                                        <div className="text-white font-medium">{userBalance} ETH</div>
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            {hasAvailableShares ? (
+                                            {hasAvailableShares && canBuy ? (
                                                 <>
                                                     <div
                                                         className="mb-3 p-2 bg-blue-900/20 border border-blue-500/30 rounded-lg">
@@ -581,8 +582,12 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
 
                                                     <button
                                                         onClick={handleBuyShares}
-                                                        disabled={isBuying || !canAfford || buyAmount <= 0}
-                                                        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base"
+                                                        disabled={isBuying || !canAfford || buyAmount <= 0 || !canBuy}
+                                                        className={`w-full px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base ${
+                                                            isBuying || !canAfford || buyAmount <= 0 || !canBuy
+                                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                                        }`}
                                                     >
                                                         {isBuying ? (
                                                             <div
@@ -590,10 +595,10 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                                                         ) : (
                                                             <ShoppingCart className="w-4 h-4 mr-2 flex-shrink-0"/>
                                                         )}
-                                                        {isBuying ? 'Buying...' : `Buy ${buyAmount} Share${buyAmount > 1 ? 's' : ''}`}
+                                                        {isBuying ? 'Buying...' : canBuy ? `Buy ${buyAmount} Share${buyAmount > 1 ? 's' : ''}` : 'Connect Wallet to Buy'}
                                                     </button>
                                                 </>
-                                            ) : (
+                                            ) : canBuy ? (
                                                 <div className="text-center py-4">
                                                     <div className="text-gray-400 text-sm mb-2">No shares available for
                                                         purchase
@@ -609,6 +614,20 @@ export default function NFTDetailModal({nft, collection, userAddress, onClose}: 
                                                             You currently own {userSharePercentage}% of this NFT
                                                         </div>
                                                     )}
+                                                </div>
+                                            ) : hasAvailableShares ? (
+                                                <div className="text-center py-4">
+                                                    <div className="text-amber-400 text-sm mb-2">
+                                                        <span className="font-medium">{availableShares}</span> shares available
+                                                    </div>
+                                                    <div className="text-xs text-amber-300">
+                                                        Connect your wallet to purchase shares
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-4">
+                                                    <div className="text-gray-400 text-sm mb-2">No shares available</div>
+                                                    <div className="text-xs text-gray-500">All shares are currently held</div>
                                                 </div>
                                             )}
                                         </div>

@@ -11,6 +11,11 @@ declare module "next-auth" {
     interface Session {
         idToken?: string | undefined;
         walletAddress?: string;
+        user?: {
+            name?: string | null;
+            email?: string | null;
+            image?: string | null;
+        }
     }
 }
 
@@ -22,9 +27,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     prompt: "consent",
                     access_type: "offline",
                     scope: "openid profile email",
-                    session: {
-                        strategy: "jwt",
-                    },
                 },
             },
             clientId: process.env.AUTH_GOOGLE_ID,
@@ -60,20 +62,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         email: null,
                     };
                 } catch (error) {
-                    console.error("Wallet authentication error:", error);
                     return null;
                 }
             }
         })
     ],
+    session: {
+        strategy: "jwt",
+    },
+    pages: {
+        signIn: "/login",
+        error: "/login",
+    },
     callbacks: {
         async jwt({ token, account, user }) {
             if (account) {
                 token.idToken = account.id_token;
+                // Ensure proper redirect after OAuth
+                if (account.provider === "google") {
+                    token.provider = "google";
+                }
             }
 
             if (user?.walletAddress) {
                 token.walletAddress = user.walletAddress;
+                token.provider = "wallet";
             }
 
             return token;
@@ -82,6 +95,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             session.idToken = token.idToken as string;
             session.walletAddress = token.walletAddress as string;
             return session;
+        },
+        async redirect({ url, baseUrl }) {
+            // Handle redirects after authentication
+            if (url.startsWith("/")) {
+                return `${baseUrl}${url}`;
+            } else if (new URL(url).origin === baseUrl) {
+                return url;
+            }
+            return `${baseUrl}/dashboard`;
         },
     },
 });

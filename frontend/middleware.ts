@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname as ROUTES);
 
     if (session && isAuthRoute) {
-        return NextResponse.redirect(new URL(ROUTES.LOGIN, request.url));
+        return NextResponse.redirect(new URL(ROUTES.DASHBOARD, request.url));
     }
 
     if (!session && !isPublicRoute) {

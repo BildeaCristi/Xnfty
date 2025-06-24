@@ -1,7 +1,7 @@
 "use client";
 
 import { useMuseumStore } from '@/store/museumStore';
-import { museumThemes } from './museumThemes';
+import { museumThemes } from '../../config/museumThemes';
 import { X, Palette, Eye, Gamepad2, Settings } from 'lucide-react';
 
 export default function ThemeSelector() {

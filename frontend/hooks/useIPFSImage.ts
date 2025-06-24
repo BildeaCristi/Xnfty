@@ -1,20 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-
-// Enhanced IPFS gateway configuration with better fallbacks
-const IPFS_GATEWAYS = [
-  'https://ipfs.io/ipfs/',
-  'https://gateway.pinata.cloud/ipfs/',
-  'https://cloudflare-ipfs.com/ipfs/',
-  'https://dweb.link/ipfs/',
-  'https://ipfs.filebase.io/ipfs/',
-  'https://4everland.io/ipfs/',
-  'https://w3s.link/ipfs/',
-];
+import { ImagePreloadService } from '@/services/imagePreloadService';
 
 interface UseIPFSImageOptions {
   quality?: 'low' | 'medium' | 'high';
-  maxRetries?: number;
   timeout?: number;
 }
 
@@ -33,8 +22,7 @@ export function useIPFSImage(
 ): UseIPFSImageResult {
   const { 
     quality = 'high', 
-    maxRetries = 2,
-    timeout = 15000 
+    timeout = 3000 
   } = options;
   
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
@@ -47,46 +35,39 @@ export function useIPFSImage(
   const abortControllerRef = useRef<AbortController | null>(null);
   const textureRef = useRef<THREE.Texture | null>(null);
 
-  // Extract CID from various IPFS URL formats
-  const extractCID = (url: string): string | null => {
-    if (!url) return null;
+  // Create texture material with proper settings
+  const createTexture = (image: HTMLImageElement): THREE.Texture => {
+    const newTexture = new THREE.Texture(image);
+    newTexture.needsUpdate = true;
+    newTexture.colorSpace = THREE.SRGBColorSpace;
     
-    // Handle ipfs:// protocol
-    if (url.startsWith('ipfs://')) {
-      return url.replace('ipfs://', '');
+    // Set quality-based texture parameters
+    switch (quality) {
+      case 'high':
+        newTexture.minFilter = THREE.LinearMipmapLinearFilter;
+        newTexture.magFilter = THREE.LinearFilter;
+        newTexture.anisotropy = 16;
+        newTexture.generateMipmaps = true;
+        break;
+      case 'medium':
+        newTexture.minFilter = THREE.LinearMipmapNearestFilter;
+        newTexture.magFilter = THREE.LinearFilter;
+        newTexture.anisotropy = 4;
+        newTexture.generateMipmaps = true;
+        break;
+      case 'low':
+        newTexture.minFilter = THREE.NearestFilter;
+        newTexture.magFilter = THREE.NearestFilter;
+        newTexture.anisotropy = 1;
+        newTexture.generateMipmaps = false;
+        break;
     }
     
-    // Handle Pinata cloud URLs: https://blue-random-raven-153.mypinata.cloud/ipfs/QmXxx
-    const pinataCloudMatch = url.match(/https:\/\/[^\/]+\.mypinata\.cloud\/ipfs\/(.+)$/);
-    if (pinataCloudMatch && pinataCloudMatch[1]) {
-      return pinataCloudMatch[1];
-    }
-    
-    // Handle standard gateway URLs: https://gateway.domain.com/ipfs/QmXxx
-    const gatewayMatch = url.match(/\/ipfs\/([a-zA-Z0-9]+)(?:\?|$|\/)/);
-    if (gatewayMatch && gatewayMatch[1]) {
-      return gatewayMatch[1];
-    }
-    
-    // Handle direct CID (if just a hash is provided)
-    const cidMatch = url.match(/^(Qm[a-zA-Z0-9]{44}|baf[a-zA-Z0-9]+)$/);
-    if (cidMatch) {
-      return cidMatch[0];
-    }
-    
-    return null;
+    return newTexture;
   };
 
-  // Generate gateway URLs from CID
-  const generateGatewayUrls = (cid: string): string[] => {
-    return IPFS_GATEWAYS.map(gateway => `${gateway}${cid}`);
-  };
-
-  // Load image with comprehensive error handling and progress tracking
-  const loadImageFromUrl = async (
-    url: string,
-    signal: AbortSignal
-  ): Promise<{ texture: THREE.Texture; resolvedUrl: string }> => {
+  // Load image from URL and create texture
+  const loadImageFromUrl = async (url: string, signal: AbortSignal): Promise<THREE.Texture> => {
     return new Promise((resolve, reject) => {
       if (signal.aborted) {
         reject(new Error('Request aborted'));
@@ -96,58 +77,27 @@ export function useIPFSImage(
       const img = new Image();
       img.crossOrigin = 'anonymous';
       
-      // Handle load success
       img.onload = () => {
         if (signal.aborted) {
           reject(new Error('Request aborted'));
           return;
         }
-
         try {
-          // Create and configure texture
-          const newTexture = new THREE.Texture(img);
-          newTexture.needsUpdate = true;
-          newTexture.colorSpace = THREE.SRGBColorSpace;
-          
-          // Set quality-based texture parameters
-          switch (quality) {
-            case 'high':
-              newTexture.minFilter = THREE.LinearMipmapLinearFilter;
-              newTexture.magFilter = THREE.LinearFilter;
-              newTexture.anisotropy = 16;
-              newTexture.generateMipmaps = true;
-              break;
-            case 'medium':
-              newTexture.minFilter = THREE.LinearMipmapNearestFilter;
-              newTexture.magFilter = THREE.LinearFilter;
-              newTexture.anisotropy = 4;
-              newTexture.generateMipmaps = true;
-              break;
-            case 'low':
-              newTexture.minFilter = THREE.NearestFilter;
-              newTexture.magFilter = THREE.NearestFilter;
-              newTexture.anisotropy = 1;
-              newTexture.generateMipmaps = false;
-              break;
-          }
-          
-          resolve({ texture: newTexture, resolvedUrl: url });
+          const newTexture = createTexture(img);
+          resolve(newTexture);
         } catch (err) {
-          reject(new Error(`Failed to create texture: ${err}`));
+          reject(err);
         }
       };
       
-      // Handle load error
       img.onerror = () => {
         reject(new Error(`Failed to load image from ${url}`));
       };
       
-      // Handle timeout
       const timeoutId = setTimeout(() => {
         reject(new Error(`Timeout loading image from ${url}`));
       }, timeout);
       
-      // Cleanup timeout on success or error
       const cleanup = () => {
         clearTimeout(timeoutId);
       };
@@ -155,55 +105,14 @@ export function useIPFSImage(
       img.addEventListener('load', cleanup, { once: true });
       img.addEventListener('error', cleanup, { once: true });
       
-      // Start loading
       img.src = url;
       
-      // Handle abort
       signal.addEventListener('abort', () => {
         cleanup();
         img.src = '';
         reject(new Error('Request aborted'));
       });
     });
-  };
-
-  // Try loading from multiple gateways with fallbacks
-  const loadWithFallbacks = async (cid: string, signal: AbortSignal): Promise<{ texture: THREE.Texture; resolvedUrl: string }> => {
-    const gatewayUrls = generateGatewayUrls(cid);
-    let lastError: Error | null = null;
-    
-    console.log(`🔄 Attempting to load IPFS image with CID: ${cid}`);
-    console.log(`📋 Trying ${gatewayUrls.length} gateways...`);
-    
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      for (let i = 0; i < gatewayUrls.length; i++) {
-        if (signal.aborted) {
-          throw new Error('Request aborted');
-        }
-        
-        const url = gatewayUrls[i];
-        const gatewayName = IPFS_GATEWAYS[i].replace('https://', '').replace('/ipfs/', '');
-        
-        try {
-          console.log(`🌐 Trying gateway ${i + 1}/${gatewayUrls.length} (attempt ${attempt + 1}/${maxRetries + 1}): ${gatewayName}`);
-          setProgress(Math.round(((i + attempt * gatewayUrls.length) / (gatewayUrls.length * (maxRetries + 1))) * 100));
-          
-          const result = await loadImageFromUrl(url, signal);
-          console.log(`✅ Successfully loaded from: ${gatewayName}`);
-          return result;
-        } catch (err) {
-          lastError = err as Error;
-          console.log(`❌ Failed ${gatewayName}: ${lastError.message}`);
-          
-          // Add small delay between attempts to avoid overwhelming gateways
-          if (i < gatewayUrls.length - 1 || attempt < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
-        }
-      }
-    }
-    
-    throw lastError || new Error('All gateways failed');
   };
 
   // Load fallback placeholder image
@@ -213,9 +122,7 @@ export function useIPFSImage(
     
     return new Promise((resolve, reject) => {
       placeholderImg.onload = () => {
-        const fallbackTexture = new THREE.Texture(placeholderImg);
-        fallbackTexture.needsUpdate = true;
-        fallbackTexture.colorSpace = THREE.SRGBColorSpace;
+        const fallbackTexture = createTexture(placeholderImg);
         resolve(fallbackTexture);
       };
       
@@ -262,37 +169,37 @@ export function useIPFSImage(
       try {
         const signal = abortControllerRef.current!.signal;
         
-        // Extract CID from the provided URL
-        const cid = extractCID(imageUri);
-        if (!cid) {
-          throw new Error(`Invalid IPFS URL format: ${imageUri}`);
+        // Start preloading with the fast service
+        setProgress(25);
+        const preloadSuccess = await ImagePreloadService.preloadImage(imageUri, { timeout });
+        
+        if (signal.aborted) return;
+        
+        if (!preloadSuccess) {
+          throw new Error('Failed to preload image');
         }
         
-        console.log(`🎯 Extracted CID: ${cid} from URL: ${imageUri}`);
+        setProgress(50);
         
-        // Try loading from multiple gateways
-        const { texture: newTexture, resolvedUrl: finalUrl } = await loadWithFallbacks(cid, signal);
+        // Get the best gateway URL from the service
+        const bestUrl = ImagePreloadService.getBestGatewayUrl(imageUri);
+        setProgress(75);
+        
+        // Create texture from the preloaded image
+        const newTexture = await loadImageFromUrl(bestUrl, signal);
         
         if (signal.aborted) return;
         
         textureRef.current = newTexture;
         setTexture(newTexture);
-        setResolvedUrl(finalUrl);
+        setResolvedUrl(bestUrl);
         setProgress(100);
         setLoading(false);
-        
-        console.log(`🎉 Successfully loaded NFT image from: ${finalUrl}`);
         
       } catch (err) {
         if (abortControllerRef.current?.signal.aborted) return;
         
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        
-        // Don't log "Request aborted" as it's expected behavior during cleanup
-        if (!errorMessage.includes('Request aborted')) {
-          console.error(`❌ Failed to load NFT image: ${errorMessage}`);
-        }
-        
         setError(errorMessage);
         
         // Try to load fallback image
@@ -301,9 +208,8 @@ export function useIPFSImage(
           textureRef.current = fallbackTexture;
           setTexture(fallbackTexture);
           setResolvedUrl('/placeholder-nft.png');
-          console.log('📸 Loaded fallback placeholder image');
         } catch (fallbackErr) {
-          console.error('❌ Failed to load fallback image:', fallbackErr);
+          // Fallback failed, texture remains null
         }
         
         setLoading(false);
@@ -322,7 +228,7 @@ export function useIPFSImage(
         abortControllerRef.current.abort();
       }
     };
-  }, [imageUri, quality, maxRetries, timeout]);
+  }, [imageUri, quality, timeout]);
 
   return {
     texture,

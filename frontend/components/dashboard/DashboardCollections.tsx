@@ -14,6 +14,7 @@ interface DashboardCollectionsProps {
   collectionStats: { [key: string]: CollectionStats };
   isLoading: boolean;
   walletAddress?: string;
+  isGuest?: boolean;
   onCollectionClick: (collectionId: number) => void;
   onAddToMetaMask: (fractionalContract: string, event: React.MouseEvent) => void;
   onCreateCollection: () => void;
@@ -28,6 +29,7 @@ export default function DashboardCollections({
   collectionStats,
   isLoading,
   walletAddress,
+  isGuest = false,
   onCollectionClick,
   onAddToMetaMask,
   onCreateCollection,
@@ -43,12 +45,15 @@ export default function DashboardCollections({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">{DASHBOARD_LABELS.COLLECTIONS}</h2>
 
-        <CollectionTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          sharesCount={sharedCollections.length}
-          ownedCount={userCollections.length}
-        />
+        {!isGuest && (
+          <CollectionTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            sharesCount={sharedCollections.length}
+            ownedCount={userCollections.length}
+            isGuest={isGuest}
+          />
+        )}
       </div>
 
       <CollectionGrid

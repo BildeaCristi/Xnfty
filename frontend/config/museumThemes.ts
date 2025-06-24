@@ -10,14 +10,6 @@ export interface MuseumTheme {
         floorRoughness: number;
         floorMetalness: number;
     };
-    lighting: {
-        ambientIntensity: number;
-        ambientColor: string;
-        directionalIntensity: number;
-        directionalColor: string;
-        accentColor: string;
-        accentIntensity: number;
-    };
     frame: {
         defaultColor: string;
         hoverColor: string;
@@ -47,14 +39,7 @@ export const museumThemes: Record<string, MuseumTheme> = {
             floorRoughness: 0.2,
             floorMetalness: 0.8,
         },
-        lighting: {
-            ambientIntensity: 0.3,
-            ambientColor: '#ffffff',
-            directionalIntensity: 0.4,
-            directionalColor: '#ffffff',
-            accentColor: '#4a90e2',
-            accentIntensity: 1.2,
-        },
+
         frame: {
             defaultColor: '#1a1a1a',
             hoverColor: '#4a90e2',
@@ -77,14 +62,7 @@ export const museumThemes: Record<string, MuseumTheme> = {
             floorRoughness: 0.9,
             floorMetalness: 0.1,
         },
-        lighting: {
-            ambientIntensity: 0.2,
-            ambientColor: '#ffe4b5',
-            directionalIntensity: 0.3,
-            directionalColor: '#ffd700',
-            accentColor: '#daa520',
-            accentIntensity: 0.8,
-        },
+
         frame: {
             defaultColor: '#8b4513',
             hoverColor: '#daa520',
@@ -112,14 +90,7 @@ export const museumThemes: Record<string, MuseumTheme> = {
             floorRoughness: 0.1,
             floorMetalness: 0.9,
         },
-        lighting: {
-            ambientIntensity: 0.15,
-            ambientColor: '#4169e1',
-            directionalIntensity: 0.2,
-            directionalColor: '#00ffff',
-            accentColor: '#ff00ff',
-            accentIntensity: 1.5,
-        },
+
         frame: {
             defaultColor: '#1e90ff',
             hoverColor: '#ff1493',
@@ -147,14 +118,7 @@ export const museumThemes: Record<string, MuseumTheme> = {
             floorRoughness: 1,
             floorMetalness: 0,
         },
-        lighting: {
-            ambientIntensity: 0.35,
-            ambientColor: '#ffffe0',
-            directionalIntensity: 0.5,
-            directionalColor: '#ffd700',
-            accentColor: '#90ee90',
-            accentIntensity: 0.6,
-        },
+
         frame: {
             defaultColor: '#8b4513',
             hoverColor: '#228b22',

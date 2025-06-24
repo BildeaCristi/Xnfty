@@ -42,7 +42,6 @@ export default function EnhancedNFTFrame({
   // Use the new IPFS image hook
   const { texture, loading, error, progress, originalUrl, resolvedUrl } = useIPFSImage(nft.imageURI, {
     quality,
-    maxRetries: 3,
     timeout: 20000,
   });
 
@@ -111,7 +110,7 @@ export default function EnhancedNFTFrame({
       return new THREE.MeshStandardMaterial({
         color: '#444444',
         emissive: 0x220000,
-        emissiveIntensity: 0.1,
+        emissiveIntensity: 0.02,
         roughness: 0.9,
         metalness: 0.0,
         transparent: true,
@@ -129,13 +128,9 @@ export default function EnhancedNFTFrame({
     });
   }, [texture, loading, error, quality]);
 
-  // Debug logging for IPFS URLs
+  // Track URL resolution for diagnostics
   useEffect(() => {
-    if (originalUrl && resolvedUrl && originalUrl !== resolvedUrl) {
-      console.log(`🔗 NFT ${nft.tokenId} URL mapping:`);
-      console.log(`   Original: ${originalUrl}`);
-      console.log(`   Resolved: ${resolvedUrl}`);
-    }
+    // URL mapping tracked for potential future logging/analytics
   }, [originalUrl, resolvedUrl, nft.tokenId]);
 
   // Create frame content

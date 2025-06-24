@@ -4,6 +4,7 @@ import { useProgress } from '@react-three/drei';
 import { useMuseumStore } from '@/store/museumStore';
 import { useSceneStore } from '@/store/sceneStore';
 import { useEffect, useState } from 'react';
+import {MUSEUM_THEMES} from "@/utils/constants/museumConstants";
 
 // Enhanced floating particles component
 function FloatingParticles() {
@@ -81,7 +82,7 @@ function getLoadingMessage(progress: number) {
 // Enhanced theme-based color schemes
 function getThemeColors(themeName: string) {
   switch (themeName) {
-    case 'classic':
+    case MUSEUM_THEMES.CLASSIC:
       return {
         primary: 'from-amber-400 to-orange-500',
         secondary: 'from-yellow-400 to-amber-500',
@@ -91,7 +92,7 @@ function getThemeColors(themeName: string) {
         glow: 'shadow-amber-500/30',
         particle: 'rgba(251, 191, 36, 0.4)',
       };
-    case 'modern':
+    case MUSEUM_THEMES.MODERN:
       return {
         primary: 'from-blue-400 to-cyan-500',
         secondary: 'from-indigo-400 to-blue-500',
@@ -101,7 +102,7 @@ function getThemeColors(themeName: string) {
         glow: 'shadow-blue-500/30',
         particle: 'rgba(59, 130, 246, 0.4)',
       };
-    case 'futuristic':
+    case MUSEUM_THEMES.FUTURISTIC:
       return {
         primary: 'from-purple-400 to-pink-500',
         secondary: 'from-violet-400 to-purple-500',
@@ -111,7 +112,7 @@ function getThemeColors(themeName: string) {
         glow: 'shadow-purple-500/30',
         particle: 'rgba(139, 92, 246, 0.4)',
       };
-    case 'nature':
+    case MUSEUM_THEMES.NATURE:
       return {
         primary: 'from-green-400 to-emerald-500',
         secondary: 'from-lime-400 to-green-500',
@@ -144,12 +145,12 @@ export default function MuseumLoadingScreen() {
 
   // Loading tips that rotate
   const loadingTips = [
-    "💡 Use WASD keys to move around your museum",
-    "🎨 Press ESC to access theme and quality settings", 
-    "🖱️ Click on NFTs to view detailed information",
-    "🔍 Use mouse wheel to zoom in and out",
-    "🎭 Try different themes for unique experiences",
-    "⚡ Higher quality settings provide better visuals"
+    "Use WASD keys to move around your museum",
+    "Press ESC to access theme and quality settings",
+    "Click on NFTs to view detailed information",
+    "Use mouse wheel to zoom in and out",
+    "Try different themes for unique experiences",
+    "Higher quality settings provide better visuals"
   ];
 
   // Smooth progress animation

@@ -10,12 +10,16 @@ import CreateCollectionModal from '@/components/create-collection/CreateCollecti
 import {ROUTES} from '@/config/routes';
 import {DASHBOARD_MESSAGES} from '@/utils/constants/dashboard';
 import {getAllCollections, getCollectionStats} from '@/services/BlockchainService';
+import {canCreateCollections, getUserStatus} from '@/utils/auth';
+import GuestWarning from '@/components/shared/GuestWarning';
 import type {Collection, CollectionStats} from '@/types';
 
 export default function CollectionsPage() {
     const {data: session} = useSession();
     const router = useRouter();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const userStatus = getUserStatus(session);
+    const canCreate = canCreateCollections(session);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [collectionStats, setCollectionStats] = useState<{ [key: string]: CollectionStats }>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -107,29 +111,59 @@ export default function CollectionsPage() {
                             Discover and explore all collections in the ecosystem
                         </p>
                     </div>
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
-                    >
-                        Create Collection
-                    </button>
+                    {canCreate ? (
+                        <button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+                        >
+                            Create Collection
+                        </button>
+                    ) : (
+                        <button
+                            disabled
+                            className="bg-gray-600 text-gray-400 px-6 py-3 rounded-lg cursor-not-allowed font-medium"
+                            title="Connect wallet to create collections"
+                        >
+                            Create Collection
+                        </button>
+                    )}
                 </div>
+
+                {/* Guest User Warning */}
+                {userStatus.isGuest && (
+                    <GuestWarning 
+                        message="You're browsing as a guest. You can explore all collections and enter the 3D museum, but you'll need to connect a wallet to buy NFT shares or create your own collections."
+                        className="mb-8"
+                    />
+                )}
 
                 {/* Collections Grid */}
                 <GlassPanel className="p-6">
                     {collections.length === 0 ? (
-                        <div className="text-center py-12">
-                            <h3 className="text-xl font-semibold text-white mb-4">No Collections Found</h3>
-                            <p className="text-blue-200 mb-6">
-                                Be the first to create a collection in this ecosystem!
-                            </p>
-                            <button
-                                onClick={() => setIsCreateModalOpen(true)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
-                            >
-                                Create First Collection
-                            </button>
-                        </div>
+                                                                <div className="text-center py-12">
+                                            <h3 className="text-xl font-semibold text-white mb-4">No Collections Found</h3>
+                                            <p className="text-blue-200 mb-6">
+                                                {canCreate 
+                                                    ? "Be the first to create a collection in this ecosystem!" 
+                                                    : "No collections have been created yet. Connect your wallet to create the first one!"
+                                                }
+                                            </p>
+                                            {canCreate ? (
+                                                <button
+                                                    onClick={() => setIsCreateModalOpen(true)}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                                                >
+                                                    Create First Collection
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    disabled
+                                                    className="bg-gray-600 text-gray-400 px-6 py-2 rounded-lg cursor-not-allowed"
+                                                >
+                                                    Connect Wallet to Create
+                                                </button>
+                                            )}
+                                        </div>
                     ) : (
                         <>
                             <div className="flex items-center justify-between mb-6">
@@ -194,8 +228,8 @@ export default function CollectionsPage() {
                 </GlassPanel>
             </div>
 
-            {/* Create Collection Modal */}
-            {isCreateModalOpen && (
+            {/* Create Collection Modal - Only for full users */}
+            {isCreateModalOpen && canCreate && (
                 <CreateCollectionModal
                     isOpen={isCreateModalOpen}
                     onClose={() => setIsCreateModalOpen(false)}

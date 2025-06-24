@@ -352,6 +352,7 @@ export default function CollectionPage({ params }: CollectionPageProps) {
                     nft={selectedNFT}
                     collection={collection}
                     userAddress={walletAddress}
+                    session={session}
                     onClose={() => setSelectedNFT(null)}
                 />
             )}

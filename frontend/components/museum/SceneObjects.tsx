@@ -10,6 +10,7 @@ import { useMuseumStore } from '@/store/museumStore';
 import { PhysicsPresets } from '@/providers/PhysicsProvider';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { useLightingSetup } from '@/hooks/useLightingSetup';
+import { MUSEUM_THEMES, QUALITY_LEVELS } from '@/utils/constants/museumConstants';
 
 // Enhanced theme-based decorative objects with full asset integration
 export default function SceneObjects() {
@@ -17,15 +18,15 @@ export default function SceneObjects() {
   const { themeName } = useMuseumStore();
 
   // Don't render extra objects on low quality
-  if (quality === 'low') return null;
+  if (quality === QUALITY_LEVELS.LOW) return null;
 
   return (
     <group name="scene-objects">
       {/* Theme-specific content with full asset integration */}
-      {themeName === 'classic' && <ClassicThemeObjects />}
-      {themeName === 'modern' && <ModernThemeObjects />}
-      {themeName === 'futuristic' && <FuturisticThemeObjects />}
-      {themeName === 'nature' && <NatureThemeObjects />}
+      {themeName === MUSEUM_THEMES.CLASSIC && <ClassicThemeObjects />}
+      {themeName === MUSEUM_THEMES.MODERN && <ModernThemeObjects />}
+      {themeName === MUSEUM_THEMES.FUTURISTIC && <FuturisticThemeObjects />}
+      {themeName === MUSEUM_THEMES.NATURE && <NatureThemeObjects />}
 
       {/* Universal objects that appear in all themes */}
       <CenterPedestal />
@@ -50,7 +51,7 @@ function ClassicThemeObjects() {
       <ClassicalPedestals />
       
       {/* Marble Decorative Elements */}
-      {quality === 'high' && <MarbleDecorations />}
+      {quality === QUALITY_LEVELS.HIGH && <MarbleDecorations />}
     </group>
   );
 }
@@ -68,7 +69,7 @@ function ModernThemeObjects() {
       <MinimalistDecorations />
       
       {/* Modern Art Installations */}
-      {quality !== 'low' && <ModernArtInstallations />}
+      {quality !== QUALITY_LEVELS.LOW && <ModernArtInstallations />}
     </group>
   );
 }
@@ -83,7 +84,7 @@ function FuturisticThemeObjects() {
       <FuturisticFurniture />
       
       {/* Holographic Elements */}
-      {quality === 'high' && <HolographicElements />}
+      {quality === QUALITY_LEVELS.HIGH && <HolographicElements />}
 
       {/* Tech Installations */}
       <TechInstallations />
@@ -147,7 +148,9 @@ function ClassicalSculptures() {
         setDrapeWomanModel(model);
       },
       undefined,
-      (error) => console.log('Draped woman sculpture not found:', error)
+      (error) => {
+        // Model not found, continue without it
+      }
     );
 
     // Load fallen angel sculpture
@@ -173,7 +176,9 @@ function ClassicalSculptures() {
         setFallenAngelModel(model);
       },
       undefined,
-      (error) => console.log('Fallen angel sculpture not found:', error)
+      (error) => {
+        // Model not found, continue without it
+      }
     );
   }, [shadowsEnabled]);
 
@@ -234,7 +239,9 @@ function ClassicalColumns() {
         setColumnModel(model);
       },
       undefined,
-      (error) => console.log('Greek column model not found:', error)
+      (error) => {
+        // Model not found, continue without it
+      }
     );
   }, [shadowsEnabled]);
 
@@ -407,7 +414,9 @@ function FuturisticFurniture() {
         setSofaModel(model);
       },
       undefined,
-      (error) => console.log('Futuristic sofa not found:', error)
+      (error) => {
+        // Model not found, continue without it
+      }
     );
   }, [shadowsEnabled]);
 
@@ -434,7 +443,7 @@ function FuturisticFurniture() {
             roughness={0.1} 
             metalness={0.9}
             emissive="#0f3460"
-            emissiveIntensity={0.1}
+            emissiveIntensity={0.02}
           />
         </mesh>
         <CuboidCollider args={[1.5, 0.2, 1.5]} />
@@ -448,7 +457,7 @@ function FuturisticFurniture() {
             roughness={0.1} 
             metalness={0.9}
             emissive="#602e0f"
-            emissiveIntensity={0.1}
+            emissiveIntensity={0.02}
           />
         </mesh>
         <CuboidCollider args={[1.2, 0.2, 1.2]} />
@@ -584,7 +593,7 @@ function CenterPedestal() {
 
   // Load theme-appropriate center piece
   useEffect(() => {
-    if (themeName === 'classic') {
+    if (themeName === MUSEUM_THEMES.CLASSIC) {
       const loader = new GLTFLoader();
       loader.load(
         '/models/classical-theme/hebe_goddess_of_youth/scene.gltf',
@@ -617,7 +626,7 @@ function CenterPedestal() {
         <mesh position={[0, 0.5, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
           <cylinderGeometry args={[1.5, 2, 1, 32]} />
           <meshStandardMaterial 
-            color={themeName === 'classic' ? "#3a3a3a" : "#2a2a2a"}
+            color={themeName === MUSEUM_THEMES.CLASSIC ? "#3a3a3a" : "#2a2a2a"}
             roughness={0.3}
             metalness={0.7}
           />
@@ -628,7 +637,7 @@ function CenterPedestal() {
       {/* Rotating center piece */}
       <Float speed={1} rotationIntensity={0} floatIntensity={0.2}>
         <group ref={sculptureRef} position={[0, 2, 0]}>
-          {statueModel && themeName === 'classic' ? (
+          {statueModel && themeName === MUSEUM_THEMES.CLASSIC ? (
             <primitive 
               object={statueModel} 
               scale={0.01}
@@ -639,11 +648,11 @@ function CenterPedestal() {
             <mesh castShadow={shadowsEnabled}>
               <torusKnotGeometry args={[0.6, 0.2, 128, 32]} />
               <meshStandardMaterial
-                color={themeName === 'futuristic' ? "#4a90e2" : "#8b4513"}
-                metalness={themeName === 'futuristic' ? 0.9 : 0.3}
-                roughness={themeName === 'futuristic' ? 0.1 : 0.7}
-                emissive={themeName === 'futuristic' ? "#1a4480" : "#000000"}
-                emissiveIntensity={themeName === 'futuristic' ? 0.2 : 0}
+                color={themeName === MUSEUM_THEMES.FUTURISTIC ? "#4a90e2" : "#8b4513"}
+                metalness={themeName === MUSEUM_THEMES.FUTURISTIC ? 0.9 : 0.3}
+                roughness={themeName === MUSEUM_THEMES.FUTURISTIC ? 0.1 : 0.7}
+                emissive={themeName === MUSEUM_THEMES.FUTURISTIC ? "#1a4480" : "#000000"}
+                emissiveIntensity={themeName === MUSEUM_THEMES.FUTURISTIC ? 0.05 : 0}
               />
             </mesh>
           )}
@@ -664,7 +673,7 @@ function CeilingLampsWithLights() {
     const loader = new GLTFLoader();
     
     // Load appropriate lamp model based on theme
-    const lampPath = themeName === 'modern' 
+    const lampPath = themeName === MUSEUM_THEMES.MODERN 
       ? '/models/common/modern_lantern.glb'
       : '/models/common/luminaria_ceiling_lamp.glb';
       
@@ -689,13 +698,13 @@ function CeilingLampsWithLights() {
 
   return (
     <>
-      {lightConfig.rectAreaLights.map((light, index) => (
+      {lightConfig.centerLights?.map((light, index) => (
         <group key={`ceiling-lamp-${index}`} position={light.position}>
           {/* Physical lamp model */}
           <RigidBody {...PhysicsPresets.static()}>
           <primitive 
             object={lampModel.clone()} 
-            scale={themeName === 'modern' ? 0.01 : 1}
+            scale={themeName === MUSEUM_THEMES.MODERN ? 0.01 : 1}
           />
           <CuboidCollider args={[0.3, 0.3, 0.3]} />
           </RigidBody>
@@ -712,7 +721,7 @@ function CeilingLampsWithLights() {
             shadow-mapSize-height={512}
           />
         </group>
-      ))}
+      )) || []}
     </>
   );
 }
@@ -782,7 +791,7 @@ function GlowingDecorations() {
           <meshStandardMaterial 
             color="#00ffff" 
             emissive="#004466"
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.05}
             metalness={0.9}
             roughness={0.1}
           />
@@ -796,7 +805,7 @@ function GlowingDecorations() {
             <meshStandardMaterial
             color="#ff0088" 
             emissive="#440044"
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.05}
             metalness={0.9}
             roughness={0.1}
             />

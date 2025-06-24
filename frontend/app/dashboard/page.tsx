@@ -6,6 +6,7 @@ import CreateCollectionModal from '@/components/create-collection/CreateCollecti
 import Navbar from '@/components/shared/Navbar';
 import {useDashboardData} from '@/hooks/useDashboardData';
 import {useDashboardActions} from '@/hooks/useDashboardActions';
+import {getUserStatus} from '@/utils/auth';
 import {DASHBOARD_MESSAGES} from '@/utils/constants/dashboard';
 
 export default function DashboardPage() {
@@ -28,9 +29,16 @@ export default function DashboardPage() {
     const {
         handleCreateSuccess,
         handleCollectionClick,
-        handleAddToMetaMask,
         formatAddress
     } = useDashboardActions();
+
+    const userStatus = getUserStatus(session);
+
+    // Handle add to MetaMask (placeholder for now)
+    const handleAddToMetaMask = (fractionalContract: string, event: React.MouseEvent) => {
+        // TODO: Implement MetaMask token addition
+        event.stopPropagation();
+    };
 
     // Handle create collection success
     const onCreateSuccess = (collectionId: number) => {
@@ -70,6 +78,7 @@ export default function DashboardPage() {
                     collectionStats={collectionStats}
                     isLoading={isLoading}
                     walletAddress={walletAddress}
+                    isGuest={userStatus.isGuest}
                     onCollectionClick={handleCollectionClick}
                     onAddToMetaMask={handleAddToMetaMask}
                     onCreateCollection={() => setShowCreateModal(true)}
