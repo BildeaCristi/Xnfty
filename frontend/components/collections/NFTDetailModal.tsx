@@ -3,7 +3,7 @@
 import {useEffect, useState} from 'react';
 import {Check, Coins, Copy, Crown, ExternalLink, ShoppingCart, User as UserIcon, X, Zap} from 'lucide-react';
 import {
-    buyNFTSharesEnhanced,
+    buyNFTShares,
     formatAddress,
     getAvailableSharesForBuyer,
     getAvailableSharesFromOwner,
@@ -172,7 +172,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
 
         setIsBuying(true);
         try {
-            const txHash = await buyNFTSharesEnhanced(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
+            const txHash = await buyNFTShares(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
 
             let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
 

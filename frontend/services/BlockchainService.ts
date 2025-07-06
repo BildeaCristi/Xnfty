@@ -921,7 +921,7 @@ export async function getCollectionsWithUserShares(userAddress: string): Promise
 /**
  * Enhanced buy shares function that supports buying all shares and automatic ownership transfer
  */
-export async function buyNFTSharesEnhanced(
+export async function buyNFTShares(
     fractionalContractAddress: string, 
     shareAmount: number, 
     sharePrice: string,

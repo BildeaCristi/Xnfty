@@ -17,7 +17,7 @@ interface PBRTextures {
     displacement: THREE.Texture | null;
 }
 
-interface EnhancedMuseumRoomProps {
+interface MuseumRoomProps {
     width?: number;
     height?: number;
     depth?: number;
@@ -27,7 +27,7 @@ export default function MuseumRoom({
                                        width = 20,
                                        height = 6,
                                        depth = 20,
-                                   }: EnhancedMuseumRoomProps) {
+                                   }: MuseumRoomProps) {
     const {currentTheme, themeName} = useMuseumStore();
     const {shadowsEnabled, quality} = useSceneStore();
     const groupRef = useRef<THREE.Group>(null);
