@@ -1,10 +1,10 @@
 "use client";
 
-import { museumThemes } from '@/config/museumThemes';
+import { museumConfig } from '@/config/museumThemes';
 
 interface ThemeSettingsProps {
   currentTheme: string;
-  setTheme: (theme: keyof typeof museumThemes) => void;
+  setTheme: (theme: keyof typeof museumConfig) => void;
 }
 
 export default function ThemeSettings({
@@ -13,10 +13,10 @@ export default function ThemeSettings({
 }: ThemeSettingsProps) {
   return (
     <div className="space-y-4">
-      {Object.entries(museumThemes).map(([key, theme]) => (
+      {Object.entries(museumConfig).map(([key, theme]) => (
         <button
           key={key}
-          onClick={() => setTheme(key as keyof typeof museumThemes)}
+          onClick={() => setTheme(key as keyof typeof museumConfig)}
           className={`w-full p-4 rounded-lg transition-all ${
             currentTheme === key
               ? 'bg-blue-600/20 border-2 border-blue-500'

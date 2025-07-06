@@ -57,13 +57,13 @@ export const KEYBOARD_CONTROLS = {
 
 export const LIGHTING_CONFIG = {
   MAX_LIGHTS: 3,
-  AMBIENT_BASE: 0.01,
-  DIRECTIONAL_BASE: 0.05,
+  AMBIENT_BASE: 0.4,
+  DIRECTIONAL_BASE: 1.0,
   RECT_AREA_BASE_INTENSITY: 2.5,
   QUALITY_MULTIPLIERS: {
-    low: 1.5,
-    medium: 1.2,
-    high: 0.8,
+    low: 1.2,
+    medium: 1.0,
+    high: 0.9,
   },
 } as const;
 

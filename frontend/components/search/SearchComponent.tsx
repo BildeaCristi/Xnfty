@@ -1,10 +1,10 @@
 'use client';
 
-import React, {useState, useEffect, useRef, useMemo} from 'react';
-import { X, Filter, Loader2, Image, Folder, Search} from 'lucide-react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Filter, Folder, Image, Loader2, Search, X} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import type {Collection, SearchResult, SearchFilters} from '@/types';
-import {SearchEngine, highlightSearchTerm, truncateText} from '@/services/SearchService';
+import type {Collection, SearchFilters, SearchResult} from '@/types';
+import {highlightSearchTerm, SearchEngine, truncateText} from '@/services/SearchService';
 import {ROUTES} from "@/config/routes";
 
 interface SearchComponentProps {
@@ -78,19 +78,15 @@ export default function SearchComponent({
     }, []);
 
     const handleResultClick = (result: SearchResult) => {
-        console.log('🔍 Result clicked:', result);
         setShowResults(false);
         setQuery('');
 
-        if (result.type === 'collection') {
+        if (result.type === 'collection' || result.type === 'nft') {
             router.push(`${ROUTES.COLLECTIONS}/${result.collectionId}`);
-        } else if (result.type === 'nft') {
-            router.push(`${ROUTES.COLLECTIONS}/${result.collectionId}?nft=${result.tokenId}`);
         }
     };
 
     const clearSearch = () => {
-        console.log('🔍 Clearing search');
         setQuery('');
         setResults([]);
         setShowResults(false);

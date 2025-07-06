@@ -11,7 +11,7 @@ import Navbar from '@/components/shared/Navbar';
 import GuestWarning from '@/components/shared/GuestWarning';
 import type {Collection, UserNFTShare} from '@/types';
 import {formatAddress as formatAddr, getAllCollections, getUserNFTShares} from '@/services/BlockchainService';
-import {getUserStatus, getUserDisplayName, getUserDisplayType} from '@/utils/auth';
+import {getUserDisplayName, getUserDisplayType, getUserStatus} from '@/utils/auth';
 import {ROUTES} from "@/config/routes";
 
 export default function ProfilePage() {
@@ -83,7 +83,8 @@ export default function ProfilePage() {
             <div className="relative z-10 pt-20 p-6">
                 {/* Profile Header */}
                 <GlassPanel className="p-8 mb-8">
-                    <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+                    <div
+                        className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                         {/* Profile Image */}
                         <div className="relative">
                             {session?.user?.image ? (
@@ -93,20 +94,22 @@ export default function ProfilePage() {
                                     className="w-24 h-24 rounded-full border-4 border-white/20"
                                 />
                             ) : (
-                                <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 border-white/20 ${
-                                    userStatus.isGuest 
-                                        ? 'bg-gradient-to-br from-amber-500 to-orange-500'
-                                        : 'bg-gradient-to-br from-purple-500 to-pink-500'
-                                }`}>
+                                <div
+                                    className={`w-24 h-24 rounded-full flex items-center justify-center border-4 border-white/20 ${
+                                        userStatus.isGuest
+                                            ? 'bg-gradient-to-br from-amber-500 to-orange-500'
+                                            : 'bg-gradient-to-br from-purple-500 to-pink-500'
+                                    }`}>
                                     <User className="w-12 h-12 text-white"/>
                                 </div>
                             )}
                             {/* Status Indicator */}
-                            <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-gray-900 flex items-center justify-center ${
-                                userStatus.isGuest 
-                                    ? 'bg-amber-500'
-                                    : 'bg-green-500'
-                            }`}>
+                            <div
+                                className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-gray-900 flex items-center justify-center ${
+                                    userStatus.isGuest
+                                        ? 'bg-amber-500'
+                                        : 'bg-green-500'
+                                }`}>
                                 {userStatus.isGuest ? (
                                     <span className="text-white text-xs font-bold">G</span>
                                 ) : (
@@ -121,16 +124,18 @@ export default function ProfilePage() {
                                 <h1 className="text-4xl font-bold text-white mb-2">
                                     {session?.user?.name || displayName}
                                 </h1>
-                                <div className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
+                                <div
+                                    className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
                                     <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                        userStatus.isGuest 
-                                            ? 'bg-amber-900/50 text-amber-300 border border-amber-500/30' 
+                                        userStatus.isGuest
+                                            ? 'bg-amber-900/50 text-amber-300 border border-amber-500/30'
                                             : 'bg-green-900/50 text-green-300 border border-green-500/30'
                                     }`}>
                                         {displayType}
                                     </span>
                                     {userStatus.isFullUser && (
-                                        <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-900/50 text-blue-300 border border-blue-500/30">
+                                        <span
+                                            className="px-4 py-2 rounded-full text-sm font-medium bg-blue-900/50 text-blue-300 border border-blue-500/30">
                                             Verified User
                                         </span>
                                     )}
@@ -140,16 +145,19 @@ export default function ProfilePage() {
                             {/* Contact Information */}
                             <div className="space-y-3">
                                 {session?.user?.email && (
-                                    <div className="flex items-center justify-center md:justify-start space-x-2 text-blue-200">
+                                    <div
+                                        className="flex items-center justify-center md:justify-start space-x-2 text-blue-200">
                                         <span className="text-sm opacity-70">Email:</span>
                                         <span className="text-sm font-medium">{session.user.email}</span>
                                     </div>
                                 )}
                                 {walletAddress && (
-                                    <div className="flex items-center justify-center md:justify-start space-x-2 text-green-200">
+                                    <div
+                                        className="flex items-center justify-center md:justify-start space-x-2 text-green-200">
                                         <Wallet className="w-4 h-4"/>
                                         <span className="text-sm opacity-70">Wallet:</span>
-                                        <span className="text-sm font-mono font-medium">{formatAddress(walletAddress)}</span>
+                                        <span
+                                            className="text-sm font-mono font-medium">{formatAddress(walletAddress)}</span>
                                     </div>
                                 )}
                             </div>
@@ -157,10 +165,10 @@ export default function ProfilePage() {
                             {/* Join Date */}
                             <div className="mt-4 pt-4 border-t border-white/10">
                                 <p className="text-sm text-gray-400">
-                                    Member since {new Date().toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'long' 
-                                    })}
+                                    Member since {new Date().toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long'
+                                })}
                                 </p>
                             </div>
                         </div>
@@ -169,7 +177,7 @@ export default function ProfilePage() {
 
                 {/* Guest User Warning */}
                 {userStatus.isGuest && (
-                    <GuestWarning 
+                    <GuestWarning
                         message="You're browsing as a guest. Connect your wallet to buy NFT shares, create collections, and track your ownership."
                         className="mb-8"
                     />
@@ -241,7 +249,8 @@ export default function ProfilePage() {
                                 </div>
                                 <h3 className="text-xl font-semibold text-white mb-2">No NFT Shares Yet</h3>
                                 <p className="text-blue-200 mb-6">
-                                    You haven't acquired any fractional NFT shares yet. Start exploring collections to find
+                                    You haven't acquired any fractional NFT shares yet. Start exploring collections to
+                                    find
                                     NFTs you'd like to own shares in.
                                 </p>
                                 <button
@@ -262,7 +271,8 @@ export default function ProfilePage() {
                             </div>
                             <h3 className="text-xl font-semibold text-white mb-2">Guest Profile</h3>
                             <p className="text-blue-200 mb-6">
-                                You're browsing as a guest. Your profile shows limited information because you haven't connected a wallet yet.
+                                You're browsing as a guest. Your profile shows limited information because you haven't
+                                connected a wallet yet.
                             </p>
                             <button
                                 onClick={() => router.push(ROUTES.DASHBOARD)}

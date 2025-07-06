@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import {useRouter} from 'next/navigation';
 import DashboardBackground from '@/components/dashboard/DashboardBackground';
@@ -131,7 +131,7 @@ export default function CollectionsPage() {
 
                 {/* Guest User Warning */}
                 {userStatus.isGuest && (
-                    <GuestWarning 
+                    <GuestWarning
                         message="You're browsing as a guest. You can explore all collections and enter the 3D museum, but you'll need to connect a wallet to buy NFT shares or create your own collections."
                         className="mb-8"
                     />
@@ -140,30 +140,30 @@ export default function CollectionsPage() {
                 {/* Collections Grid */}
                 <GlassPanel className="p-6">
                     {collections.length === 0 ? (
-                                                                <div className="text-center py-12">
-                                            <h3 className="text-xl font-semibold text-white mb-4">No Collections Found</h3>
-                                            <p className="text-blue-200 mb-6">
-                                                {canCreate 
-                                                    ? "Be the first to create a collection in this ecosystem!" 
-                                                    : "No collections have been created yet. Connect your wallet to create the first one!"
-                                                }
-                                            </p>
-                                            {canCreate ? (
-                                                <button
-                                                    onClick={() => setIsCreateModalOpen(true)}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
-                                                >
-                                                    Create First Collection
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    disabled
-                                                    className="bg-gray-600 text-gray-400 px-6 py-2 rounded-lg cursor-not-allowed"
-                                                >
-                                                    Connect Wallet to Create
-                                                </button>
-                                            )}
-                                        </div>
+                        <div className="text-center py-12">
+                            <h3 className="text-xl font-semibold text-white mb-4">No Collections Found</h3>
+                            <p className="text-blue-200 mb-6">
+                                {canCreate
+                                    ? "Be the first to create a collection in this ecosystem!"
+                                    : "No collections have been created yet. Connect your wallet to create the first one!"
+                                }
+                            </p>
+                            {canCreate ? (
+                                <button
+                                    onClick={() => setIsCreateModalOpen(true)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                                >
+                                    Create First Collection
+                                </button>
+                            ) : (
+                                <button
+                                    disabled
+                                    className="bg-gray-600 text-gray-400 px-6 py-2 rounded-lg cursor-not-allowed"
+                                >
+                                    Connect Wallet to Create
+                                </button>
+                            )}
+                        </div>
                     ) : (
                         <>
                             <div className="flex items-center justify-between mb-6">

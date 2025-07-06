@@ -1,22 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useNotifications } from '@/providers/NotificationContext';
-import { createCollection, fractionalizeNFT, getNFTFactoryContract, getSigner, mintNFT } from '@/services/BlockchainService';
-import { createCollectionMetadata, createNFTMetadata, uploadFileToIPFS, uploadJSONToIPFS } from '@/services/IpfsService';
-import { 
-    createNewNFT, 
-    createImagePreview, 
-    initializeDeploymentSteps, 
-    validateCollection, 
-    validateAllNFTs 
+import React, {useEffect, useState} from 'react';
+import {useNotifications} from '@/providers/NotificationContext';
+import {
+    createCollection,
+    fractionalizeNFT,
+    getNFTFactoryContract,
+    getSigner,
+    mintNFT
+} from '@/services/BlockchainService';
+import {createCollectionMetadata, createNFTMetadata, uploadFileToIPFS, uploadJSONToIPFS} from '@/services/IpfsService';
+import {
+    createImagePreview,
+    createNewNFT,
+    initializeDeploymentSteps,
+    validateAllNFTs,
+    validateCollection
 } from '@/services/CollectionCreatorService';
-import type { 
-    CreateCollectionModalProps, 
-    CollectionFormData, 
-    NFTData, 
-    DeploymentStep 
-} from '@/types';
+import type {CollectionFormData, CreateCollectionModalProps, DeploymentStep, NFTData} from '@/types';
 
 // Import smaller components
 import ModalHeader from './ModalHeader';
@@ -26,12 +27,12 @@ import DeploymentProgress from './DeploymentProgress';
 import StepNavigation from './StepNavigation';
 
 export default function CreateCollectionModal({
-    isOpen, 
-    onClose, 
-    onSuccess
-}: CreateCollectionModalProps) {
-    const { showSuccess, showError, showWarning, confirm } = useNotifications();
-    
+                                                  isOpen,
+                                                  onClose,
+                                                  onSuccess
+                                              }: CreateCollectionModalProps) {
+    const {showSuccess, showError, showWarning, confirm} = useNotifications();
+
     // State management
     const [step, setStep] = useState(1);
     const [isDeploying, setIsDeploying] = useState(false);
@@ -77,8 +78,8 @@ export default function CreateCollectionModal({
     };
 
     const updateNFT = (id: string, field: keyof NFTData, value: any) => {
-        setNfts(prevNfts => prevNfts.map(nft => 
-            nft.id === id ? { ...nft, [field]: value } : nft
+        setNfts(prevNfts => prevNfts.map(nft =>
+            nft.id === id ? {...nft, [field]: value} : nft
         ));
     };
 
@@ -99,7 +100,7 @@ export default function CreateCollectionModal({
         ));
     };
 
-    // Main deployment function - Restored with full blockchain logic
+    // Main deployment function
     const deployEverything = async () => {
         if (!collectionData || !collectionImage) {
             showError('Missing Data', 'Collection data and image are required');
@@ -138,7 +139,7 @@ export default function CreateCollectionModal({
             );
 
             setDeployedCollectionId(collectionResult.collectionId);
-            
+
             // Get collection address from the factory
             const factory = getNFTFactoryContract(await getSigner());
             const collectionInfo = await factory.getCollection(collectionResult.collectionId);
@@ -153,7 +154,7 @@ export default function CreateCollectionModal({
                     updateDeploymentStep(`mint-${nft.id}`, 'processing', 'Uploading NFT image...');
                     updateNFT(nft.id, 'status', 'minting');
 
-                    // Get the file to upload - prefer imageData.file if available, fallback to legacy image field
+                    // Get the file to upload
                     const fileToUpload = nft.imageData?.file || nft.image;
 
                     if (!fileToUpload) {
@@ -227,13 +228,13 @@ export default function CreateCollectionModal({
         }
     };
 
-    // Form submission handlers - Modified to preserve data
+    // Form submission handlers
     const handleCollectionSubmit = async (data: CollectionFormData) => {
         if (!collectionImage) {
             showWarning('Collection image required', 'Please upload a collection image');
             return;
         }
-        
+
         const validation = validateCollection(data, collectionImage);
         if (!validation.isValid) {
             showError('Validation Error', validation.errors[0] || 'Invalid collection data');
@@ -295,7 +296,8 @@ export default function CreateCollectionModal({
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col border border-gray-700">
+            <div
+                className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col border border-gray-700">
                 <ModalHeader
                     title="Create NFT Collection"
                     subtitle="Deploy your NFT collection with fractional ownership capabilities"
@@ -311,7 +313,8 @@ export default function CreateCollectionModal({
                         canGoBack={step > 1}
                         canGoNext={false}
                         onBack={goBack}
-                        onNext={() => {}}
+                        onNext={() => {
+                        }}
                         isDeploying={isDeploying}
                     />
                 </div>

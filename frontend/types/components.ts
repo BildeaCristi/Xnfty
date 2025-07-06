@@ -1,6 +1,6 @@
 // Component prop interfaces and types
-import { ReactNode } from 'react';
-import { Collection, UserNFTShare } from './blockchain';
+import {ReactNode} from 'react';
+import {Collection, UserNFTShare} from './blockchain';
 
 // Modal and UI component props
 export interface GlassModalProps {

@@ -12,7 +12,6 @@ import {DASHBOARD_MESSAGES} from '@/utils/constants/dashboard';
 export default function DashboardPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    // Custom hooks for data and actions
     const {
         allCollections,
         userCollections,
@@ -34,13 +33,6 @@ export default function DashboardPage() {
 
     const userStatus = getUserStatus(session);
 
-    // Handle add to MetaMask (placeholder for now)
-    const handleAddToMetaMask = (fractionalContract: string, event: React.MouseEvent) => {
-        // TODO: Implement MetaMask token addition
-        event.stopPropagation();
-    };
-
-    // Handle create collection success
     const onCreateSuccess = (collectionId: number) => {
         loadCollections(); // Refresh data
         handleCreateSuccess(collectionId); // Navigate to collection
@@ -57,7 +49,6 @@ export default function DashboardPage() {
         );
     }
 
-    // Main dashboard layout
     return (
         <div className="min-h-screen relative overflow-hidden">
             <DashboardBackground/>
@@ -80,7 +71,6 @@ export default function DashboardPage() {
                     walletAddress={walletAddress}
                     isGuest={userStatus.isGuest}
                     onCollectionClick={handleCollectionClick}
-                    onAddToMetaMask={handleAddToMetaMask}
                     onCreateCollection={() => setShowCreateModal(true)}
                     formatAddress={formatAddress}
                     getCollectionsToShow={getCollectionsToShow}

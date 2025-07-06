@@ -82,7 +82,6 @@ export default function UserCollections() {
 
             const updatedNFTs = await Promise.all(collection.nfts.map(async (nft) => {
                 try {
-                    // Skip NFTs without token IDs
                     if (nft.tokenId === undefined) return nft;
 
                     const balanceOf = await collectionContract.balanceOf(session.walletAddress, nft.tokenId);
@@ -118,9 +117,9 @@ export default function UserCollections() {
                             nft.totalShares = fractionalData.totalShares ? Number(fractionalData.totalShares) : undefined;
                             nft.availableShares = fractionalData.availableShares ? Number(fractionalData.availableShares) : undefined;
                             nft.pricePerShare = fractionalData.pricePerShare ? ethers.formatEther(fractionalData.pricePerShare) : undefined;
-                                            } catch (err) {
-                        // Handle error silently
-                    }
+                        } catch (err) {
+                            // Skip error silently
+                        }
 
                         return {
                             ...nft,

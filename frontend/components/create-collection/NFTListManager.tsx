@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Plus } from 'lucide-react';
-import type { NFTData } from '@/types/forms';
-import { createNewNFT } from '@/services/CollectionCreatorService';
+import {Plus} from 'lucide-react';
+import type {NFTData} from '@/types/forms';
 import NFTFormItem from './NFTFormItem';
 
 interface NFTListManagerProps {
@@ -16,13 +15,13 @@ interface NFTListManagerProps {
 }
 
 export default function NFTListManager({
-    nfts,
-    onAddNFT,
-    onRemoveNFT,
-    onUpdateNFT,
-    onImageUpload,
-    onSubmit
-}: NFTListManagerProps) {
+                                           nfts,
+                                           onAddNFT,
+                                           onRemoveNFT,
+                                           onUpdateNFT,
+                                           onImageUpload,
+                                           onSubmit
+                                       }: NFTListManagerProps) {
     return (
         <div className="space-y-6">
             {/* Header - Removed Add NFT button */}
@@ -39,7 +38,7 @@ export default function NFTListManager({
             {nfts.length === 0 ? (
                 <div className="text-center py-12 bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-600">
                     <div className="max-w-sm mx-auto">
-                        <Plus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <Plus className="w-12 h-12 text-gray-400 mx-auto mb-4"/>
                         <h4 className="text-lg font-medium text-white mb-2">No NFTs Added Yet</h4>
                         <p className="text-gray-400 text-sm mb-6">
                             Start by adding your first NFT to the collection
@@ -72,7 +71,7 @@ export default function NFTListManager({
                             onClick={onAddNFT}
                             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
                         >
-                            <Plus className="w-5 h-5" />
+                            <Plus className="w-5 h-5"/>
                             <span className="font-medium">Add Another NFT</span>
                         </button>
                     </div>

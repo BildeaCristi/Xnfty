@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useWalletStore } from '@/store/walletStore';
+import { useWalletStore } from '@/store/WalletStore';
 import { useNotifications } from '@/providers/NotificationContext';
 import { signOut } from 'next-auth/react';
 

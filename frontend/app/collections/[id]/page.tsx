@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from 'react';
-import { useSession } from 'next-auth/react';
+import {use, useEffect, useState} from 'react';
+import {useSession} from 'next-auth/react';
 import {
     ArrowLeft,
     Calendar,
@@ -9,27 +9,18 @@ import {
     Coins,
     Copy,
     ExternalLink,
+    Eye,
     Image,
     Share2,
-    User as UserIcon,
-    Eye
+    User as UserIcon
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import DashboardBackground from '@/components/dashboard/DashboardBackground';
 import GlassPanel from '@/components/dashboard/GlassPanel';
 import Museum3DScene from '@/components/museum/Museum3DScene';
-import { ROUTES } from '@/config/routes';
-import {
-    formatAddress,
-    getCollection,
-    getCollectionNFTs,
-    getCollectionStats,
-} from '@/services/BlockchainService';
-import type {
-    Collection,
-    CollectionStats,
-    NFT
-} from '@/types/blockchain';
+import {ROUTES} from '@/config/routes';
+import {formatAddress, getCollection, getCollectionNFTs, getCollectionStats,} from '@/services/BlockchainService';
+import type {Collection, CollectionStats, NFT} from '@/types/blockchain';
 import NFTDetailModal from "@/components/collections/NFTDetailModal";
 
 interface CollectionPageProps {
@@ -38,8 +29,8 @@ interface CollectionPageProps {
     }>;
 }
 
-export default function CollectionPage({ params }: CollectionPageProps) {
-    const { data: session } = useSession();
+export default function CollectionPage({params}: CollectionPageProps) {
+    const {data: session} = useSession();
     const router = useRouter();
     const [collection, setCollection] = useState<Collection | null>(null);
     const [nfts, setNfts] = useState<NFT[]>([]);
@@ -152,6 +143,7 @@ export default function CollectionPage({ params }: CollectionPageProps) {
                     collection={collection}
                     nfts={nfts}
                     userAddress={walletAddress}
+                    session={session}
                 />
             </div>
         );

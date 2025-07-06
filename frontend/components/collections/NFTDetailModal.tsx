@@ -1,18 +1,7 @@
 "use client";
 
 import {useEffect, useState} from 'react';
-import {
-    ArrowUpRight,
-    Check,
-    Coins,
-    Copy,
-    Crown,
-    ExternalLink,
-    ShoppingCart,
-    User as UserIcon,
-    X,
-    Zap
-} from 'lucide-react';
+import {Check, Coins, Copy, Crown, ExternalLink, ShoppingCart, User as UserIcon, X, Zap} from 'lucide-react';
 import {
     buyNFTSharesEnhanced,
     formatAddress,
@@ -23,11 +12,10 @@ import {
     getUserNFTSharePercentage,
     isAllSharesWithOwner
 } from '@/services/BlockchainService';
-import type { Collection, NFT, ShareHolder, FractionalNFTInfo } from '@/types';
-import { useNotifications } from '@/providers/NotificationContext';
-import { canBuyNFTs } from '@/utils/auth';
+import type {Collection, FractionalNFTInfo, NFT, ShareHolder} from '@/types';
+import {useNotifications} from '@/providers/NotificationContext';
+import {canBuyNFTs} from '@/utils/auth';
 import GuestWarning from '@/components/shared/GuestWarning';
-import { ethers } from 'ethers';
 
 interface NFTDetailModalProps {
     nft: NFT;
@@ -38,7 +26,7 @@ interface NFTDetailModalProps {
 }
 
 export default function NFTDetailModal({nft, collection, userAddress, session, onClose}: NFTDetailModalProps) {
-    const { showSuccess, showError, showWarning, showInfo, confirm } = useNotifications();
+    const {showSuccess, showError, showWarning, showInfo, confirm} = useNotifications();
     const canBuy = canBuyNFTs(session);
     const [fractionalInfo, setFractionalInfo] = useState<FractionalNFTInfo & { creator?: string } | null>(null);
     const [shareHolders, setShareHolders] = useState<ShareHolder[]>([]);
@@ -63,7 +51,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
             }
             setIsInitialLoading(false);
         };
-        
+
         initializeModal();
     }, [nft]);
 
@@ -88,7 +76,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
             const balanceInEth = (Number(balance) / 1e18).toFixed(4);
             setUserBalance(balanceInEth);
         } catch (error) {
-            // Handle error silently
+            // Skip error silently
         }
     };
 
@@ -98,7 +86,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
             setCopiedAddress(type);
             setTimeout(() => setCopiedAddress(null), 2000);
         } catch (err) {
-            // Handle error silently
+            // Skip error silently
         }
     };
 
@@ -140,7 +128,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                 setMaxBuyAmount(Math.max(1, maxPossible));
             }
         } catch (error) {
-            // Handle error silently
+            // Skip error silently
         } finally {
             setIsLoading(false);
         }
@@ -185,9 +173,9 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
         setIsBuying(true);
         try {
             const txHash = await buyNFTSharesEnhanced(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
-            
+
             let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
-            
+
             const remainingShares = availableShares - buyAmount;
             if (remainingShares === 0) {
                 successMessage += ' You now own the entire NFT!';
@@ -198,7 +186,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
             await loadFractionalData();
             setBuyAmount(1);
         } catch (error) {
-            
+
             let errorMessage = 'Failed to buy shares. Please try again.';
             if (error instanceof Error) {
                 if (error.message.includes('user rejected')) {
@@ -211,7 +199,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                     errorMessage = error.message;
                 }
             }
-            
+
             showError('Purchase failed', errorMessage);
         } finally {
             setIsBuying(false);
@@ -245,18 +233,21 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                 </div>
 
                 {/* Content */}
-                <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(90vh-120px)] relative">
+                <div
+                    className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)] sm:max-h-[calc(90vh-120px)] relative">
                     {/* Loading Overlay */}
                     {isInitialLoading && (
-                        <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                        <div
+                            className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
                             <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                                <div
+                                    className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
                                 <div className="text-white text-lg font-medium mb-2">Loading NFT Details</div>
                                 <div className="text-gray-400 text-sm">Fetching fractional ownership data...</div>
                             </div>
                         </div>
                     )}
-                    
+
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
                         {/* Left Column - Image */}
                         <div className="order-1 xl:order-1">
@@ -364,7 +355,8 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                             {/* Fractional Contract Info */}
                             {nft.fractionalContract && (
                                 <div className="bg-purple-900/30 rounded-lg p-4 border border-purple-500/30">
-                                    <h3 className="text-lg font-semibold text-white mb-3">Fractional Contract (ERC-20)</h3>
+                                    <h3 className="text-lg font-semibold text-white mb-3">Fractional Contract
+                                        (ERC-20)</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <span className="text-gray-400 text-sm">Shares Contract Address</span>
@@ -431,7 +423,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                                     {session ? (
                                         <div className="border-t border-purple-500/30 pt-4">
                                             {!canBuy && (
-                                                <GuestWarning 
+                                                <GuestWarning
                                                     message="Connect your wallet to buy NFT shares and start building your digital art collection."
                                                     className="mb-4"
                                                 />
@@ -618,7 +610,8 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                                             ) : hasAvailableShares ? (
                                                 <div className="text-center py-4">
                                                     <div className="text-amber-400 text-sm mb-2">
-                                                        <span className="font-medium">{availableShares}</span> shares available
+                                                        <span className="font-medium">{availableShares}</span> shares
+                                                        available
                                                     </div>
                                                     <div className="text-xs text-amber-300">
                                                         Connect your wallet to purchase shares
@@ -626,8 +619,11 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                                                 </div>
                                             ) : (
                                                 <div className="text-center py-4">
-                                                    <div className="text-gray-400 text-sm mb-2">No shares available</div>
-                                                    <div className="text-xs text-gray-500">All shares are currently held</div>
+                                                    <div className="text-gray-400 text-sm mb-2">No shares available
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">All shares are currently
+                                                        held
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

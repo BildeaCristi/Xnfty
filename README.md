@@ -159,9 +159,9 @@ xnfty/
 │   │   └── providers/               # Context providers
 │   ├── 🔗 hooks/                    # Custom React hooks
 │   ├── 🗄️ store/                    # Zustand state management
-│   │   ├── sceneStore.ts            # 3D scene state
-│   │   ├── museumStore.ts           # Museum specific state
-│   │   └── walletStore.ts           # Wallet connection state
+│   │   ├── SceneStore.ts            # 3D scene state
+│   │   ├── MuseumStore.ts           # Museum specific state
+│   │   └── WalletStore.ts           # Wallet connection state
 │   ├── 🎭 types/                    # TypeScript definitions
 │   └── 🛠️ utils/                    # Helper functions
 ├── 🔗 smart-contracts/              # Blockchain layer

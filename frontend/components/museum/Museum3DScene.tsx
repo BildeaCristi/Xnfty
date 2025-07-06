@@ -4,31 +4,30 @@ import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 
 import {Canvas} from '@react-three/fiber';
 import {AdaptiveDpr, AdaptiveEvents, OrbitControls, PerformanceMonitor, Preload, Stats} from '@react-three/drei';
 import {Bloom, EffectComposer} from '@react-three/postprocessing';
+import {Session} from 'next-auth';
 import {Collection, NFT} from '@/types/blockchain';
-import {useMuseumStore} from '@/store/museumStore';
-import {useSceneStore} from '@/store/sceneStore';
+import {useMuseumStore} from '@/store/MuseumStore';
+import {useSceneStore} from '@/store/SceneStore';
 import PhysicsProvider from '@/providers/PhysicsProvider';
-import LoadingScreen from './core/EnhancedLoadingScreen';
+import LoadingScreen from './core/LoadingScreen';
 import NFTDetailModal from '../collections/NFTDetailModal';
 import SettingsPanel from './SettingsPanel';
 import * as THREE from 'three';
-import {MuseumService} from '@/services/museumService';
-import {LightingService} from '@/services/lightingService';
+import {MuseumService} from '@/services/MuseumService';
 import {
     CAMERA_SETTINGS,
     CONTROL_MODES,
     KEYBOARD_CONTROLS,
     MODAL_SETTINGS,
-    PERFORMANCE_SETTINGS,
-    QUALITY_LEVELS
+    PERFORMANCE_SETTINGS
 } from '@/utils/constants/museumConstants';
 import NFTImagePreloader from './core/NFTImagePreloader';
 import CrosshairRaycaster from './core/CrosshairRaycaster';
 import SceneLighting from './core/SceneLighting';
 
 // Lazy load heavy components
-const EnhancedMuseumRoom = lazy(() => import('./EnhancedMuseumRoom'));
-const EnhancedNFTFrame = lazy(() => import('./EnhancedNFTFrame'));
+const MuseumRoom = lazy(() => import('./MuseumRoom'));
+const NFTFrame = lazy(() => import('./NFTFrame'));
 const FirstPersonCharacterController = lazy(() => import('./FirstPersonCharacterController'));
 const SceneObjects = lazy(() => import('./SceneObjects'));
 
@@ -36,13 +35,15 @@ interface Museum3DSceneProps {
     collection: Collection;
     nfts: NFT[];
     userAddress?: string;
+    session?: Session | null;
 }
 
 
 export default function Museum3DScene({
                                           collection,
                                           nfts,
-                                          userAddress
+                                          userAddress,
+                                          session
                                       }: Museum3DSceneProps) {
     const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
     const [hoveredNFT, setHoveredNFT] = useState<number | null>(null);
@@ -71,7 +72,6 @@ export default function Museum3DScene({
     } = useSceneStore();
 
     const renderSettings = getRenderSettings();
-    const lightingConfig = LightingService.getLightingConfig();
 
     // NFT positioning logic
     const nftPositions = useMemo(() => {
@@ -80,7 +80,6 @@ export default function Museum3DScene({
 
     // Handle NFT click with cooldown to prevent immediate re-opening
     const handleNFTClick = useCallback((nft: NFT) => {
-        // Block if modal is open or just closed
         if (modalJustClosed || selectedNFT) {
             return;
         }
@@ -104,11 +103,6 @@ export default function Museum3DScene({
     // Handle performance changes
     const handlePerformanceChange = useCallback(({fps, factor}: { fps: number; factor: number }) => {
         updatePerformanceMetrics({fps});
-
-        // Adjust quality based on performance
-        if (factor < 0.5 && quality !== QUALITY_LEVELS.LOW) {
-            // Performance is poor, consider lowering quality
-        }
     }, [quality, updatePerformanceMetrics]);
 
     // Handle when all images are loaded
@@ -241,11 +235,11 @@ export default function Museum3DScene({
                             <SceneLighting/>
 
                             {/* Museum Room */}
-                            <EnhancedMuseumRoom/>
+                            <MuseumRoom/>
 
                             {/* NFT Frames */}
                             {nfts.map((nft, index) => (
-                                <EnhancedNFTFrame
+                                <NFTFrame
                                     key={nft.tokenId}
                                     nft={nft}
                                     position={nftPositions[index]}
@@ -405,6 +399,7 @@ export default function Museum3DScene({
                     nft={selectedNFT}
                     collection={collection}
                     userAddress={userAddress}
+                    session={session}
                     onClose={handleModalClose}
                 />
             )}

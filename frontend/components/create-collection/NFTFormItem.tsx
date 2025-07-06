@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Upload, Trash2, Plus, X } from 'lucide-react';
-import type { NFTData } from '@/types/forms';
-import { 
-    createImageData, 
-    createImagePreview, 
-    validateImageFile, 
-    formatFileSize 
+import {Plus, Trash2, Upload, X} from 'lucide-react';
+import type {NFTData} from '@/types/forms';
+import {
+    createImageData,
+    createImagePreview,
+    formatFileSize,
+    validateImageFile
 } from '@/services/CollectionCreatorService';
 
 interface NFTFormItemProps {
@@ -18,13 +18,13 @@ interface NFTFormItemProps {
     onImageUpload: (id: string, event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function NFTFormItem({ 
-    nft, 
-    index, 
-    onUpdate, 
-    onRemove, 
-    onImageUpload 
-}: NFTFormItemProps) {
+export default function NFTFormItem({
+                                        nft,
+                                        index,
+                                        onUpdate,
+                                        onRemove,
+                                        onImageUpload
+                                    }: NFTFormItemProps) {
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -49,7 +49,7 @@ export default function NFTFormItem({
     };
 
     const addAttribute = () => {
-        const newAttributes = [...nft.attributes, { trait_type: '', value: '' }];
+        const newAttributes = [...nft.attributes, {trait_type: '', value: ''}];
         onUpdate(nft.id, 'attributes', newAttributes);
     };
 
@@ -60,12 +60,13 @@ export default function NFTFormItem({
 
     const updateAttribute = (index: number, field: 'trait_type' | 'value', value: string) => {
         const newAttributes = [...nft.attributes];
-        newAttributes[index] = { ...newAttributes[index], [field]: value };
+        newAttributes[index] = {...newAttributes[index], [field]: value};
         onUpdate(nft.id, 'attributes', newAttributes);
     };
 
     return (
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-gray-600 hover:border-gray-500 transition-colors">
+        <div
+            className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-gray-600 hover:border-gray-500 transition-colors">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-white">NFT {index + 1}</h3>
                 <button
@@ -73,7 +74,7 @@ export default function NFTFormItem({
                     className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-900/20 rounded-lg"
                     aria-label="Remove NFT"
                 >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-5 h-5"/>
                 </button>
             </div>
 
@@ -102,16 +103,17 @@ export default function NFTFormItem({
                                         alt="NFT preview"
                                         className="w-full h-full object-contain rounded-lg"
                                     />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                    <div
+                                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                                         <div className="text-center text-white">
-                                            <Upload className="w-6 h-6 mx-auto mb-1" />
+                                            <Upload className="w-6 h-6 mx-auto mb-1"/>
                                             <span className="text-sm font-medium">Change Image</span>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full text-gray-400 p-6">
-                                    <Upload className="w-12 h-12 mb-3" />
+                                    <Upload className="w-12 h-12 mb-3"/>
                                     <span className="text-sm font-medium mb-1">Upload NFT Image</span>
                                     <span className="text-xs text-center">PNG, JPG, GIF up to 10MB</span>
                                 </div>
@@ -124,7 +126,8 @@ export default function NFTFormItem({
                                 <span className="font-medium text-gray-300">File:</span> {nft.imageData.name}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">
-                                <span className="font-medium text-gray-300">Size:</span> {formatFileSize(nft.imageData.size)}
+                                <span
+                                    className="font-medium text-gray-300">Size:</span> {formatFileSize(nft.imageData.size)}
                             </p>
                         </div>
                     )}
@@ -247,7 +250,7 @@ export default function NFTFormItem({
                         onClick={addAttribute}
                         className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors bg-blue-900/20 hover:bg-blue-900/30 px-3 py-1 rounded-lg"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4"/>
                         <span className="text-sm">Add Attribute</span>
                     </button>
                 </div>
@@ -255,7 +258,8 @@ export default function NFTFormItem({
                 {nft.attributes.length === 0 ? (
                     <div className="text-center py-6 bg-gray-800/30 rounded-lg border-2 border-dashed border-gray-600">
                         <p className="text-gray-400 text-sm">No attributes added yet</p>
-                        <p className="text-gray-500 text-xs mt-1">Attributes help describe unique properties of your NFT</p>
+                        <p className="text-gray-500 text-xs mt-1">Attributes help describe unique properties of your
+                            NFT</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -280,7 +284,7 @@ export default function NFTFormItem({
                                     className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-900/20 rounded-lg"
                                     aria-label="Remove attribute"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-4 h-4"/>
                                 </button>
                             </div>
                         ))}

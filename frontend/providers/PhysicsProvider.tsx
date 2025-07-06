@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from 'react';
 import { Physics, RapierRigidBody } from '@react-three/rapier';
-import { useSceneStore } from '@/store/sceneStore';
+import { useSceneStore } from '@/store/SceneStore';
 import { Vector3 } from 'three';
 
 interface PhysicsProviderProps {

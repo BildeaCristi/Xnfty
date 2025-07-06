@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { Upload } from 'lucide-react';
-import type { CollectionFormData } from '@/types/forms';
-import { validateImageFile, formatFileSize } from '@/services/CollectionCreatorService';
+import React, {useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+import {Upload} from 'lucide-react';
+import type {CollectionFormData} from '@/types/forms';
+import {formatFileSize, validateImageFile} from '@/services/CollectionCreatorService';
 
 interface CollectionFormProps {
     onSubmit: (data: CollectionFormData) => void;
@@ -15,16 +15,16 @@ interface CollectionFormProps {
 }
 
 export default function CollectionForm({
-    onSubmit,
-    collectionImage,
-    collectionImagePreview,
-    onImageUpload,
-    defaultValues
-}: CollectionFormProps) {
+                                           onSubmit,
+                                           collectionImage,
+                                           collectionImagePreview,
+                                           onImageUpload,
+                                           defaultValues
+                                       }: CollectionFormProps) {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
         reset
     } = useForm<CollectionFormData>({
         defaultValues: defaultValues || undefined
@@ -77,16 +77,17 @@ export default function CollectionForm({
                                             alt="Collection preview"
                                             className="w-full h-full object-contain rounded-xl"
                                         />
-                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                                        <div
+                                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
                                             <div className="text-center text-white">
-                                                <Upload className="w-8 h-8 mx-auto mb-2" />
+                                                <Upload className="w-8 h-8 mx-auto mb-2"/>
                                                 <span className="text-sm font-medium">Click to change</span>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
-                                        <Upload className="w-16 h-16 mb-4" />
+                                        <Upload className="w-16 h-16 mb-4"/>
                                         <span className="text-lg font-medium mb-2">Upload Collection Image</span>
                                         <span className="text-sm text-center">PNG, JPG, GIF up to 10MB</span>
                                     </div>
@@ -99,7 +100,8 @@ export default function CollectionForm({
                                     <span className="font-medium text-gray-300">File:</span> {collectionImage.name}
                                 </p>
                                 <p className="text-xs text-gray-400 mt-1">
-                                    <span className="font-medium text-gray-300">Size:</span> {formatFileSize(collectionImage.size)}
+                                    <span
+                                        className="font-medium text-gray-300">Size:</span> {formatFileSize(collectionImage.size)}
                                 </p>
                             </div>
                         )}
@@ -113,10 +115,10 @@ export default function CollectionForm({
                                 Collection Name *
                             </label>
                             <input
-                                {...register('name', { 
+                                {...register('name', {
                                     required: 'Collection name is required',
-                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
-                                    maxLength: { value: 50, message: 'Name must be less than 50 characters' }
+                                    minLength: {value: 2, message: 'Name must be at least 2 characters'},
+                                    maxLength: {value: 50, message: 'Name must be less than 50 characters'}
                                 })}
                                 type="text"
                                 className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
@@ -133,11 +135,14 @@ export default function CollectionForm({
                                 Collection Symbol *
                             </label>
                             <input
-                                {...register('symbol', { 
+                                {...register('symbol', {
                                     required: 'Collection symbol is required',
-                                    minLength: { value: 2, message: 'Symbol must be at least 2 characters' },
-                                    maxLength: { value: 10, message: 'Symbol must be less than 10 characters' },
-                                    pattern: { value: /^[A-Z0-9]+$/, message: 'Symbol must be uppercase letters and numbers only' }
+                                    minLength: {value: 2, message: 'Symbol must be at least 2 characters'},
+                                    maxLength: {value: 10, message: 'Symbol must be less than 10 characters'},
+                                    pattern: {
+                                        value: /^[A-Z0-9]+$/,
+                                        message: 'Symbol must be uppercase letters and numbers only'
+                                    }
                                 })}
                                 type="text"
                                 className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase transition-colors"
@@ -160,10 +165,10 @@ export default function CollectionForm({
                                 Description *
                             </label>
                             <textarea
-                                {...register('description', { 
+                                {...register('description', {
                                     required: 'Collection description is required',
-                                    minLength: { value: 10, message: 'Description must be at least 10 characters' },
-                                    maxLength: { value: 500, message: 'Description must be less than 500 characters' }
+                                    minLength: {value: 10, message: 'Description must be at least 10 characters'},
+                                    maxLength: {value: 500, message: 'Description must be less than 500 characters'}
                                 })}
                                 rows={4}
                                 className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-colors"
@@ -184,9 +189,9 @@ export default function CollectionForm({
                             </label>
                             <input
                                 {...register('externalLink', {
-                                    pattern: { 
-                                        value: /^https?:\/\/.+/, 
-                                        message: 'Please enter a valid URL starting with http:// or https://' 
+                                    pattern: {
+                                        value: /^https?:\/\/.+/,
+                                        message: 'Please enter a valid URL starting with http:// or https://'
                                     }
                                 })}
                                 type="url"

@@ -4,7 +4,7 @@ import {useState} from "react";
 import {ethers} from "ethers";
 import {signIn} from "next-auth/react";
 import {useNotifications} from "@/providers/NotificationContext";
-import {useWalletStore} from "@/store/walletStore";
+import {useWalletStore} from "@/store/WalletStore";
 import {MetaMaskLogo} from "@/components/shared/MetaMaskLogo";
 
 export default function WalletLoginButton() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMuseumStore } from '@/store/museumStore';
+import { useMuseumStore } from '@/store/MuseumStore';
 
 interface ControlSettingsProps {
   controlMode: 'orbit' | 'firstPerson';

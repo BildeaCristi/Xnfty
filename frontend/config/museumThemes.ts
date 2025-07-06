@@ -26,7 +26,7 @@ export interface MuseumTheme {
     };
 }
 
-export const museumThemes: Record<string, MuseumTheme> = {
+export const museumConfig: Record<string, MuseumTheme> = {
     modern: {
         name: 'Modern Gallery',
         description: 'Clean, minimalist design with bright lighting',
