@@ -1,13 +1,10 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { ethers } from "ethers";
+import {ethers} from "ethers";
+import {ROUTES} from "@/config/routes";
 
 declare module "next-auth" {
-    interface User {
-        idToken?: string;
-        walletAddress?: string;
-    }
     interface Session {
         idToken?: string | undefined;
         walletAddress?: string;
@@ -19,7 +16,7 @@ declare module "next-auth" {
     }
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const {handlers, signIn, signOut, auth} = NextAuth({
     providers: [
         Google({
             authorization: {
@@ -36,9 +33,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: "wallet-connect",
             name: "Wallet Connect",
             credentials: {
-                message: { label: "Message", type: "text" },
-                signature: { label: "Signature", type: "text" },
-                walletAddress: { label: "Wallet Address", type: "text" },
+                message: {label: "Message", type: "text"},
+                signature: {label: "Signature", type: "text"},
+                walletAddress: {label: "Wallet Address", type: "text"},
             },
             async authorize(credentials) {
                 if (!credentials?.message || !credentials?.signature || !credentials?.walletAddress) {
@@ -75,7 +72,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         error: "/login",
     },
     callbacks: {
-        async jwt({ token, account, user }) {
+        async jwt({token, account, user}) {
             if (account) {
                 token.idToken = account.id_token;
                 // Ensure proper redirect after OAuth
@@ -91,19 +88,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             return token;
         },
-        async session({ session, token }) {
+        async session({session, token}) {
             session.idToken = token.idToken as string;
             session.walletAddress = token.walletAddress as string;
             return session;
         },
-        async redirect({ url, baseUrl }) {
+        async redirect({url, baseUrl}) {
             // Handle redirects after authentication
             if (url.startsWith("/")) {
                 return `${baseUrl}${url}`;
             } else if (new URL(url).origin === baseUrl) {
                 return url;
             }
-            return `${baseUrl}/dashboard`;
+            return `${baseUrl}${ROUTES.DASHBOARD}`;
         },
     },
 });

@@ -378,7 +378,7 @@ export async function getUserNFTShares(userAddress: string): Promise<UserNFTShar
 
         const nftsWithMetadata = await Promise.all(
             userNFTs.map(async (nft: any, index: number) => {
-                console.log(`📝 Processing NFT ${index}:`, {
+                console.log(`Processing NFT ${index}:`, {
                     tokenId: nft.tokenId.toString(),
                     userShares: nft.userShares.toString(),
                     totalShares: nft.totalShares.toString(),
@@ -402,7 +402,7 @@ export async function getUserNFTShares(userAddress: string): Promise<UserNFTShar
                     imageURI: metadata?.image || '',
                 };
 
-                console.log(`✅ Processed NFT ${index}:`, result);
+                console.log(`Processed NFT ${index}:`, result);
                 return result;
             })
         );

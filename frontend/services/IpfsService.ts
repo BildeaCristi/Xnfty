@@ -242,15 +242,3 @@ export const convertIpfsUriToHttpUri = (uri: string): string => {
   // Return original if we don't know how to handle it
   return uri;
 };
-
-export const uploadJsonToPinata = async (json: any): Promise<string> => {
-  const response = await axios.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', json, {
-    headers: {
-      'Content-Type': 'application/json',
-      pinata_api_key: PINATA_API_KEY,
-      pinata_secret_api_key: process.env.PINATA_SECRET_API_KEY!,
-    },
-  });
-
-  return response.data.IpfsHash;
-};
