@@ -278,7 +278,7 @@ export default function NFTFrame({
             )}
 
             {/* Glass cover (for high quality) */}
-            {quality === 'high' && (
+                            {quality === 'medium' && (
                 <mesh position={[0, 0, 0.06]}>
                     <planeGeometry args={[frameSize.width, frameSize.height]}/>
                     <meshPhysicalMaterial

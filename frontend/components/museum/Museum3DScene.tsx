@@ -3,7 +3,6 @@
 import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Canvas} from '@react-three/fiber';
 import {AdaptiveDpr, AdaptiveEvents, OrbitControls, PerformanceMonitor, Preload, Stats} from '@react-three/drei';
-import {Bloom, EffectComposer} from '@react-three/postprocessing';
 import {Session} from 'next-auth';
 import {Collection, NFT} from '@/types/blockchain';
 import {useMuseumStore} from '@/store/MuseumStore';
@@ -64,8 +63,6 @@ export default function Museum3DScene({
 
     const {
         getRenderSettings,
-        shadowsEnabled,
-        postProcessingEnabled,
         updatePerformanceMetrics,
         physicsConfig,
         quality
@@ -297,17 +294,6 @@ export default function Museum3DScene({
                                     enabled={!selectedNFT && !modalJustClosed}
                                     position={[0, 2.5, 5]}
                                 />
-                            )}
-
-                            {/* Post-processing effects */}
-                            {postProcessingEnabled && (
-                                <EffectComposer>
-                                    <Bloom
-                                        intensity={0.3}
-                                        luminanceThreshold={0.95}
-                                        luminanceSmoothing={0.9}
-                                    />
-                                </EffectComposer>
                             )}
                         </PhysicsProvider>
 

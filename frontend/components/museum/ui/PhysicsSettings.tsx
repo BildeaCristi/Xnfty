@@ -3,6 +3,7 @@
 import { ToggleSwitch } from './index';
 
 interface PhysicsConfig {
+  timeStep: number | "vary" | undefined;
   enabled: boolean;
   gravity: [number, number, number];
   debug: boolean;

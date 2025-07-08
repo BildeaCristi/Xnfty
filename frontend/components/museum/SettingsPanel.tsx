@@ -27,11 +27,8 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
         setQuality,
         shadowsEnabled,
         setShadowsEnabled,
-        postProcessingEnabled,
-        setPostProcessingEnabled,
         physicsConfig,
         updatePhysicsConfig,
-        performanceMetrics
     } = useSceneStore();
 
     // Panel animation
@@ -102,10 +99,9 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                             {activeTab === 'display' && (
                                 <DisplaySettings
                                     quality={quality}
+                                    setQuality={setQuality}
                                     shadowsEnabled={shadowsEnabled}
                                     setShadowsEnabled={setShadowsEnabled}
-                                    postProcessingEnabled={postProcessingEnabled}
-                                    setPostProcessingEnabled={setPostProcessingEnabled}
                                 />
                             )}
 

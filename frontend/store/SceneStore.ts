@@ -2,7 +2,7 @@ import {create} from 'zustand';
 import {devtools, persist} from 'zustand/middleware';
 import * as THREE from 'three';
 
-export type QualityLevel = 'low' | 'medium' | 'high';
+export type QualityLevel = 'low' | 'medium';
 
 interface PhysicsConfig {
     timeStep: number | "vary" | undefined;
@@ -34,7 +34,6 @@ interface SceneState {
 
     // Rendering settings
     shadowsEnabled: boolean;
-    postProcessingEnabled: boolean;
     reflectionsEnabled: boolean;
 
     // Physics settings
@@ -47,7 +46,6 @@ interface SceneState {
     setQuality: (quality: QualityLevel) => void;
     setAutoQuality: (auto: boolean) => void;
     setShadowsEnabled: (enabled: boolean) => void;
-    setPostProcessingEnabled: (enabled: boolean) => void;
     setReflectionsEnabled: (enabled: boolean) => void;
     updatePhysicsConfig: (config: {
         enabled: boolean;
@@ -84,10 +82,9 @@ export const useSceneStore = create<SceneState>()(
         persist(
             (set, get) => ({
                 // Initial state
-                quality: 'high',
+                quality: 'low',
                 autoQuality: true,
                 shadowsEnabled: true,
-                postProcessingEnabled: true,
                 reflectionsEnabled: true,
                 physicsConfig: defaultPhysicsConfig,
                 performanceMetrics: defaultPerformanceMetrics,
@@ -100,21 +97,12 @@ export const useSceneStore = create<SceneState>()(
                         case 'low':
                             set({
                                 shadowsEnabled: false,
-                                postProcessingEnabled: false,
                                 reflectionsEnabled: false,
                             });
                             break;
                         case 'medium':
                             set({
                                 shadowsEnabled: true,
-                                postProcessingEnabled: false,
-                                reflectionsEnabled: false,
-                            });
-                            break;
-                        case 'high':
-                            set({
-                                shadowsEnabled: true,
-                                postProcessingEnabled: true,
                                 reflectionsEnabled: true,
                             });
                             break;
@@ -123,7 +111,6 @@ export const useSceneStore = create<SceneState>()(
 
                 setAutoQuality: (auto) => set({autoQuality: auto}),
                 setShadowsEnabled: (enabled) => set({shadowsEnabled: enabled}),
-                setPostProcessingEnabled: (enabled) => set({postProcessingEnabled: enabled}),
                 setReflectionsEnabled: (enabled) => set({reflectionsEnabled: enabled}),
 
                 updatePhysicsConfig: (config) =>
@@ -161,12 +148,6 @@ export const useSceneStore = create<SceneState>()(
                                 ...baseSettings,
                                 shadowMapSize: 1024,
                             };
-                        case 'high':
-                            return {
-                                ...baseSettings,
-                                shadowMapSize: 4096,
-                                toneMappingExposure: 1.2,
-                            };
                         default:
                             return baseSettings;
                     }
@@ -174,11 +155,9 @@ export const useSceneStore = create<SceneState>()(
 
                 reset: () => {
                     set({
-                        quality: 'high',
-                        autoQuality: true,
-                        shadowsEnabled: true,
-                        postProcessingEnabled: true,
-                        reflectionsEnabled: true,
+                        quality: 'low',
+                        shadowsEnabled: false,
+                        reflectionsEnabled: false,
                         physicsConfig: defaultPhysicsConfig,
                         performanceMetrics: defaultPerformanceMetrics,
                     });
@@ -188,9 +167,7 @@ export const useSceneStore = create<SceneState>()(
                 name: 'scene-settings',
                 partialize: (state) => ({
                     quality: state.quality,
-                    autoQuality: state.autoQuality,
                     shadowsEnabled: state.shadowsEnabled,
-                    postProcessingEnabled: state.postProcessingEnabled,
                     reflectionsEnabled: state.reflectionsEnabled,
                     physicsConfig: state.physicsConfig,
                 }),

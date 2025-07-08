@@ -74,8 +74,8 @@ export default function MuseumRoom({
                 [diffuse, normal, roughness, displacement].forEach(texture => {
                     if (texture) {
                         texture.repeat.set(width / 4, depth / 4);
-                        if (quality === 'high') {
-                            texture.anisotropy = 8;
+                        if (quality === 'medium') {
+                            texture.anisotropy = 4;
                         }
                     }
                 });
@@ -88,14 +88,12 @@ export default function MuseumRoom({
                 switch (themeName) {
                     case MUSEUM_THEMES.CLASSIC:
                         const classicalFloor = await loadTexture(
-                            quality === 'high'
-                                ? '/textures/classical-theme/marble_floor_4k.jpg'
-                                : '/textures/classical-theme/marble_floor_2k.jpg'
+                            '/textures/classical-theme/marble_floor_2k.jpg'
                         );
                         if (classicalFloor) {
                             classicalFloor.repeat.set(width / 4, depth / 4);
-                            if (quality === 'high') {
-                                classicalFloor.anisotropy = 16;
+                            if (quality === 'medium') {
+                                classicalFloor.anisotropy = 8;
                             }
                             setFloorTextures({
                                 diffuse: classicalFloor,
@@ -268,7 +266,7 @@ export default function MuseumRoom({
                     receiveShadow={shadowsEnabled}
                 >
                     <planeGeometry args={[width, depth, 32, 32]}/>
-                    {quality === 'high' && floorTextures.diffuse ? (
+                    {quality === 'medium' && floorTextures.diffuse ? (
                         <MeshReflectorMaterial
                             color={currentTheme.room.floorColor}
                             roughness={currentTheme.room.floorRoughness}
@@ -360,7 +358,7 @@ export default function MuseumRoom({
             </RigidBody>
 
             {/* Enhanced architectural details */}
-            {quality === QUALITY_LEVELS.HIGH && (
+            {quality === QUALITY_LEVELS.MEDIUM && (
                 <>
                     {/* Baseboards with theme-specific materials */}
                     <group>

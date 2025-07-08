@@ -28,7 +28,6 @@ export default function SceneObjects() {
 
             {/* Universal objects that appear in all themes */}
             <CenterPedestal/>
-            <CeilingLampsWithLights/>
         </group>
     );
 }
@@ -44,12 +43,6 @@ function ClassicThemeObjects() {
 
             {/* Classical Columns */}
             <ClassicalColumns/>
-
-            {/* Classical Pedestals and Bases */}
-            <ClassicalPedestals/>
-
-            {/* Marble Decorative Elements */}
-            {quality === QUALITY_LEVELS.HIGH && <MarbleDecorations/>}
         </group>
     );
 }
@@ -66,26 +59,16 @@ function ModernThemeObjects() {
             {/* Minimalist Decorations */}
             <MinimalistDecorations/>
 
-            {/* Modern Art Installations */}
-            {quality !== QUALITY_LEVELS.LOW && <ModernArtInstallations/>}
         </group>
     );
 }
 
 // === FUTURISTIC THEME
 function FuturisticThemeObjects() {
-    const {quality} = useSceneStore();
-
     return (
         <group name="futuristic-theme">
             {/* Futuristic Furniture from assets */}
             <FuturisticFurniture/>
-
-            {/* Holographic Elements */}
-            {quality === QUALITY_LEVELS.HIGH && <HolographicElements/>}
-
-            {/* Tech Installations */}
-            <TechInstallations/>
 
             {/* Glowing Decorations */}
             <GlowingDecorations/>
@@ -102,9 +85,6 @@ function NatureThemeObjects() {
 
             {/* Wooden Furniture */}
             <WoodenFurniture/>
-
-            {/* Natural Decorations */}
-            <NaturalDecorations/>
 
             {/* Stone Elements */}
             <StoneElements/>
@@ -263,47 +243,6 @@ function ClassicalColumns() {
     );
 }
 
-// === CLASSICAL PEDESTALS ===
-function ClassicalPedestals() {
-    const {shadowsEnabled} = useSceneStore();
-
-    const pedestalPositions: [number, number, number][] = [
-        [-3, 0.1, -6],
-        [3, 0.1, -6],
-        [-3, 0.1, 6],
-        [3, 0.1, 6],
-    ];
-
-    return (
-        <>
-            {pedestalPositions.map((position, index) => (
-                <RigidBody key={`pedestal-${index}`} {...PhysicsPresets.static()} position={position}>
-                    <group>
-                        {/* Classical pedestal base */}
-                        <mesh position={[0, 0.3, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                            <cylinderGeometry args={[0.6, 0.8, 0.6, 16]}/>
-                            <meshStandardMaterial
-                                color="#f0f0f0"
-                                roughness={0.4}
-                                metalness={0.1}
-                            />
-                        </mesh>
-                        {/* Pedestal top */}
-                        <mesh position={[0, 0.7, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                            <cylinderGeometry args={[0.5, 0.6, 0.2, 16]}/>
-                            <meshStandardMaterial
-                                color="#f5f5f5"
-                                roughness={0.3}
-                                metalness={0.1}
-                            />
-                        </mesh>
-                    </group>
-                    <CuboidCollider args={[0.6, 0.4, 0.6]}/>
-                </RigidBody>
-            ))}
-        </>
-    );
-}
 
 // === MODERN FURNITURE ===
 function ModernFurniture() {
@@ -546,39 +485,6 @@ function NaturalPlants() {
     );
 }
 
-// === HOLOGRAPHIC ELEMENTS ===
-function HolographicElements() {
-    const holoRef = useRef<THREE.Mesh>(null);
-
-    useFrame((state) => {
-        if (holoRef.current) {
-            holoRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-            holoRef.current.position.y = 1.5 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
-        }
-    });
-
-    return (
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-            <mesh ref={holoRef} position={[0, 1.5, -6]}>
-                <octahedronGeometry args={[0.5, 1]}/>
-                <meshBasicMaterial
-                    color="#00ffff"
-                    transparent
-                    opacity={0.6}
-                    wireframe
-                />
-            </mesh>
-            <mesh position={[-4, 1.2, -6]}>
-                <torusGeometry args={[0.3, 0.1, 16, 32]}/>
-                <meshBasicMaterial
-                    color="#ff00ff"
-                    transparent
-                    opacity={0.7}
-                />
-            </mesh>
-        </Float>
-    );
-}
 
 // === CENTER PEDESTAL (Universal) ===
 function CenterPedestal() {
@@ -658,96 +564,6 @@ function CenterPedestal() {
     );
 }
 
-// === CEILING LAMPS WITH LIGHTS (Universal) ===
-function CeilingLampsWithLights() {
-    const {shadowsEnabled} = useSceneStore();
-    const {themeName} = useMuseumStore();
-    const [lampModel, setLampModel] = useState<THREE.Group | null>(null);
-    const lightConfig = useLightingSetup();
-
-    useEffect(() => {
-        const loader = new GLTFLoader();
-
-        // Load appropriate lamp model based on theme
-        const lampPath = themeName === MUSEUM_THEMES.MODERN
-            ? '/models/common/modern_lantern.glb'
-            : '/models/common/luminaria_ceiling_lamp.glb';
-
-        loader.load(
-            lampPath,
-            (gltf) => {
-                const model = gltf.scene.clone();
-                model.traverse((child) => {
-                    if (child instanceof THREE.Mesh) {
-                        child.castShadow = shadowsEnabled;
-                        child.receiveShadow = shadowsEnabled;
-                    }
-                });
-                setLampModel(model);
-            },
-            undefined,
-            (error) => console.log('Lamp model not found:', error)
-        );
-    }, [themeName, shadowsEnabled]);
-
-    if (!lampModel) return null;
-
-    return (
-        <>
-            {lightConfig.centerLights?.map((light, index) => (
-                <group key={`ceiling-lamp-${index}`} position={light.position}>
-                    {/* Physical lamp model */}
-                    <RigidBody {...PhysicsPresets.static()}>
-                        <primitive
-                            object={lampModel.clone()}
-                            scale={themeName === MUSEUM_THEMES.MODERN ? 0.01 : 1}
-                        />
-                        <CuboidCollider args={[0.3, 0.3, 0.3]}/>
-                    </RigidBody>
-
-                    {/* Point light at lamp position for additional illumination */}
-                    <pointLight
-                        position={[0, -0.5, 0]} // Slightly below the lamp
-                        color={light.color}
-                        intensity={light.intensity * 0.3} // Dimmer than the RectAreaLight
-                        distance={8}
-                        decay={2}
-                        castShadow={shadowsEnabled && index < 3} // Only main lights cast shadows
-                        shadow-mapSize-width={512}
-                        shadow-mapSize-height={512}
-                    />
-                </group>
-            )) || []}
-        </>
-    );
-}
-
-// Placeholder functions for additional decorations
-function MarbleDecorations() {
-    const {shadowsEnabled} = useSceneStore();
-
-    return (
-        <>
-            {/* Decorative marble urns */}
-            <RigidBody {...PhysicsPresets.static()} position={[-5, 0.1, -5]}>
-                <mesh position={[0, 0.4, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[0.3, 0.2, 0.8, 16]}/>
-                    <meshStandardMaterial color="#f0f0f0" roughness={0.3} metalness={0.1}/>
-                </mesh>
-                <CuboidCollider args={[0.3, 0.4, 0.3]}/>
-            </RigidBody>
-
-            <RigidBody {...PhysicsPresets.static()} position={[5, 0.1, 5]}>
-                <mesh position={[0, 0.4, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[0.3, 0.2, 0.8, 16]}/>
-                    <meshStandardMaterial color="#f0f0f0" roughness={0.3} metalness={0.1}/>
-                </mesh>
-                <CuboidCollider args={[0.3, 0.4, 0.3]}/>
-            </RigidBody>
-        </>
-    );
-}
-
 function MinimalistDecorations() {
     const {shadowsEnabled} = useSceneStore();
 
@@ -771,14 +587,6 @@ function MinimalistDecorations() {
             </RigidBody>
         </>
     );
-}
-
-function ModernArtInstallations() {
-    return null;
-}
-
-function TechInstallations() {
-    return null;
 }
 
 function GlowingDecorations() {
@@ -841,10 +649,6 @@ function WoodenFurniture() {
             </RigidBody>
         </>
     );
-}
-
-function NaturalDecorations() {
-    return null;
 }
 
 function StoneElements() {

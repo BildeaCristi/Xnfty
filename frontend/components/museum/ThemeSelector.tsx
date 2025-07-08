@@ -122,8 +122,8 @@ export default function ThemeSelector() {
                         <Settings className="w-5 h-5 mr-2 text-green-400"/>
                         Performance Quality
                     </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                        {(['low', 'medium', 'high'] as const).map((q) => (
+                    <div className="grid grid-cols-2 gap-4">
+                        {(['low', 'medium'] as const).map((q) => (
                             <button
                                 key={q}
                                 onClick={() => setQuality(q)}
@@ -137,7 +137,6 @@ export default function ThemeSelector() {
                                 <p className="text-xs text-gray-400">
                                     {q === 'low' && 'Better performance'}
                                     {q === 'medium' && 'Balanced'}
-                                    {q === 'high' && 'Best visuals'}
                                 </p>
                             </button>
                         ))}

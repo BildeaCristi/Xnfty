@@ -13,7 +13,6 @@ export const CONTROL_MODES = {
 export const QUALITY_LEVELS = {
   LOW: 'low',
   MEDIUM: 'medium',
-  HIGH: 'high',
 } as const;
 
 export const MUSEUM_DIMENSIONS = {
@@ -63,7 +62,6 @@ export const LIGHTING_CONFIG = {
   QUALITY_MULTIPLIERS: {
     low: 1.2,
     medium: 1.0,
-    high: 0.9,
   },
 } as const;
 

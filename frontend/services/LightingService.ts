@@ -1,7 +1,7 @@
 import {UNIFIED_LIGHTING} from '@/config/museumConfig';
 import {LIGHTING_CONFIG} from '@/utils/constants/museumConstants';
 
-type QualityLevel = 'low' | 'medium' | 'high';
+type QualityLevel = 'low' | 'medium';
 
 export class LightingService {
     static getLightingConfig(quality?: QualityLevel) {

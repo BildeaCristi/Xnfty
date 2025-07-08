@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {ImagePreloadService} from '@/services/ImagePreloadService';
 
 interface UseIPFSImageOptions {
-    quality?: 'low' | 'medium' | 'high';
+    quality?: 'low' | 'medium';
     timeout?: number;
 }
 
@@ -21,7 +21,7 @@ export function useIPFSImage(
     options: UseIPFSImageOptions = {}
 ): UseIPFSImageResult {
     const {
-        quality = 'high',
+        quality = 'medium',
         timeout = 3000
     } = options;
 
@@ -43,12 +43,6 @@ export function useIPFSImage(
 
         // Set quality-based texture parameters
         switch (quality) {
-            case 'high':
-                newTexture.minFilter = THREE.LinearMipmapLinearFilter;
-                newTexture.magFilter = THREE.LinearFilter;
-                newTexture.anisotropy = 16;
-                newTexture.generateMipmaps = true;
-                break;
             case 'medium':
                 newTexture.minFilter = THREE.LinearMipmapNearestFilter;
                 newTexture.magFilter = THREE.LinearFilter;

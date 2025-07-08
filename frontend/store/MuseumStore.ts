@@ -20,8 +20,8 @@ interface MuseumState {
     setShowControls: (show: boolean) => void;
 
     // Performance settings
-    quality: 'low' | 'medium' | 'high';
-    setQuality: (quality: 'low' | 'medium' | 'high') => void;
+    quality: 'low' | 'medium';
+    setQuality: (quality: 'low' | 'medium') => void;
 
     // Camera settings
     cameraPosition: [number, number, number];
