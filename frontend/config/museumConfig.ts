@@ -1,4 +1,4 @@
-import {LIGHTING_CONFIG, QUALITY_LEVELS} from '@/utils/constants/museumConstants';
+import {LIGHTING_CONFIG} from '@/utils/constants/museumConstants';
 
 export interface LightingSettings {
     ambient: {

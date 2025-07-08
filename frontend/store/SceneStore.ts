@@ -78,6 +78,7 @@ const defaultPerformanceMetrics: PerformanceMetrics = {
 // @ts-ignore
 // @ts-ignore
 // @ts-ignore
+// @ts-ignore
 export const useSceneStore = create<SceneState>()(
     devtools(
         persist(

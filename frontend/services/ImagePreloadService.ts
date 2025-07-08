@@ -227,48 +227,7 @@ export class ImagePreloadService {
     await Promise.allSettled(promises);
     return progress;
   }
-
-  static isImageLoaded(url: string): boolean {
-    const hash = this.extractIPFSHash(url);
-    if (hash && this.imageCache.has(hash)) {
-      return true;
-    }
-    return this.loadedImages.has(convertIpfsUriToHttpUri(url));
-  }
-
-  static isImageFailed(url: string): boolean {
-    return this.failedImages.has(convertIpfsUriToHttpUri(url));
-  }
-
-  static getLoadedImagesCount(): number {
-    return this.loadedImages.size;
-  }
-
-  static getFailedImagesCount(): number {
-    return this.failedImages.size;
-  }
-
-  static clearCache(): void {
-    this.loadPromises.clear();
-    this.loadedImages.clear();
-    this.failedImages.clear();
-    this.imageCache.clear();
-  }
-
-  static async preloadSingleNFTImage(nft: NFT, options?: ImagePreloadOptions): Promise<boolean> {
-    if (!nft.imageURI) return false;
-    const httpUrl = convertIpfsUriToHttpUri(nft.imageURI);
-    return this.preloadImage(httpUrl, options);
-  }
-
-  static getPreloadStats() {
-    return {
-      loaded: this.loadedImages.size,
-      failed: this.failedImages.size,
-      inProgress: this.loadPromises.size
-    };
-  }
-
+  
   static getBestGatewayUrl(ipfsUrl: string): string {
     const hash = this.extractIPFSHash(ipfsUrl);
     if (hash && this.imageCache.has(hash)) {

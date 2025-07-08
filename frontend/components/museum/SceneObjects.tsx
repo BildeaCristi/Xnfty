@@ -13,10 +13,9 @@ import {useLightingSetup} from '@/hooks/useLightingSetup';
 import {MUSEUM_THEMES, QUALITY_LEVELS} from '@/utils/constants/museumConstants';
 
 export default function SceneObjects() {
-    const {quality, shadowsEnabled} = useSceneStore();
+    const {quality} = useSceneStore();
     const {themeName} = useMuseumStore();
 
-    // Don't render extra objects on low quality
     if (quality === QUALITY_LEVELS.LOW) return null;
 
     return (
@@ -36,7 +35,7 @@ export default function SceneObjects() {
 
 // === CLASSIC THEME ===
 function ClassicThemeObjects() {
-    const {shadowsEnabled, quality} = useSceneStore();
+    const {quality} = useSceneStore();
 
     return (
         <group name="classical-theme">
@@ -57,7 +56,7 @@ function ClassicThemeObjects() {
 
 // === MODERN THEME ===
 function ModernThemeObjects() {
-    const {shadowsEnabled, quality} = useSceneStore();
+    const {quality} = useSceneStore();
 
     return (
         <group name="modern-theme">
@@ -75,7 +74,7 @@ function ModernThemeObjects() {
 
 // === FUTURISTIC THEME
 function FuturisticThemeObjects() {
-    const {shadowsEnabled, quality} = useSceneStore();
+    const {quality} = useSceneStore();
 
     return (
         <group name="futuristic-theme">
@@ -96,8 +95,6 @@ function FuturisticThemeObjects() {
 
 // === NATURE THEME ===
 function NatureThemeObjects() {
-    const {shadowsEnabled, quality} = useSceneStore();
-
     return (
         <group name="nature-theme">
             {/* Natural Plants and Trees from assets */}

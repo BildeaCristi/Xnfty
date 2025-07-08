@@ -75,7 +75,6 @@ export default function ThemeSelector() {
                                         />
                                         <div
                                             className="w-8 h-8 rounded-full border border-gray-600"
-                                            style={{backgroundColor: theme.lighting.accentColor}}
                                             title="Accent Color"
                                         />
                                     </div>

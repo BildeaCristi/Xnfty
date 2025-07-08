@@ -20,8 +20,6 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
         setTheme,
         controlMode,
         setControlMode,
-        playerSpeed,
-        setPlayerSpeed
     } = useMuseumStore();
 
     const {
@@ -50,6 +48,7 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
         {id: 'physics', label: 'Physics', icon: Settings},
     ];
 
+    // @ts-ignore
     return transitions((style: SpringValues<{ opacity: number; transform: string }>, item: boolean) =>
         item ? (
             <div>
@@ -103,12 +102,10 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                             {activeTab === 'display' && (
                                 <DisplaySettings
                                     quality={quality}
-                                    setQuality={setQuality}
                                     shadowsEnabled={shadowsEnabled}
                                     setShadowsEnabled={setShadowsEnabled}
                                     postProcessingEnabled={postProcessingEnabled}
                                     setPostProcessingEnabled={setPostProcessingEnabled}
-                                    performanceMetrics={performanceMetrics}
                                 />
                             )}
 

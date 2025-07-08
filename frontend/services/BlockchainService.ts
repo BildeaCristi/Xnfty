@@ -597,33 +597,6 @@ export async function getNFTShareHolders(fractionalContractAddress: string): Pro
 }
 
 /**
- *  Retrieves information about a fractionalized NFT.
- *  @param {string} fractionalContractAddress - Address of the FractionalNFT contract.
- *  @returns {Promise<FractionalNFTInfo>} - Information about the fractional NFT.
- */
-export async function getFractionalNFTInfo(fractionalContractAddress: string): Promise<FractionalNFTInfo> {
-    try {
-        const provider = getProvider();
-        const fractionalNFT = getFractionalNFTContract(fractionalContractAddress, provider);
-
-        const info = await fractionalNFT.getNFTInfo();
-
-        return {
-            collection: info[0],
-            tokenId: Number(info[1]),
-            metadataURI: info[2],
-            sharePrice: ethers.formatEther(info[3]),
-            totalShares: Number(info[4]),
-            currentOwner: info[5],
-            createdAt: Number(info[6]),
-        };
-    } catch (error) {
-        console.error('Error fetching fractional NFT info:', error);
-        throw error;
-    }
-}
-
-/**
  *  Retrieves the share percentage of a user for a given fractionalized NFT.
  *  @param {string} fractionalContractAddress - Address of the FractionalNFT contract.
  *  @param {string} userAddress - Address of the user.
