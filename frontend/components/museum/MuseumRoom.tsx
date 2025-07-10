@@ -9,7 +9,6 @@ import {MUSEUM_THEMES, QUALITY_LEVELS} from "@/utils/constants/museumConstants";
 import {useMuseumStore} from "@/store/MuseumStore";
 import {useSceneStore} from "@/store/SceneStore";
 
-// PBR Material interface
 interface PBRTextures {
     diffuse: THREE.Texture | null;
     normal: THREE.Texture | null;
@@ -357,10 +356,9 @@ export default function MuseumRoom({
                 <CuboidCollider args={[width / 2, 0.1, depth / 2]} position={[0, 0.1, 0]}/>
             </RigidBody>
 
-            {/* Enhanced architectural details */}
+            {/* architectural details */}
             {quality === QUALITY_LEVELS.MEDIUM && (
                 <>
-                    {/* Baseboards with theme-specific materials */}
                     <group>
                         {/* Front baseboard */}
                         <mesh position={[0, 0.15, -depth / 2 + 0.05]} castShadow={shadowsEnabled}>

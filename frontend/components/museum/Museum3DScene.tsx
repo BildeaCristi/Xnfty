@@ -24,7 +24,6 @@ import NFTImagePreloader from './core/NFTImagePreloader';
 import CrosshairRaycaster from './core/CrosshairRaycaster';
 import SceneLighting from './core/SceneLighting';
 
-// Lazy load heavy components
 const MuseumRoom = lazy(() => import('./MuseumRoom'));
 const NFTFrame = lazy(() => import('./NFTFrame'));
 const FirstPersonCharacterController = lazy(() => import('./FirstPersonCharacterController'));
@@ -119,7 +118,6 @@ export default function Museum3DScene({
         }
     }, [currentTheme]);
 
-    // Handle keyboard shortcuts
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
             if ((KEYBOARD_CONTROLS.TOGGLE_CONTROL as readonly string[]).includes(e.key)) {
@@ -358,7 +356,6 @@ export default function Museum3DScene({
                     </div>
                 )}
 
-                {/* Simple 2D Crosshair for First Person Mode */}
                 {allImagesLoaded && controlMode === CONTROL_MODES.FIRST_PERSON && (
                     <div
                         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">

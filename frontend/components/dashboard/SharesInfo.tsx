@@ -1,6 +1,5 @@
 'use client';
 
-import {ExternalLink} from 'lucide-react';
 import {DASHBOARD_LABELS, SHARE_STATUS} from '@/utils/constants/dashboard';
 import type {CollectionWithShares} from '@/types';
 

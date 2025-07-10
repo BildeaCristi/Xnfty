@@ -1,7 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-Do not write console.logs and commented code, try to separate concern in what folder should belong.
-

@@ -101,7 +101,6 @@ export default function NFTFrame({
         }
 
         if (error || !texture) {
-            // Error state material
             return new THREE.MeshStandardMaterial({
                 color: '#444444',
                 emissive: 0x220000,
@@ -277,8 +276,8 @@ export default function NFTFrame({
                 </group>
             )}
 
-            {/* Glass cover (for high quality) */}
-                            {quality === 'medium' && (
+            {/* Glass cover */}
+            {quality === 'medium' && (
                 <mesh position={[0, 0, 0.06]}>
                     <planeGeometry args={[frameSize.width, frameSize.height]}/>
                     <meshPhysicalMaterial

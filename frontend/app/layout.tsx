@@ -10,7 +10,7 @@ const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
     title: "Xnfty",
-    description: "Your NFT Platform",
+    description: "NFT Platform",
 };
 
 export default function RootLayout({

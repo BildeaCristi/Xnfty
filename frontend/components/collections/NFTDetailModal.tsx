@@ -128,7 +128,6 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                 setMaxBuyAmount(Math.max(1, maxPossible));
             }
         } catch (error) {
-            // Skip error silently
         } finally {
             setIsLoading(false);
         }
@@ -172,7 +171,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
 
         setIsBuying(true);
         try {
-            const txHash = await buyNFTShares(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
+            await buyNFTShares(nft.fractionalContract, buyAmount, fractionalInfo.sharePrice, userAddress);
 
             let successMessage = `Successfully purchased ${buyAmount} share${buyAmount > 1 ? 's' : ''}!`;
 
@@ -449,7 +448,7 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
                                                             available for purchase
                                                             {allSharesWithOwner && (
                                                                 <span className="block text-yellow-300 mt-1">
-                                  ⚡ All shares held by owner - you can buy the entire NFT!
+                                  All shares held by owner - you can buy the entire NFT!
                                 </span>
                                                             )}
                                                         </div>

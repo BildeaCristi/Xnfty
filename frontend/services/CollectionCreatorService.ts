@@ -115,7 +115,7 @@ export function validateAllNFTs(nfts: NFTData[]): NFTValidationResult {
 
     if (nfts.length === 0) {
         allErrors.push('At least one NFT is required');
-        return { isValid: false, errors: allErrors };
+        return {isValid: false, errors: allErrors};
     }
 
     nfts.forEach((nft, index) => {
@@ -191,11 +191,11 @@ export function createImagePreview(file: File): Promise<string> {
  */
 export function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
@@ -220,5 +220,5 @@ export function validateImageFile(file: File): { isValid: boolean; error?: strin
         };
     }
 
-    return { isValid: true };
+    return {isValid: true};
 } 

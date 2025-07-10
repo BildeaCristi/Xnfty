@@ -186,23 +186,19 @@ export default function LoginScene() {
             requestAnimationFrame(animate);
         };
 
-        // Handle window resize
         const handleResize = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         };
 
-        // Add event listeners
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('touchmove', handleTouchMove);
         window.addEventListener('click', handleClick);
         window.addEventListener('resize', handleResize);
 
-        // Start animation
         animate();
 
-        // Cleanup
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('touchmove', handleTouchMove);
@@ -213,7 +209,6 @@ export default function LoginScene() {
                 containerRef.current.removeChild(renderer.domElement);
             }
 
-            // Dispose resources
             renderer.dispose();
             particles.mesh.geometry.dispose();
             (particles.mesh.material as THREE.Material).dispose();

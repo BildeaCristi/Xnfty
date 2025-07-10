@@ -1,16 +1,9 @@
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 import * as factoryMetadata from '@/utils/artifacts/contracts/NFTFactory.sol/NFTFactory.json';
 import * as factoryViewMetadata from '@/utils/artifacts/contracts/NFTFactoryView.sol/NFTFactoryView.json';
 import * as collectionMetadata from '@/utils/artifacts/contracts/NFTCollection.sol/NFTCollection.json';
 import * as fractionalMetadata from '@/utils/artifacts/contracts/FractionalNFT.sol/FractionalNFT.json';
-import type {
-    Collection,
-    NFT,
-    FractionalNFTInfo,
-    ShareHolder,
-    CollectionStats,
-    UserNFTShare,
-} from '@/types';
+import type {Collection, CollectionStats, FractionalNFTInfo, NFT, ShareHolder, UserNFTShare,} from '@/types';
 
 // --- Contract ABIs ---
 const NFT_FACTORY_ABI = factoryMetadata.abi;
@@ -421,7 +414,10 @@ export async function getUserNFTShares(userAddress: string): Promise<UserNFTShar
  *  @param {string} metadataURI - IPFS URI of the NFT metadata.
  *  @returns {Promise<{ tokenId: number; txHash: string }>} - Token ID and transaction hash.
  */
-export async function mintNFT(collectionAddress: string, metadataURI: string): Promise<{ tokenId: number; txHash: string }> {
+export async function mintNFT(collectionAddress: string, metadataURI: string): Promise<{
+    tokenId: number;
+    txHash: string
+}> {
     try {
         const signer = await getSigner();
         const collection = getNFTCollectionContract(collectionAddress, signer);
@@ -620,13 +616,15 @@ export async function getUserNFTSharePercentage(fractionalContractAddress: strin
  *  @param {string} fractionalContractAddress - Address of the fractional NFT contract.
  *  @returns {Promise<FractionalNFTInfo & { creator: string }>} - Extended NFT information.
  */
-export async function getExtendedNFTInfo(fractionalContractAddress: string): Promise<FractionalNFTInfo & { creator: string }> {
+export async function getExtendedNFTInfo(fractionalContractAddress: string): Promise<FractionalNFTInfo & {
+    creator: string
+}> {
     try {
         const provider = getProvider();
         const fractionalNFT = getFractionalNFTContract(fractionalContractAddress, provider);
 
         const nftInfo = await fractionalNFT.getNFTInfo();
-        
+
         let creator: string;
         try {
             creator = await fractionalNFT.getCreator();
@@ -675,7 +673,7 @@ export async function getAvailableSharesForBuyer(fractionalContractAddress: stri
         const totalShares = Number(nftInfo[4]);
         const currentOwner = nftInfo[5];
         const [holders, shares] = shareHolders;
-        
+
         // Get creator address
         let creator;
         try {
@@ -687,14 +685,14 @@ export async function getAvailableSharesForBuyer(fractionalContractAddress: stri
                 creator = currentOwner; // fallback
             }
         }
-        
+
         let buyerCurrentShares = 0;
         let totalAvailableForPurchase = 0;
-        
+
         for (let i = 0; i < holders.length; i++) {
             const holder = holders[i];
             const holderShares = Number(shares[i]);
-            
+
             if (holder.toLowerCase() === buyerAddress.toLowerCase()) {
                 buyerCurrentShares = holderShares;
             } else {
@@ -710,27 +708,27 @@ export async function getAvailableSharesForBuyer(fractionalContractAddress: stri
             buyerAddress,
             buyerCurrentShares,
             totalAvailableForPurchase,
-            holders: holders.map((h: string, i: number) => ({ address: h, shares: Number(shares[i]) }))
+            holders: holders.map((h: string, i: number) => ({address: h, shares: Number(shares[i])}))
         });
 
         return Math.max(0, totalAvailableForPurchase);
     } catch (error) {
         console.error('Error fetching available shares for buyer:', error);
-        
+
         // Fallback: try the simple method
         try {
             const provider = getProvider();
             const fractionalNFT = getFractionalNFTContract(fractionalContractAddress, provider);
-            
+
             // Get total shares and buyer's shares
             const [nftInfo, buyerShares] = await Promise.all([
                 fractionalNFT.getNFTInfo(),
                 fractionalNFT.userShares(buyerAddress)
             ]);
-            
+
             const totalShares = Number(nftInfo[4]);
             const buyerSharesNum = Number(buyerShares);
-            
+
             // Simple fallback: total shares minus buyer's shares
             return Math.max(0, totalShares - buyerSharesNum);
         } catch (fallbackError) {
@@ -776,7 +774,7 @@ export async function getAvailableSharesFromOwner(fractionalContractAddress: str
     try {
         const provider = getProvider();
         const contract = getFractionalNFTContract(fractionalContractAddress, provider);
-        
+
         const availableShares = await contract.getAvailableSharesFromOwner();
         return Number(availableShares);
     } catch (error) {
@@ -792,7 +790,7 @@ export async function isAllSharesWithOwner(fractionalContractAddress: string): P
     try {
         const provider = getProvider();
         const contract = getFractionalNFTContract(fractionalContractAddress, provider);
-        
+
         return await contract.isAllSharesWithOwner();
     } catch (error) {
         console.error('Error checking if all shares are with owner:', error);
@@ -807,11 +805,11 @@ export async function getAllFractionalizedNFTs(): Promise<UserNFTShare[]> {
     try {
         const provider = getProvider();
         const factoryView = getNFTFactoryViewContract(provider);
-        
+
         const fractionalizedNFTs = await factoryView.getAllFractionalizedNFTs();
-        
+
         const processedNFTs: UserNFTShare[] = [];
-        
+
         for (const nft of fractionalizedNFTs) {
             let processedNFT: UserNFTShare = {
                 collectionId: Number(nft.collectionId),
@@ -839,7 +837,7 @@ export async function getAllFractionalizedNFTs(): Promise<UserNFTShare[]> {
 
             processedNFTs.push(processedNFT);
         }
-        
+
         return processedNFTs;
     } catch (error) {
         console.error('Error getting all fractionalized NFTs:', error);
@@ -854,11 +852,11 @@ export async function getCollectionsWithUserShares(userAddress: string): Promise
     try {
         const provider = getProvider();
         const factoryView = getNFTFactoryViewContract(provider);
-        
+
         const collections = await factoryView.getCollectionsWithUserShares(userAddress);
-        
+
         const processedCollections: Collection[] = [];
-        
+
         for (const collection of collections) {
             let processedCollection: Collection = {
                 collectionId: Number(collection.collectionId),
@@ -883,7 +881,7 @@ export async function getCollectionsWithUserShares(userAddress: string): Promise
 
             processedCollections.push(processedCollection);
         }
-        
+
         return processedCollections;
     } catch (error) {
         console.error('Error getting collections with user shares:', error);
@@ -895,37 +893,37 @@ export async function getCollectionsWithUserShares(userAddress: string): Promise
  * Enhanced buy shares function that supports buying all shares and automatic ownership transfer
  */
 export async function buyNFTShares(
-    fractionalContractAddress: string, 
-    shareAmount: number, 
+    fractionalContractAddress: string,
+    shareAmount: number,
     sharePrice: string,
     sessionWalletAddress?: string
 ): Promise<string> {
     try {
         const signer = await getSignerWithSessionCheck(sessionWalletAddress);
         const contract = getFractionalNFTContract(fractionalContractAddress, signer);
-        
+
         const sharePriceWei = ethers.parseEther(sharePrice);
         const totalCost = sharePriceWei * BigInt(shareAmount);
-        
+
         console.log(`Buying ${shareAmount} shares for ${ethers.formatEther(totalCost)} ETH total`);
-        
+
         // Check if buying all shares
         const totalShares = await contract.getTotalShares();
         const isBuyingAllShares = shareAmount === Number(totalShares);
-        
+
         if (isBuyingAllShares) {
             console.log('Buying all shares - will transfer NFT ownership automatically');
         }
-        
+
         const tx = await contract.buyShares(shareAmount, {
             value: totalCost,
             gasLimit: 500000 // Increased gas limit for ownership transfer
         });
-        
+
         console.log('Transaction sent:', tx.hash);
         await tx.wait();
         console.log('Transaction confirmed');
-        
+
         return tx.hash;
     } catch (error) {
         console.error('Error buying NFT shares:', error);

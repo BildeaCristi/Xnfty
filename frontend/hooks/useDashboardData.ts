@@ -58,12 +58,10 @@ export function useDashboardData() {
                     const collectionStat = await getCollectionStats(collection.collectionAddress);
                     stats[collection.collectionAddress] = collectionStat;
                 } catch (error) {
-                    // Handle stats loading errors silently
                 }
             }
             setCollectionStats(stats);
         } catch (error) {
-            // Skip collection loading errors silently
         } finally {
             setIsLoading(false);
         }

@@ -30,7 +30,6 @@ export default function CollectionForm({
         defaultValues: defaultValues || undefined
     });
 
-    // Update form when defaultValues change
     useEffect(() => {
         if (defaultValues) {
             reset(defaultValues);

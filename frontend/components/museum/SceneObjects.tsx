@@ -9,7 +9,6 @@ import {useSceneStore} from '@/store/SceneStore';
 import {useMuseumStore} from '@/store/MuseumStore';
 import {PhysicsPresets} from '@/providers/PhysicsProvider';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
-import {useLightingSetup} from '@/hooks/useLightingSetup';
 import {MUSEUM_THEMES, QUALITY_LEVELS} from '@/utils/constants/museumConstants';
 
 export default function SceneObjects() {
@@ -49,8 +48,6 @@ function ClassicThemeObjects() {
 
 // === MODERN THEME ===
 function ModernThemeObjects() {
-    const {quality} = useSceneStore();
-
     return (
         <group name="modern-theme">
             {/* Modern Furniture from assets */}

@@ -1,5 +1,5 @@
 // Form-related interfaces and types
-import { Attribute } from './ipfs';
+import {Attribute} from './ipfs';
 
 export interface NFTItem {
     image: File | null;
@@ -102,4 +102,4 @@ export interface CollectionValidationResult {
 }
 
 // Re-export Attribute for convenience
-export type { Attribute } from './ipfs'; 
+export type {Attribute} from './ipfs';

@@ -19,7 +19,6 @@ import {
 } from '@/services/CollectionCreatorService';
 import type {CollectionFormData, CreateCollectionModalProps, DeploymentStep, NFTData} from '@/types';
 
-// Import smaller components
 import ModalHeader from './ModalHeader';
 import CollectionForm from './CollectionForm';
 import NFTListManager from './NFTListManager';
@@ -33,7 +32,6 @@ export default function CreateCollectionModal({
                                               }: CreateCollectionModalProps) {
     const {showSuccess, showError, showWarning, confirm} = useNotifications();
 
-    // State management
     const [step, setStep] = useState(1);
     const [isDeploying, setIsDeploying] = useState(false);
     const [collectionImage, setCollectionImage] = useState<File | null>(null);
@@ -44,7 +42,6 @@ export default function CreateCollectionModal({
     const [deployedCollectionId, setDeployedCollectionId] = useState<number | null>(null);
     const [deployedCollectionAddress, setDeployedCollectionAddress] = useState<string | null>(null);
 
-    // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -58,7 +55,6 @@ export default function CreateCollectionModal({
         };
     }, [isOpen]);
 
-    // Image upload handler
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -67,7 +63,6 @@ export default function CreateCollectionModal({
         }
     };
 
-    // NFT management
     const addNFT = () => {
         const newNFT = createNewNFT();
         setNfts([...nfts, newNFT]);
@@ -91,7 +86,6 @@ export default function CreateCollectionModal({
         }
     };
 
-    // Deployment step management
     const updateDeploymentStep = (stepId: string, status: DeploymentStep['status'], description?: string) => {
         setDeploymentSteps(prev => prev.map(step =>
             step.id === stepId
@@ -100,7 +94,6 @@ export default function CreateCollectionModal({
         ));
     };
 
-    // Main deployment function
     const deployEverything = async () => {
         if (!collectionData || !collectionImage) {
             showError('Missing Data', 'Collection data and image are required');
@@ -154,7 +147,6 @@ export default function CreateCollectionModal({
                     updateDeploymentStep(`mint-${nft.id}`, 'processing', 'Uploading NFT image...');
                     updateNFT(nft.id, 'status', 'minting');
 
-                    // Get the file to upload
                     const fileToUpload = nft.imageData?.file || nft.image;
 
                     if (!fileToUpload) {
@@ -228,7 +220,6 @@ export default function CreateCollectionModal({
         }
     };
 
-    // Form submission handlers
     const handleCollectionSubmit = async (data: CollectionFormData) => {
         if (!collectionImage) {
             showWarning('Collection image required', 'Please upload a collection image');
@@ -241,7 +232,6 @@ export default function CreateCollectionModal({
             return;
         }
 
-        // Save the form data
         setCollectionData(data);
         setStep(2);
     };
@@ -272,7 +262,6 @@ export default function CreateCollectionModal({
         }
     };
 
-    // Navigation handlers
     const goBack = () => {
         if (step > 1 && !isDeploying) {
             setStep(step - 1);

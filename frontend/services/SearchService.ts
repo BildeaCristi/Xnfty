@@ -14,7 +14,6 @@ export class SearchEngine {
 
     updateCollections(collections: Collection[]) {
         this.collections = collections;
-        // Clear cache when collections update
         this.nftsCache.clear();
     }
 

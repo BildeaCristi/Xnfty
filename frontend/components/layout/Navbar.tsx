@@ -113,16 +113,6 @@ export default function Navbar({session, collections, onCreateCollection}: Navba
                 </div>
             </div>
 
-            {/* Mobile Search (hidden on desktop) */}
-            <div className="lg:hidden px-4 pb-3">
-                <SearchComponent
-                    collections={collections}
-                    placeholder="Search collections and NFTs..."
-                    maxResults={6}
-                    className="w-full"
-                />
-            </div>
-
             {/* Click outside to close profile menu */}
             {showProfileMenu && (
                 <div

@@ -37,7 +37,7 @@ export default function CrosshairRaycaster({
             let obj = intersect.object;
 
             while (obj) {
-                if (obj.userData?.tokenId) {
+                if (obj.userData?.tokenId !== undefined) {
                     onHoverNFT(obj.userData.tokenId);
                     foundNFT = true;
                     break;
@@ -67,7 +67,7 @@ export default function CrosshairRaycaster({
                 let obj = intersect.object;
 
                 while (obj) {
-                    if (obj.userData?.tokenId) {
+                    if (obj.userData?.tokenId !== undefined) {
                         const nft = nfts.find(n => n.tokenId === obj.userData.tokenId);
                         onClickNFT(nft || null);
                         return;

@@ -57,7 +57,6 @@ export default function DashboardContent({session}: DashboardContentProps) {
             setAllCollections(collections);
             setAllFractionalizedNFTs(fractionalizedNFTs);
 
-            // Load user-specific data if wallet is connected
             if (walletAddress) {
 
                 const [ownedCollections, nftShares, collectionsWithShares] = await Promise.all([
@@ -69,7 +68,6 @@ export default function DashboardContent({session}: DashboardContentProps) {
                 setUserCollections(ownedCollections);
                 setUserNFTShares(nftShares);
 
-                // Process shared collections
                 await processSharedCollections(nftShares, collectionsWithShares);
             }
 
@@ -326,7 +324,7 @@ export default function DashboardContent({session}: DashboardContentProps) {
                                                                 }`}>
                                   {share.userShares}/{share.totalShares} shares ({share.sharePercentage}%)
                                                                     {(share.isOwner || share.sharePercentage === 100) && (
-                                                                        <span className="ml-1 text-yellow-300">👑</span>
+                                                                        <span className="ml-1 text-yellow-300">Owned</span>
                                                                     )}
                                 </span>
                                                             </div>
@@ -344,7 +342,6 @@ export default function DashboardContent({session}: DashboardContentProps) {
                                                     {/* Show ownership transfer status */}
                                                     {sharedCol.userNFTShares.some((share: any) => share.isOwner || share.sharePercentage === 100) && (
                                                         <div className="text-xs text-green-300 flex items-center mb-2">
-                                                            <span className="mr-1">👑</span>
                                                             You own some NFTs completely!
                                                         </div>
                                                     )}
@@ -352,7 +349,6 @@ export default function DashboardContent({session}: DashboardContentProps) {
                                                     {/* Show ownership and MetaMask options */}
                                                     {sharedCol.userNFTShares.some((share: any) => share.isOwnershipTransferred) && (
                                                         <div className="text-xs text-yellow-300 flex items-center mb-2">
-                                                            <span className="mr-1">⚡</span>
                                                             Some NFTs have transferred ownership
                                                         </div>
                                                     )}

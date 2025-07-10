@@ -31,7 +31,6 @@ export default function SceneLighting() {
                 />
             ))}
 
-            {/* Additional point lights for better visibility */}
             {/* Center floor light to illuminate the ground */}
             <pointLight
                 position={[0, 1, 0]}

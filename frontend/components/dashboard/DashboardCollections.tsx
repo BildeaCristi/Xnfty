@@ -22,7 +22,6 @@ interface DashboardCollectionsProps {
 }
 
 export default function DashboardCollections({
-                                                 allCollections,
                                                  userCollections,
                                                  sharedCollections,
                                                  collectionStats,
