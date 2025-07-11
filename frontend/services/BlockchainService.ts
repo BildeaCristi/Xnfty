@@ -25,7 +25,7 @@ let signerPromise: Promise<ethers.Signer> | null = null;
 export function getProvider(): ethers.JsonRpcProvider {
     const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
     if (!rpcUrl) {
-        throw new Error('RPC URL not configured. Please add NEXT_PUBLIC_RPC_URL to your .env.local file. See setup-env.md for details.');
+        throw new Error('RPC URL not configured.');
     }
     return new ethers.JsonRpcProvider(rpcUrl);
 }
@@ -137,7 +137,7 @@ export async function getSignerWithSessionCheck(sessionWalletAddress?: string): 
 export function getNFTFactoryContract(signerOrProvider: ethers.Signer | ethers.Provider): ethers.Contract {
     const factoryAddress = process.env.NEXT_PUBLIC_NFT_FACTORY_ADDRESS;
     if (!factoryAddress) {
-        throw new Error('NFT Factory address not configured. Please add NEXT_PUBLIC_NFT_FACTORY_ADDRESS to your .env.local file. See setup-env.md for details.');
+        throw new Error('NFT Factory address not configured.');
     }
     return new ethers.Contract(factoryAddress, NFT_FACTORY_ABI, signerOrProvider);
 }
@@ -151,7 +151,7 @@ export function getNFTFactoryContract(signerOrProvider: ethers.Signer | ethers.P
 export function getNFTFactoryViewContract(signerOrProvider: ethers.Signer | ethers.Provider): ethers.Contract {
     const factoryViewAddress = process.env.NEXT_PUBLIC_NFT_FACTORY_VIEW_ADDRESS;
     if (!factoryViewAddress) {
-        throw new Error('NFT Factory View address not configured. Please add NEXT_PUBLIC_NFT_FACTORY_VIEW_ADDRESS to your .env.local file. See setup-env.md for details.');
+        throw new Error('NFT Factory View address not configured.');
     }
     return new ethers.Contract(factoryViewAddress, NFT_FACTORY_VIEW_ABI, signerOrProvider);
 }
