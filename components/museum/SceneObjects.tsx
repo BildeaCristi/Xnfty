@@ -1,47 +1,47 @@
 "use client";
 
-import {useEffect, useRef, useState} from 'react';
-import {useFrame} from '@react-three/fiber';
-import {BallCollider, CuboidCollider, RigidBody} from '@react-three/rapier';
-import {Float} from '@react-three/drei';
+import { useEffect, useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { BallCollider, CuboidCollider, RigidBody } from '@react-three/rapier';
+import { Float } from '@react-three/drei';
 import * as THREE from 'three';
-import {useSceneStore} from '@/store/SceneStore';
-import {useMuseumStore} from '@/store/MuseumStore';
-import {PhysicsPresets} from '@/providers/PhysicsProvider';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
-import {MUSEUM_THEMES, QUALITY_LEVELS} from '@/utils/constants/museumConstants';
+import { useSceneStore } from '@/store/SceneStore';
+import { useMuseumStore } from '@/store/MuseumStore';
+import { PhysicsPresets } from '@/providers/PhysicsProvider';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MUSEUM_THEMES, QUALITY_LEVELS } from '@/utils/constants/museumConstants';
 
 export default function SceneObjects() {
-    const {quality} = useSceneStore();
-    const {themeName} = useMuseumStore();
+    const { quality } = useSceneStore();
+    const { themeName } = useMuseumStore();
 
     if (quality === QUALITY_LEVELS.LOW) return null;
 
     return (
         <group name="scene-objects">
             {/* Theme-specific content with full asset integration */}
-            {themeName === MUSEUM_THEMES.CLASSIC && <ClassicThemeObjects/>}
-            {themeName === MUSEUM_THEMES.MODERN && <ModernThemeObjects/>}
-            {themeName === MUSEUM_THEMES.FUTURISTIC && <FuturisticThemeObjects/>}
-            {themeName === MUSEUM_THEMES.NATURE && <NatureThemeObjects/>}
+            {themeName === MUSEUM_THEMES.CLASSIC && <ClassicThemeObjects />}
+            {themeName === MUSEUM_THEMES.MODERN && <ModernThemeObjects />}
+            {themeName === MUSEUM_THEMES.FUTURISTIC && <FuturisticThemeObjects />}
+            {themeName === MUSEUM_THEMES.NATURE && <NatureThemeObjects />}
 
             {/* Universal objects that appear in all themes */}
-            <CenterPedestal/>
+            <CenterPedestal />
         </group>
     );
 }
 
 // === CLASSIC THEME ===
 function ClassicThemeObjects() {
-    const {quality} = useSceneStore();
+    const { quality } = useSceneStore();
 
     return (
         <group name="classical-theme">
             {/* Classical Sculptures with Physics */}
-            <ClassicalSculptures/>
+            <ClassicalSculptures />
 
             {/* Classical Columns */}
-            <ClassicalColumns/>
+            <ClassicalColumns />
         </group>
     );
 }
@@ -51,10 +51,10 @@ function ModernThemeObjects() {
     return (
         <group name="modern-theme">
             {/* Modern Furniture from assets */}
-            <ModernFurniture/>
+            <ModernFurniture />
 
             {/* Minimalist Decorations */}
-            <MinimalistDecorations/>
+            <MinimalistDecorations />
 
         </group>
     );
@@ -65,10 +65,10 @@ function FuturisticThemeObjects() {
     return (
         <group name="futuristic-theme">
             {/* Futuristic Furniture from assets */}
-            <FuturisticFurniture/>
+            <FuturisticFurniture />
 
             {/* Glowing Decorations */}
-            <GlowingDecorations/>
+            <GlowingDecorations />
         </group>
     );
 }
@@ -78,20 +78,20 @@ function NatureThemeObjects() {
     return (
         <group name="nature-theme">
             {/* Natural Plants and Trees from assets */}
-            <NaturalPlants/>
+            <NaturalPlants />
 
             {/* Wooden Furniture */}
-            <WoodenFurniture/>
+            <WoodenFurniture />
 
             {/* Stone Elements */}
-            <StoneElements/>
+            <StoneElements />
         </group>
     );
 }
 
 // === CLASSICAL SCULPTURES WITH PHYSICS ===
 function ClassicalSculptures() {
-    const {shadowsEnabled, quality} = useSceneStore();
+    const { shadowsEnabled, quality } = useSceneStore();
     const [drapeWomanModel, setDrapeWomanModel] = useState<THREE.Group | null>(null);
     const [fallenAngelModel, setFallenAngelModel] = useState<THREE.Group | null>(null);
 
@@ -164,7 +164,7 @@ function ClassicalSculptures() {
                         object={drapeWomanModel.clone()}
                         scale={0.8}
                     />
-                    <CuboidCollider args={[0.5, 1.5, 0.5]} position={[0, 0.75, 0]}/>
+                    <CuboidCollider args={[0.5, 1.5, 0.5]} position={[0, 0.75, 0]} />
                 </RigidBody>
             )}
 
@@ -176,7 +176,7 @@ function ClassicalSculptures() {
                         scale={0.8}
                         rotation={[0, Math.PI, 0]}
                     />
-                    <CuboidCollider args={[0.6, 1.2, 0.6]} position={[0, 0.6, 0]}/>
+                    <CuboidCollider args={[0.6, 1.2, 0.6]} position={[0, 0.6, 0]} />
                 </RigidBody>
             )}
         </>
@@ -185,7 +185,7 @@ function ClassicalSculptures() {
 
 // === CLASSICAL COLUMNS ===
 function ClassicalColumns() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
     const [columnModel, setColumnModel] = useState<THREE.Group | null>(null);
 
     useEffect(() => {
@@ -233,7 +233,7 @@ function ClassicalColumns() {
                         object={columnModel.clone()}
                         scale={1.5}
                     />
-                    <CuboidCollider args={[0.4, 2.5, 0.4]} position={[0, 1.2, 0]}/>
+                    <CuboidCollider args={[0.4, 2.5, 0.4]} position={[0, 1.2, 0]} />
                 </RigidBody>
             ))}
         </>
@@ -243,7 +243,7 @@ function ClassicalColumns() {
 
 // === MODERN FURNITURE ===
 function ModernFurniture() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
     const [sofaModel, setSofaModel] = useState<THREE.Group | null>(null);
     const [furnitureModel, setFurnitureModel] = useState<THREE.Group | null>(null);
 
@@ -294,7 +294,7 @@ function ModernFurniture() {
                         object={sofaModel.clone()}
                         scale={1.2}
                     />
-                    <CuboidCollider args={[1.5, 0.8, 0.8]} position={[0, 0.4, 0]}/>
+                    <CuboidCollider args={[1.5, 0.8, 0.8]} position={[0, 0.4, 0]} />
                 </RigidBody>
             )}
 
@@ -305,21 +305,21 @@ function ModernFurniture() {
                         object={furnitureModel.clone()}
                         scale={0.8}
                     />
-                    <CuboidCollider args={[1.2, 0.6, 1.2]} position={[0, 0.3, 0]}/>
+                    <CuboidCollider args={[1.2, 0.6, 1.2]} position={[0, 0.3, 0]} />
                 </RigidBody>
             )}
 
             {/* Modern Minimalist Benches */}
             <RigidBody {...PhysicsPresets.static()} position={[0, 0.35, 6]}>
                 <mesh castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <boxGeometry args={[3, 0.4, 0.6]}/>
+                    <boxGeometry args={[3, 0.4, 0.6]} />
                     <meshStandardMaterial
                         color="#2a2a2a"
                         roughness={0.1}
                         metalness={0.8}
                     />
                 </mesh>
-                <CuboidCollider args={[1.5, 0.2, 0.3]}/>
+                <CuboidCollider args={[1.5, 0.2, 0.3]} />
             </RigidBody>
         </>
     );
@@ -327,7 +327,7 @@ function ModernFurniture() {
 
 // === FUTURISTIC FURNITURE ===
 function FuturisticFurniture() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
     const [sofaModel, setSofaModel] = useState<THREE.Group | null>(null);
 
     useEffect(() => {
@@ -362,14 +362,14 @@ function FuturisticFurniture() {
                         scale={1}
                         rotation={[0, Math.PI, 0]}
                     />
-                    <CuboidCollider args={[1.5, 0.8, 0.8]} position={[0, 0.4, 0]}/>
+                    <CuboidCollider args={[1.5, 0.8, 0.8]} position={[0, 0.4, 0]} />
                 </RigidBody>
             )}
 
             {/* Futuristic Platform Benches */}
             <RigidBody {...PhysicsPresets.static()} position={[-6, 0.2, 4]}>
                 <mesh castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[1.5, 1.8, 0.4, 16]}/>
+                    <cylinderGeometry args={[1.5, 1.8, 0.4, 16]} />
                     <meshStandardMaterial
                         color="#1a1a2e"
                         roughness={0.1}
@@ -378,12 +378,12 @@ function FuturisticFurniture() {
                         emissiveIntensity={0.02}
                     />
                 </mesh>
-                <CuboidCollider args={[1.5, 0.2, 1.5]}/>
+                <CuboidCollider args={[1.5, 0.2, 1.5]} />
             </RigidBody>
 
             <RigidBody {...PhysicsPresets.static()} position={[6, 0.2, -4]}>
                 <mesh castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[1.2, 1.5, 0.4, 16]}/>
+                    <cylinderGeometry args={[1.2, 1.5, 0.4, 16]} />
                     <meshStandardMaterial
                         color="#2e1a1a"
                         roughness={0.1}
@@ -392,7 +392,7 @@ function FuturisticFurniture() {
                         emissiveIntensity={0.02}
                     />
                 </mesh>
-                <CuboidCollider args={[1.2, 0.2, 1.2]}/>
+                <CuboidCollider args={[1.2, 0.2, 1.2]} />
             </RigidBody>
         </>
     );
@@ -400,7 +400,7 @@ function FuturisticFurniture() {
 
 // === NATURAL PLANTS ===
 function NaturalPlants() {
-    const {shadowsEnabled, quality} = useSceneStore();
+    const { shadowsEnabled, quality } = useSceneStore();
     const [ficusModel, setFicusModel] = useState<THREE.Group | null>(null);
     const [pottedPlantModel, setPottedPlantModel] = useState<THREE.Group | null>(null);
 
@@ -466,16 +466,16 @@ function NaturalPlants() {
                         // Fallback simple plant
                         <>
                             <mesh position={[0, 0.3, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                                <cylinderGeometry args={[0.3, 0.25, 0.5, 12]}/>
-                                <meshStandardMaterial color="#8b4513" roughness={0.9}/>
+                                <cylinderGeometry args={[0.3, 0.25, 0.5, 12]} />
+                                <meshStandardMaterial color="#8b4513" roughness={0.9} />
                             </mesh>
                             <mesh position={[0, 0.8, 0]} castShadow={shadowsEnabled}>
-                                <sphereGeometry args={[0.4, 12, 8]}/>
-                                <meshStandardMaterial color="#228b22" roughness={0.8}/>
+                                <sphereGeometry args={[0.4, 12, 8]} />
+                                <meshStandardMaterial color="#228b22" roughness={0.8} />
                             </mesh>
                         </>
                     )}
-                    <CuboidCollider args={[0.3, 0.5, 0.3]} position={[0, 0.25, 0]}/>
+                    <CuboidCollider args={[0.3, 0.5, 0.3]} position={[0, 0.25, 0]} />
                 </RigidBody>
             ))}
         </>
@@ -486,8 +486,8 @@ function NaturalPlants() {
 // === CENTER PEDESTAL (Universal) ===
 function CenterPedestal() {
     const sculptureRef = useRef<THREE.Group>(null);
-    const {shadowsEnabled} = useSceneStore();
-    const {themeName} = useMuseumStore();
+    const { shadowsEnabled } = useSceneStore();
+    const { themeName } = useMuseumStore();
     const [statueModel, setStatueModel] = useState<THREE.Group | null>(null);
 
     // Load theme-appropriate center piece
@@ -523,14 +523,14 @@ function CenterPedestal() {
             {/* Pedestal base - positioned above floor */}
             <RigidBody {...PhysicsPresets.static()} position={[0, 0.1, 0]}>
                 <mesh position={[0, 0.5, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[1.5, 2, 1, 32]}/>
+                    <cylinderGeometry args={[1.5, 2, 1, 32]} />
                     <meshStandardMaterial
                         color={themeName === MUSEUM_THEMES.CLASSIC ? "#3a3a3a" : "#2a2a2a"}
                         roughness={0.3}
                         metalness={0.7}
                     />
                 </mesh>
-                <CuboidCollider args={[1.5, 0.5, 1.5]}/>
+                <CuboidCollider args={[1.5, 0.5, 1.5]} />
             </RigidBody>
 
             {/* Rotating center piece */}
@@ -545,7 +545,7 @@ function CenterPedestal() {
                         />
                     ) : (
                         <mesh castShadow={shadowsEnabled}>
-                            <torusKnotGeometry args={[0.6, 0.2, 128, 32]}/>
+                            <torusKnotGeometry args={[0.6, 0.2, 128, 32]} />
                             <meshStandardMaterial
                                 color={themeName === MUSEUM_THEMES.FUTURISTIC ? "#4a90e2" : "#8b4513"}
                                 metalness={themeName === MUSEUM_THEMES.FUTURISTIC ? 0.9 : 0.3}
@@ -562,39 +562,39 @@ function CenterPedestal() {
 }
 
 function MinimalistDecorations() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
 
     return (
         <>
             {/* Modern geometric planters */}
             <RigidBody {...PhysicsPresets.static()} position={[-4, 0.1, -6]}>
                 <mesh position={[0, 0.3, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <boxGeometry args={[0.6, 0.6, 0.6]}/>
-                    <meshStandardMaterial color="#333333" roughness={0.2} metalness={0.8}/>
+                    <boxGeometry args={[0.6, 0.6, 0.6]} />
+                    <meshStandardMaterial color="#333333" roughness={0.2} metalness={0.8} />
                 </mesh>
-                <CuboidCollider args={[0.3, 0.3, 0.3]}/>
+                <CuboidCollider args={[0.3, 0.3, 0.3]} />
             </RigidBody>
 
             <RigidBody {...PhysicsPresets.static()} position={[4, 0.1, 6]}>
                 <mesh position={[0, 0.3, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <boxGeometry args={[0.6, 0.6, 0.6]}/>
-                    <meshStandardMaterial color="#333333" roughness={0.2} metalness={0.8}/>
+                    <boxGeometry args={[0.6, 0.6, 0.6]} />
+                    <meshStandardMaterial color="#333333" roughness={0.2} metalness={0.8} />
                 </mesh>
-                <CuboidCollider args={[0.3, 0.3, 0.3]}/>
+                <CuboidCollider args={[0.3, 0.3, 0.3]} />
             </RigidBody>
         </>
     );
 }
 
 function GlowingDecorations() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
 
     return (
         <>
             {/* Glowing tech orbs */}
             <RigidBody {...PhysicsPresets.static()} position={[-4, 0.5, 2]}>
                 <mesh castShadow={shadowsEnabled}>
-                    <sphereGeometry args={[0.4, 16, 16]}/>
+                    <sphereGeometry args={[0.4, 16, 16]} />
                     <meshStandardMaterial
                         color="#00ffff"
                         emissive="#004466"
@@ -603,12 +603,12 @@ function GlowingDecorations() {
                         roughness={0.1}
                     />
                 </mesh>
-                <BallCollider args={[0.4]}/>
+                <BallCollider args={[0.4]} />
             </RigidBody>
 
             <RigidBody {...PhysicsPresets.static()} position={[4, 0.5, -2]}>
                 <mesh castShadow={shadowsEnabled}>
-                    <sphereGeometry args={[0.4, 16, 16]}/>
+                    <sphereGeometry args={[0.4, 16, 16]} />
                     <meshStandardMaterial
                         color="#ff0088"
                         emissive="#440044"
@@ -617,57 +617,57 @@ function GlowingDecorations() {
                         roughness={0.1}
                     />
                 </mesh>
-                <BallCollider args={[0.4]}/>
+                <BallCollider args={[0.4]} />
             </RigidBody>
         </>
     );
 }
 
 function WoodenFurniture() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
 
     return (
         <>
             {/* Wooden benches */}
             <RigidBody {...PhysicsPresets.static()} position={[-6, 0.3, 0]}>
                 <mesh castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <boxGeometry args={[2.5, 0.4, 0.6]}/>
-                    <meshStandardMaterial color="#8b4513" roughness={0.8} metalness={0.1}/>
+                    <boxGeometry args={[2.5, 0.4, 0.6]} />
+                    <meshStandardMaterial color="#8b4513" roughness={0.8} metalness={0.1} />
                 </mesh>
-                <CuboidCollider args={[1.25, 0.2, 0.3]}/>
+                <CuboidCollider args={[1.25, 0.2, 0.3]} />
             </RigidBody>
 
             <RigidBody {...PhysicsPresets.static()} position={[6, 0.3, 0]}>
                 <mesh castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <boxGeometry args={[2.5, 0.4, 0.6]}/>
-                    <meshStandardMaterial color="#8b4513" roughness={0.8} metalness={0.1}/>
+                    <boxGeometry args={[2.5, 0.4, 0.6]} />
+                    <meshStandardMaterial color="#8b4513" roughness={0.8} metalness={0.1} />
                 </mesh>
-                <CuboidCollider args={[1.25, 0.2, 0.3]}/>
+                <CuboidCollider args={[1.25, 0.2, 0.3]} />
             </RigidBody>
         </>
     );
 }
 
 function StoneElements() {
-    const {shadowsEnabled} = useSceneStore();
+    const { shadowsEnabled } = useSceneStore();
 
     return (
         <>
             {/* Stone formations */}
             <RigidBody {...PhysicsPresets.static()} position={[-5, 0.1, -3]}>
                 <mesh position={[0, 0.3, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <sphereGeometry args={[0.5, 12, 8]}/>
-                    <meshStandardMaterial color="#666666" roughness={0.9} metalness={0.1}/>
+                    <sphereGeometry args={[0.5, 12, 8]} />
+                    <meshStandardMaterial color="#666666" roughness={0.9} metalness={0.1} />
                 </mesh>
-                <BallCollider args={[0.5]}/>
+                <BallCollider args={[0.5]} />
             </RigidBody>
 
             <RigidBody {...PhysicsPresets.static()} position={[5, 0.1, 3]}>
                 <mesh position={[0, 0.4, 0]} castShadow={shadowsEnabled} receiveShadow={shadowsEnabled}>
-                    <cylinderGeometry args={[0.4, 0.6, 0.8, 8]}/>
-                    <meshStandardMaterial color="#777777" roughness={0.8} metalness={0.1}/>
+                    <cylinderGeometry args={[0.4, 0.6, 0.8, 8]} />
+                    <meshStandardMaterial color="#777777" roughness={0.8} metalness={0.1} />
                 </mesh>
-                <CuboidCollider args={[0.4, 0.4, 0.4]}/>
+                <CuboidCollider args={[0.4, 0.4, 0.4]} />
             </RigidBody>
         </>
     );
