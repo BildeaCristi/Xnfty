@@ -1,15 +1,15 @@
 "use client";
 
-import {useEffect, useMemo, useRef} from 'react';
-import {CuboidCollider, RigidBody} from '@react-three/rapier';
-import {Float, Text} from '@react-three/drei';
+import { useEffect, useMemo, useRef } from 'react';
+import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import { Float, Text } from '@react-three/drei';
 import * as THREE from 'three';
-import {animated, useSpring} from '@react-spring/three';
-import {NFT} from '@/types/blockchain';
-import {useMuseumStore} from '@/store/MuseumStore';
-import {useSceneStore} from '@/store/SceneStore';
-import {PhysicsPresets} from '@/providers/PhysicsProvider';
-import {useIPFSImage} from '@/hooks/useIPFSImage';
+import { animated, useSpring } from '@react-spring/three';
+import { NFT } from '@/types/blockchain';
+import { useMuseumStore } from '@/store/MuseumStore';
+import { useSceneStore } from '@/store/SceneStore';
+import { PhysicsPresets } from '@/providers/PhysicsProvider';
+import { useIPFSImage } from '@/hooks/useIPFSImage';
 
 interface EnhancedNFTFrameProps {
     nft: NFT;
@@ -24,21 +24,21 @@ interface EnhancedNFTFrameProps {
 }
 
 export default function NFTFrame({
-                                     nft,
-                                     position,
-                                     rotation = [0, 0, 0],
-                                     scale = 1,
-                                     interactive = true,
-                                     onClick,
-                                     onHover,
-                                     isHovered = false,
-                                     enablePhysics = false,
-                                 }: EnhancedNFTFrameProps) {
+    nft,
+    position,
+    rotation = [0, 0, 0],
+    scale = 1,
+    interactive = true,
+    onClick,
+    onHover,
+    isHovered = false,
+    enablePhysics = false,
+}: EnhancedNFTFrameProps) {
     const frameRef = useRef<THREE.Group>(null);
-    const {currentTheme} = useMuseumStore();
-    const {quality, shadowsEnabled} = useSceneStore();
+    const { currentTheme } = useMuseumStore();
+    const { quality, shadowsEnabled } = useSceneStore();
 
-    const {texture, loading, error, progress, originalUrl, resolvedUrl} = useIPFSImage(nft.imageURI, {
+    const { texture, loading, error, progress, originalUrl, resolvedUrl } = useIPFSImage(nft.imageURI, {
         quality,
         timeout: 20000,
     });
@@ -76,14 +76,15 @@ export default function NFTFrame({
     // Calculate frame dimensions based on image aspect ratio
     const frameSize = useMemo(() => {
         if (texture?.image) {
-            const aspectRatio = texture.image.width / texture.image.height;
+            const image = texture.image as HTMLImageElement;
+            const aspectRatio = image.width / image.height;
             const baseSize = 2;
             return {
                 width: aspectRatio > 1 ? baseSize : baseSize * aspectRatio,
                 height: aspectRatio > 1 ? baseSize / aspectRatio : baseSize,
             };
         }
-        return {width: 2, height: 2};
+        return { width: 2, height: 2 };
     }, [texture]);
 
     // Create NFT material with proper settings
@@ -152,7 +153,7 @@ export default function NFTFrame({
                     frameSize.width + 0.2,
                     frameSize.height + 0.2,
                     0.1
-                ]}/>
+                ]} />
                 <animated.meshStandardMaterial
                     color={springs.frameColor}
                     metalness={currentTheme.frame.metalness}
@@ -166,7 +167,7 @@ export default function NFTFrame({
                 <planeGeometry args={[
                     frameSize.width + 0.1,
                     frameSize.height + 0.1
-                ]}/>
+                ]} />
                 <meshStandardMaterial
                     color="#1a1a1a"
                     roughness={0.9}
@@ -175,8 +176,8 @@ export default function NFTFrame({
 
             {/* NFT Image */}
             <mesh position={[0, 0, 0.052]}>
-                <planeGeometry args={[frameSize.width, frameSize.height]}/>
-                <primitive object={nftMaterial} attach="material"/>
+                <planeGeometry args={[frameSize.width, frameSize.height]} />
+                <primitive object={nftMaterial} attach="material" />
             </mesh>
 
             {/* Loading Progress Indicator */}
@@ -184,14 +185,14 @@ export default function NFTFrame({
                 <group position={[0, 0, 0.053]}>
                     {/* Loading background */}
                     <mesh>
-                        <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]}/>
-                        <meshBasicMaterial color="#000000" transparent opacity={0.8}/>
+                        <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]} />
+                        <meshBasicMaterial color="#000000" transparent opacity={0.8} />
                     </mesh>
 
                     {/* Progress bar background */}
                     <mesh position={[0, -frameSize.height * 0.3, 0.001]}>
-                        <planeGeometry args={[frameSize.width * 0.8, 0.05]}/>
-                        <meshBasicMaterial color="#333333"/>
+                        <planeGeometry args={[frameSize.width * 0.8, 0.05]} />
+                        <meshBasicMaterial color="#333333" />
                     </mesh>
 
                     {/* Progress bar fill */}
@@ -200,8 +201,8 @@ export default function NFTFrame({
                         -frameSize.height * 0.3,
                         0.002
                     ]}>
-                        <planeGeometry args={[(frameSize.width * 0.8 * progress) / 100, 0.05]}/>
-                        <meshBasicMaterial color="#4a90e2"/>
+                        <planeGeometry args={[(frameSize.width * 0.8 * progress) / 100, 0.05]} />
+                        <meshBasicMaterial color="#4a90e2" />
                     </mesh>
 
                     {/* Loading text */}
@@ -234,19 +235,19 @@ export default function NFTFrame({
                 <group position={[0, 0, 0.053]}>
                     {/* Error background */}
                     <mesh>
-                        <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]}/>
-                        <meshBasicMaterial color="#220000" transparent opacity={0.8}/>
+                        <planeGeometry args={[frameSize.width * 0.9, frameSize.height * 0.9]} />
+                        <meshBasicMaterial color="#220000" transparent opacity={0.8} />
                     </mesh>
 
                     {/* Error icon (simple X) */}
                     <group position={[0, frameSize.height * 0.1, 0.001]}>
                         <mesh rotation={[0, 0, Math.PI / 4]}>
-                            <planeGeometry args={[0.3, 0.05]}/>
-                            <meshBasicMaterial color="#ff4444"/>
+                            <planeGeometry args={[0.3, 0.05]} />
+                            <meshBasicMaterial color="#ff4444" />
                         </mesh>
                         <mesh rotation={[0, 0, -Math.PI / 4]}>
-                            <planeGeometry args={[0.3, 0.05]}/>
-                            <meshBasicMaterial color="#ff4444"/>
+                            <planeGeometry args={[0.3, 0.05]} />
+                            <meshBasicMaterial color="#ff4444" />
                         </mesh>
                     </group>
 
@@ -279,7 +280,7 @@ export default function NFTFrame({
             {/* Glass cover */}
             {quality === 'medium' && (
                 <mesh position={[0, 0, 0.06]}>
-                    <planeGeometry args={[frameSize.width, frameSize.height]}/>
+                    <planeGeometry args={[frameSize.width, frameSize.height]} />
                     <meshPhysicalMaterial
                         transparent
                         transmission={0.9}
@@ -295,7 +296,7 @@ export default function NFTFrame({
             {/* NFT Info label */}
             <group position={[0, -(frameSize.height / 2) - 0.3, 0.1]}>
                 <mesh>
-                    <planeGeometry args={[frameSize.width, 0.3]}/>
+                    <planeGeometry args={[frameSize.width, 0.3]} />
                     <meshStandardMaterial
                         color="#000000"
                         metalness={0.8}
@@ -332,7 +333,7 @@ export default function NFTFrame({
                     floatingRange={[-0.05, 0.05]}
                 >
                     <mesh position={[frameSize.width / 2 - 0.2, frameSize.height / 2 - 0.2, 0.1]}>
-                        <sphereGeometry args={[0.08, 16, 16]}/>
+                        <sphereGeometry args={[0.08, 16, 16]} />
                         <meshBasicMaterial
                             color="#4a90e2"
                             transparent
@@ -352,7 +353,7 @@ export default function NFTFrame({
                 (frameSize.width + 0.2) / 2,
                 (frameSize.height + 0.2) / 2,
                 0.1
-            ]}/>
+            ]} />
         </RigidBody>
     );
 } 
