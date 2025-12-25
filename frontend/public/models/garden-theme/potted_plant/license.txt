@@ -1,0 +1,8 @@
+Model Information:
+* title:	Potted plant
+* source:	https://sketchfab.com/3d-models/potted-plant-4e336cb64b3d4f08b74a88aa6531b7fc
+* author:	framedflankz (https://sketchfab.com/framedflankz)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
