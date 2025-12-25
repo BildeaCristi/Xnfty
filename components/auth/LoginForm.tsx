@@ -8,6 +8,8 @@ import { ROUTES } from "@/config/routes";
 export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showGuestInput, setShowGuestInput] = useState(false);
+    const [guestUsername, setGuestUsername] = useState("");
 
     const handleGoogleSignIn = async () => {
         try {
@@ -55,6 +57,25 @@ export default function LoginForm() {
         }
     };
 
+    const handleGuestSignIn = async () => {
+        if (showGuestInput && !guestUsername.trim()) {
+            setError("Please enter a username or just click 'Continue as Guest' without inputting a name");
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            await signIn("guest-login", {
+                username: guestUsername || "Guest User",
+                callbackUrl: "/dashboard"
+            });
+        } catch (error) {
+            setError("Failed to sign in as guest");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {error && (
@@ -63,38 +84,74 @@ export default function LoginForm() {
                 </div>
             )}
 
-            <button
-                onClick={handleGoogleSignIn}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-                {isLoading ? "Loading..." : "Sign in with Google"}
-            </button>
+            {!showGuestInput ? (
+                <>
+                    <button
+                        onClick={handleGoogleSignIn}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                        {isLoading ? "Loading..." : "Sign in with Google"}
+                    </button>
 
-            <button
-                onClick={handleWalletSignIn}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-            >
-                {isLoading ? "Loading..." : "Sign in with Wallet"}
-            </button>
+                    <button
+                        onClick={handleWalletSignIn}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                    >
+                        {isLoading ? "Loading..." : "Sign in with Wallet"}
+                    </button>
 
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">Or continue without account</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setShowGuestInput(true)}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                        Guest Options
+                    </button>
+                </>
+            ) : (
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                            Choose a Guest Username
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={guestUsername}
+                            onChange={(e) => setGuestUsername(e.target.value)}
+                            placeholder="Enter username (optional)"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleGuestSignIn}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                    >
+                        {isLoading ? "Entering..." : (guestUsername ? `Play as ${guestUsername}` : "Continue as Guest")}
+                    </button>
+
+                    <button
+                        onClick={() => setShowGuestInput(false)}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                    >
+                        Back to Login Options
+                    </button>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue without account</span>
-                </div>
-            </div>
-
-            <button
-                onClick={() => signIn("guest-login", { callbackUrl: "/dashboard" })}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-                Continue as Guest
-            </button>
+            )}
         </div>
     );
-} 
+}

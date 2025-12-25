@@ -33,12 +33,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         CredentialsProvider({
             id: "guest-login",
             name: "Guest Login",
-            credentials: {},
-            async authorize() {
+            credentials: {
+                username: { label: "Username", type: "text" }
+            },
+            async authorize(credentials) {
+                const username = (credentials?.username as string) || "Guest User";
                 return {
                     id: "guest-" + Date.now(),
-                    name: "Guest User",
-                    email: "guest@example.com",
+                    name: username,
+                    email: `${username.toLowerCase().replace(/\s+/g, '.')}@guest.com`,
                     walletAddress: undefined,
                     image: null
                 };
