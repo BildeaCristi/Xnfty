@@ -1,18 +1,18 @@
 "use client";
 
-import {useState} from 'react';
-import {Gamepad2, Info, Monitor, Palette, Settings, X} from 'lucide-react';
-import {useMuseumStore} from '@/store/MuseumStore';
-import {useSceneStore} from '@/store/SceneStore';
-import {animated, SpringValues, useTransition} from '@react-spring/web';
-import {ControlSettings, DisplaySettings, PhysicsSettings, ThemeSettings} from './ui';
+import { useState } from 'react';
+import { Gamepad2, Info, Monitor, Palette, Settings, X } from 'lucide-react';
+import { useMuseumStore } from '@/store/MuseumStore';
+import { useSceneStore } from '@/store/SceneStore';
+import { animated, SpringValues, useTransition } from '@react-spring/web';
+import { ControlSettings, DisplaySettings, PhysicsSettings, ThemeSettings } from './ui';
 
 interface SettingsPanelProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     const [activeTab, setActiveTab] = useState<'display' | 'theme' | 'controls' | 'physics'>('display');
 
     const {
@@ -33,16 +33,16 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
 
     // Panel animation
     const transitions = useTransition(isOpen, {
-        from: {opacity: 0, transform: 'translateX(100%)'},
-        enter: {opacity: 1, transform: 'translateX(0%)'},
-        leave: {opacity: 0, transform: 'translateX(100%)'},
+        from: { opacity: 0, transform: 'translateX(100%)' },
+        enter: { opacity: 1, transform: 'translateX(0%)' },
+        leave: { opacity: 0, transform: 'translateX(100%)' },
     });
 
     const tabs = [
-        {id: 'display', label: 'Display', icon: Monitor},
-        {id: 'theme', label: 'Theme', icon: Palette},
-        {id: 'controls', label: 'Controls', icon: Gamepad2},
-        {id: 'physics', label: 'Physics', icon: Settings},
+        { id: 'display', label: 'Display', icon: Monitor },
+        { id: 'theme', label: 'Theme', icon: Palette },
+        { id: 'controls', label: 'Controls', icon: Gamepad2 },
+        { id: 'physics', label: 'Physics', icon: Settings },
     ];
 
     // @ts-ignore
@@ -53,7 +53,7 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                 {/* Backdrop */}
                 <animated.div
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-                    style={{opacity: style.opacity}}
+                    style={{ opacity: style.opacity }}
                     onClick={onClose}
                 />
 
@@ -70,7 +70,7 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                                 onClick={onClose}
                                 className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
                             >
-                                <X className="w-5 h-5 text-gray-400"/>
+                                <X className="w-5 h-5 text-gray-400" />
                             </button>
                         </div>
 
@@ -82,13 +82,12 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as any)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-3 transition-colors ${
-                                            activeTab === tab.id
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 transition-colors ${activeTab === tab.id
                                                 ? 'text-blue-400 border-b-2 border-blue-400'
                                                 : 'text-gray-400 hover:text-white'
-                                        }`}
+                                            }`}
                                     >
-                                        <Icon className="w-4 h-4"/>
+                                        <Icon className="w-4 h-4" />
                                         <span className="text-sm font-medium">{tab.label}</span>
                                     </button>
                                 );
@@ -123,7 +122,7 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                             {activeTab === 'physics' && (
                                 <PhysicsSettings
                                     physicsConfig={physicsConfig}
-                                    updatePhysicsConfig={updatePhysicsConfig}
+                                    updatePhysicsConfig={updatePhysicsConfig as any}
                                 />
                             )}
                         </div>
@@ -131,7 +130,7 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
                         {/* Footer */}
                         <div className="p-6 border-t border-gray-800">
                             <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <Info className="w-4 h-4"/>
+                                <Info className="w-4 h-4" />
                                 <span>Press ESC to close settings</span>
                             </div>
                         </div>
