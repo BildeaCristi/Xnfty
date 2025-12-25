@@ -1,5 +1,5 @@
-import {create} from 'zustand';
-import {devtools, persist} from 'zustand/middleware';
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 import * as THREE from 'three';
 
 export type QualityLevel = 'low' | 'medium';
@@ -94,7 +94,7 @@ export const useSceneStore = create<SceneState>()(
 
                 // Actions
                 setQuality: (quality) => {
-                    set({quality});
+                    set({ quality });
                     // Automatically adjust other settings based on quality
                     switch (quality) {
                         case 'low':
@@ -112,18 +112,18 @@ export const useSceneStore = create<SceneState>()(
                     }
                 },
 
-                setAutoQuality: (auto) => set({autoQuality: auto}),
-                setShadowsEnabled: (enabled) => set({shadowsEnabled: enabled}),
-                setReflectionsEnabled: (enabled) => set({reflectionsEnabled: enabled}),
+                setAutoQuality: (auto) => set({ autoQuality: auto }),
+                setShadowsEnabled: (enabled) => set({ shadowsEnabled: enabled }),
+                setReflectionsEnabled: (enabled) => set({ reflectionsEnabled: enabled }),
 
                 updatePhysicsConfig: (config) =>
                     set((state) => ({
-                        physicsConfig: {...state.physicsConfig, ...config}
+                        physicsConfig: { ...state.physicsConfig, ...config } as PhysicsConfig
                     })),
 
                 updatePerformanceMetrics: (metrics) =>
                     set((state) => ({
-                        performanceMetrics: {...state.performanceMetrics, ...metrics}
+                        performanceMetrics: { ...state.performanceMetrics, ...metrics }
                     })),
 
                 getRenderSettings: () => {
