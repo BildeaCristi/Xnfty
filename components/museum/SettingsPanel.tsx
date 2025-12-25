@@ -47,7 +47,6 @@ export default function SettingsPanel({isOpen, onClose}: SettingsPanelProps) {
 
     // @ts-ignore
     // @ts-ignore
-    // @ts-ignore
     return transitions((style: SpringValues<{ opacity: number; transform: string }>, item: boolean) =>
         item ? (
             <div>

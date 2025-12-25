@@ -1,8 +1,0 @@
-Model Information:
-* title:	Hebe, Goddess of Youth
-* source:	https://sketchfab.com/3d-models/hebe-goddess-of-youth-d1146badd25143bcb7f3f3fb83ea0bb8
-* author:	Fabian Mohr (https://sketchfab.com/fabianmohr)
-
-Model License:
-* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
-* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
