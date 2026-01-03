@@ -1,6 +1,7 @@
 "use client";
 
 import {useEffect, useState} from 'react';
+import {ethers} from 'ethers';
 import {Check, Coins, Copy, Crown, ExternalLink, ShoppingCart, User as UserIcon, X, Zap} from 'lucide-react';
 import {
     buyNFTShares,
@@ -65,15 +66,10 @@ export default function NFTDetailModal({nft, collection, userAddress, session, o
         if (!userAddress) return;
 
         try {
-            const {getSigner} = await import('@/services/BlockchainService');
-            const signer = await getSigner();
-
-            if (!signer.provider) {
-                return;
-            }
-
-            const balance = await signer.provider.getBalance(userAddress);
-            const balanceInEth = (Number(balance) / 1e18).toFixed(4);
+            const {getProvider} = await import('@/services/BlockchainService');
+            const provider = getProvider();
+            const balance = await provider.getBalance(userAddress);
+            const balanceInEth = Number(ethers.formatEther(balance)).toFixed(4);
             setUserBalance(balanceInEth);
         } catch (error) {
             // Skip error silently
