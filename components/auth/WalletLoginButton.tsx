@@ -6,6 +6,7 @@ import {signIn} from "next-auth/react";
 import {useNotifications} from "@/providers/NotificationContext";
 import {useWalletStore} from "@/store/WalletStore";
 import {MetaMaskLogo} from "@/components/shared/MetaMaskLogo";
+import {ensureSepoliaChain} from "@/utils/chain";
 
 export default function WalletLoginButton() {
     const [isConnecting, setIsConnecting] = useState(false);
@@ -23,6 +24,7 @@ export default function WalletLoginButton() {
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             await provider.send('eth_requestAccounts', []);
+            await ensureSepoliaChain(provider);
             const signer = await provider.getSigner();
             const walletAddress = await signer.getAddress();
 
