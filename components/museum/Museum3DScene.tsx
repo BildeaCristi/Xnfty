@@ -410,8 +410,9 @@ export default function Museum3DScene({
                             onMove={setMoveInput}
                             onJumpStart={() => setTouchJump(true)}
                             onJumpEnd={() => setTouchJump(false)}
-                            onInteractStart={() => setIsTouchInteracting(true)}
-                            onInteractEnd={() => setIsTouchInteracting(false)}
+                            onInteractStart={() => setIsTouchInteracting(prev => !prev)}
+                            onInteractEnd={() => {}}
+                            interactActive={isTouchInteracting}
                         />
                     )}
                     <div className="absolute top-4 right-4 flex flex-col gap-2 z-20 pointer-events-auto">

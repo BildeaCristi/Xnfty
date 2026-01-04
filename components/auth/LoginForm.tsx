@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { ethers } from "ethers";
 import { ROUTES } from "@/config/routes";
+import {isMobileDevice, openMetaMaskDeepLink} from "@/utils/wallet";
 
 export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +18,10 @@ export default function LoginForm() {
             setError(null);
 
             if (!window.ethereum) {
+                if (isMobileDevice()) {
+                    openMetaMaskDeepLink();
+                    throw new Error("Redirecting to MetaMask app...");
+                }
                 throw new Error("Please install MetaMask to use wallet authentication");
             }
 

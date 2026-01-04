@@ -7,6 +7,7 @@ import {useNotifications} from "@/providers/NotificationContext";
 import {useWalletStore} from "@/store/WalletStore";
 import {MetaMaskLogo} from "@/components/shared/MetaMaskLogo";
 import {ensureSepoliaChain} from "@/utils/chain";
+import {isMobileDevice, openMetaMaskDeepLink} from "@/utils/wallet";
 
 export default function WalletLoginButton() {
     const [isConnecting, setIsConnecting] = useState(false);
@@ -15,6 +16,11 @@ export default function WalletLoginButton() {
 
     const handleWalletLogin = async () => {
         if (!window.ethereum) {
+            if (isMobileDevice()) {
+                showError("Open in MetaMask", "Redirecting you to the MetaMask app...");
+                openMetaMaskDeepLink();
+                return;
+            }
             showError("MetaMask Required", "Please install MetaMask to connect your wallet");
             window.open("https://metamask.io/download/", "_blank");
             return;

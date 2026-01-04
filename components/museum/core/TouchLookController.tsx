@@ -21,11 +21,14 @@ export default function TouchLookController({enabled, onLookInput}: TouchLookCon
 
     useEffect(() => {
         const canvas = gl.domElement;
+        const previousTouchAction = canvas.style.touchAction;
+        canvas.style.touchAction = 'none';
 
         const handlePointerDown = (event: PointerEvent) => {
             if (!enabled) return;
             activePointerId.current = event.pointerId;
             lastPoint.current = {x: event.clientX, y: event.clientY};
+            canvas.setPointerCapture(event.pointerId);
             onLookInput({x: 0, y: 0});
         };
 
@@ -46,6 +49,7 @@ export default function TouchLookController({enabled, onLookInput}: TouchLookCon
             if (activePointerId.current !== event.pointerId) return;
             activePointerId.current = null;
             lastPoint.current = null;
+            canvas.releasePointerCapture(event.pointerId);
             onLookInput({x: 0, y: 0});
         };
 
@@ -55,6 +59,7 @@ export default function TouchLookController({enabled, onLookInput}: TouchLookCon
         canvas.addEventListener('pointercancel', handlePointerUp, {passive: true});
 
         return () => {
+            canvas.style.touchAction = previousTouchAction;
             canvas.removeEventListener('pointerdown', handlePointerDown);
             canvas.removeEventListener('pointermove', handlePointerMove);
             canvas.removeEventListener('pointerup', handlePointerUp);

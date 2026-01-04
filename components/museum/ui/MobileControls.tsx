@@ -14,6 +14,7 @@ interface MobileControlsProps {
     onJumpEnd: () => void;
     onInteractStart: () => void;
     onInteractEnd: () => void;
+    interactActive: boolean;
 }
 
 const JOYSTICK_RADIUS = 48;
@@ -33,6 +34,7 @@ export default function MobileControls({
                                           onJumpEnd,
                                           onInteractStart,
                                           onInteractEnd,
+                                          interactActive,
                                       }: MobileControlsProps) {
     const moveBaseRef = useRef<HTMLDivElement | null>(null);
 
@@ -115,7 +117,9 @@ export default function MobileControls({
                 </button>
                 <button
                     type="button"
-                    className="px-4 py-2 rounded-full bg-purple-500/80 text-white text-sm font-semibold shadow-lg"
+                    className={`px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg ${
+                        interactActive ? 'bg-purple-600/90 ring-2 ring-purple-200/70' : 'bg-purple-500/80'
+                    }`}
                     onPointerDown={onInteractStart}
                     onPointerUp={onInteractEnd}
                     onPointerLeave={onInteractEnd}
