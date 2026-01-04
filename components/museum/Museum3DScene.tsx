@@ -23,6 +23,8 @@ import {
 import NFTImagePreloader from './core/NFTImagePreloader';
 import CrosshairRaycaster from './core/CrosshairRaycaster';
 import SceneLighting from './core/SceneLighting';
+import TouchLookController from './core/TouchLookController';
+import MobileControls from './ui/MobileControls';
 
 const MuseumRoom = lazy(() => import('./MuseumRoom'));
 const NFTFrame = lazy(() => import('./NFTFrame'));
@@ -50,6 +52,11 @@ export default function Museum3DScene({
     const [allImagesLoaded, setAllImagesLoaded] = useState(false);
     const [modalJustClosed, setModalJustClosed] = useState(false);
     const [isInteractionKeyPressed, setIsInteractionKeyPressed] = useState(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    const [moveInput, setMoveInput] = useState({x: 0, y: 0});
+    const [lookInput, setLookInput] = useState({x: 0, y: 0});
+    const [touchJump, setTouchJump] = useState(false);
+    const [isTouchInteracting, setIsTouchInteracting] = useState(false);
     const {
         controlMode,
         setControlMode,
@@ -146,6 +153,22 @@ export default function Museum3DScene({
             window.removeEventListener('keyup', handleKeyRelease);
         };
     }, [controlMode, setControlMode]);
+
+    useEffect(() => {
+        setIsTouchDevice(
+            typeof window !== 'undefined' &&
+            ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+        );
+    }, []);
+
+    useEffect(() => {
+        if (controlMode !== CONTROL_MODES.FIRST_PERSON || !isTouchDevice) {
+            setMoveInput({x: 0, y: 0});
+            setLookInput({x: 0, y: 0});
+            setTouchJump(false);
+            setIsTouchInteracting(false);
+        }
+    }, [controlMode, isTouchDevice]);
 
     // Initialize loading state
     useEffect(() => {
@@ -272,7 +295,13 @@ export default function Museum3DScene({
                                         }
                                     }}
                                     nfts={nfts}
-                                    interactionMode={isInteractionKeyPressed}
+                                    interactionMode={isInteractionKeyPressed || isTouchInteracting}
+                                />
+                            )}
+                            {controlMode === CONTROL_MODES.FIRST_PERSON && isTouchDevice && (
+                                <TouchLookController
+                                    enabled={!selectedNFT && !modalJustClosed}
+                                    onLookInput={setLookInput}
                                 />
                             )}
 
@@ -291,6 +320,10 @@ export default function Museum3DScene({
                                 <FirstPersonCharacterController
                                     enabled={!selectedNFT && !modalJustClosed}
                                     position={[0, 2.5, 5]}
+                                    moveInput={moveInput}
+                                    lookInput={lookInput}
+                                    touchJump={touchJump}
+                                    isTouchDevice={isTouchDevice}
                                 />
                             )}
                         </PhysicsProvider>
@@ -360,15 +393,45 @@ export default function Museum3DScene({
                     <div
                         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                         <div className="w-4 h-4 border-2 border-white rounded-full bg-white/20"/>
-                        {hoveredNFT !== null && isInteractionKeyPressed && (
+                        {hoveredNFT !== null && (isInteractionKeyPressed || isTouchInteracting) && (
                             <div
                                 className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded text-sm whitespace-nowrap">
-                                Click to view NFT details
+                                {isTouchDevice ? 'Tap to view NFT details' : 'Click to view NFT details'}
                             </div>
                         )}
                     </div>
                 )}
             </div>
+
+            {allImagesLoaded && isTouchDevice && (
+                <>
+                    {controlMode === CONTROL_MODES.FIRST_PERSON && (
+                        <MobileControls
+                            onMove={setMoveInput}
+                            onJumpStart={() => setTouchJump(true)}
+                            onJumpEnd={() => setTouchJump(false)}
+                            onInteractStart={() => setIsTouchInteracting(true)}
+                            onInteractEnd={() => setIsTouchInteracting(false)}
+                        />
+                    )}
+                    <div className="absolute top-4 right-4 flex flex-col gap-2 z-20 pointer-events-auto">
+                        <button
+                            type="button"
+                            className="px-3 py-2 rounded-full bg-black/60 text-white text-xs font-semibold"
+                            onClick={() => setControlMode(controlMode === CONTROL_MODES.ORBIT ? CONTROL_MODES.FIRST_PERSON : CONTROL_MODES.ORBIT)}
+                        >
+                            Toggle Mode
+                        </button>
+                        <button
+                            type="button"
+                            className="px-3 py-2 rounded-full bg-black/60 text-white text-xs font-semibold"
+                            onClick={() => setSettingsOpen(true)}
+                        >
+                            Settings
+                        </button>
+                    </div>
+                </>
+            )}
 
             {/* Settings Panel */}
             <SettingsPanel

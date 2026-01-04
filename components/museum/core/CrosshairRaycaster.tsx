@@ -53,7 +53,7 @@ export default function CrosshairRaycaster({
         }
     });
 
-    // Handle click events
+    // Handle click/tap events
     useEffect(() => {
         if (!enabled) return;
 
@@ -81,9 +81,11 @@ export default function CrosshairRaycaster({
 
         const canvas = gl.domElement;
         canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('pointerup', handleClick);
 
         return () => {
             canvas.removeEventListener('click', handleClick);
+            canvas.removeEventListener('pointerup', handleClick);
         };
     }, [enabled, camera, scene, gl, onClickNFT, nfts, interactionMode]);
 
