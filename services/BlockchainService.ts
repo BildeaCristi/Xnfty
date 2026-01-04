@@ -4,6 +4,7 @@ import * as factoryViewMetadata from '@/utils/artifacts/contracts/NFTFactoryView
 import * as collectionMetadata from '@/utils/artifacts/contracts/NFTCollection.sol/NFTCollection.json';
 import * as fractionalMetadata from '@/utils/artifacts/contracts/FractionalNFT.sol/FractionalNFT.json';
 import type {Collection, CollectionStats, FractionalNFTInfo, NFT, ShareHolder, UserNFTShare,} from '@/types';
+import {ensureSepoliaChain} from '@/utils/chain';
 
 // --- Contract ABIs ---
 const NFT_FACTORY_ABI = factoryMetadata.abi;
@@ -69,6 +70,7 @@ export async function getSigner(): Promise<ethers.Signer> {
     signerPromise = (async () => {
         try {
             const provider = getBrowserProvider();
+            await ensureSepoliaChain(provider);
 
             const accounts = await provider.send('eth_accounts', []);
             if (accounts.length === 0) {
