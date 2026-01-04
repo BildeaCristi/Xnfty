@@ -10,11 +10,11 @@ interface Vector2 {
 
 interface MobileControlsProps {
     onMove: (vector: Vector2) => void;
+    onLook: (vector: Vector2) => void;
     onJumpStart: () => void;
     onJumpEnd: () => void;
     onInteractStart: () => void;
     onInteractEnd: () => void;
-    interactActive: boolean;
 }
 
 const JOYSTICK_RADIUS = 48;
@@ -30,17 +30,20 @@ function clampVector(dx: number, dy: number, radius: number) {
 
 export default function MobileControls({
                                           onMove,
+                                          onLook,
                                           onJumpStart,
                                           onJumpEnd,
                                           onInteractStart,
                                           onInteractEnd,
-                                          interactActive,
                                       }: MobileControlsProps) {
     const moveBaseRef = useRef<HTMLDivElement | null>(null);
+    const lookBaseRef = useRef<HTMLDivElement | null>(null);
 
     const [moveKnob, setMoveKnob] = useState<Vector2>({x: 0, y: 0});
+    const [lookKnob, setLookKnob] = useState<Vector2>({x: 0, y: 0});
 
     const movePointerId = useRef<number | null>(null);
+    const lookPointerId = useRef<number | null>(null);
 
     const updateJoystick = useCallback((
         event: PointerEvent<HTMLDivElement>,
@@ -69,7 +72,7 @@ export default function MobileControls({
     }, []);
 
     return (
-        <div className="absolute inset-0 pointer-events-none select-none z-20" data-ui-control="true">
+        <div className="absolute inset-0 pointer-events-none select-none z-20">
             <div className="absolute bottom-6 left-6 pointer-events-auto">
                 <div
                     ref={moveBaseRef}
@@ -105,6 +108,41 @@ export default function MobileControls({
                 <p className="mt-2 text-xs text-white/70 text-center">Move</p>
             </div>
 
+            <div className="absolute bottom-6 right-6 pointer-events-auto">
+                <div
+                    ref={lookBaseRef}
+                    className="relative w-28 h-28 rounded-full bg-white/10 border border-white/20 touch-none"
+                    onPointerDown={(event) => {
+                        lookPointerId.current = event.pointerId;
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                        updateJoystick(event, lookBaseRef, setLookKnob, onLook);
+                    }}
+                    onPointerMove={(event) => {
+                        if (lookPointerId.current !== event.pointerId) return;
+                        updateJoystick(event, lookBaseRef, setLookKnob, onLook);
+                    }}
+                    onPointerUp={(event) => {
+                        if (lookPointerId.current !== event.pointerId) return;
+                        lookPointerId.current = null;
+                        event.currentTarget.releasePointerCapture(event.pointerId);
+                        resetJoystick(setLookKnob, onLook);
+                    }}
+                    onPointerCancel={(event) => {
+                        if (lookPointerId.current !== event.pointerId) return;
+                        lookPointerId.current = null;
+                        resetJoystick(setLookKnob, onLook);
+                    }}
+                >
+                    <div
+                        className="absolute w-12 h-12 rounded-full bg-white/40 border border-white/70"
+                        style={{
+                            transform: `translate(${lookKnob.x + JOYSTICK_RADIUS}px, ${lookKnob.y + JOYSTICK_RADIUS}px)`,
+                        }}
+                    />
+                </div>
+                <p className="mt-2 text-xs text-white/70 text-center">Look</p>
+            </div>
+
             <div className="absolute bottom-28 right-36 flex flex-col gap-3 pointer-events-auto">
                 <button
                     type="button"
@@ -117,9 +155,7 @@ export default function MobileControls({
                 </button>
                 <button
                     type="button"
-                    className={`px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg ${
-                        interactActive ? 'bg-purple-600/90 ring-2 ring-purple-200/70' : 'bg-purple-500/80'
-                    }`}
+                    className="px-4 py-2 rounded-full bg-purple-500/80 text-white text-sm font-semibold shadow-lg"
                     onPointerDown={onInteractStart}
                     onPointerUp={onInteractEnd}
                     onPointerLeave={onInteractEnd}

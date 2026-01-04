@@ -23,7 +23,6 @@ import {
 import NFTImagePreloader from './core/NFTImagePreloader';
 import CrosshairRaycaster from './core/CrosshairRaycaster';
 import SceneLighting from './core/SceneLighting';
-import TouchLookController from './core/TouchLookController';
 import MobileControls from './ui/MobileControls';
 
 const MuseumRoom = lazy(() => import('./MuseumRoom'));
@@ -298,12 +297,6 @@ export default function Museum3DScene({
                                     interactionMode={isInteractionKeyPressed || isTouchInteracting}
                                 />
                             )}
-                            {controlMode === CONTROL_MODES.FIRST_PERSON && isTouchDevice && (
-                                <TouchLookController
-                                    enabled={!selectedNFT && !modalJustClosed}
-                                    onLookInput={setLookInput}
-                                />
-                            )}
 
                             {/* Camera Controls */}
                             {controlMode === CONTROL_MODES.ORBIT ? (
@@ -408,11 +401,11 @@ export default function Museum3DScene({
                     {controlMode === CONTROL_MODES.FIRST_PERSON && (
                         <MobileControls
                             onMove={setMoveInput}
+                            onLook={setLookInput}
                             onJumpStart={() => setTouchJump(true)}
                             onJumpEnd={() => setTouchJump(false)}
-                            onInteractStart={() => setIsTouchInteracting(prev => !prev)}
-                            onInteractEnd={() => {}}
-                            interactActive={isTouchInteracting}
+                            onInteractStart={() => setIsTouchInteracting(true)}
+                            onInteractEnd={() => setIsTouchInteracting(false)}
                         />
                     )}
                     <div className="absolute top-4 right-4 flex flex-col gap-2 z-20 pointer-events-auto">
