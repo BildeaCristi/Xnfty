@@ -3,6 +3,7 @@ import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import React from "react";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { NotificationProvider } from "@/providers/NotificationContext";
 import WalletProvider from "@/providers/WalletProvider";
@@ -30,6 +31,7 @@ export default function RootLayout({
             </WalletProvider>
           </NotificationProvider>
           <Analytics />
+          <SpeedInsights />
         </body>
         </html>
     );
