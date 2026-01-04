@@ -40,8 +40,8 @@ export default function TouchLookController({enabled, onLookInput}: TouchLookCon
             const dy = event.clientY - last.y;
             lastPoint.current = {x: event.clientX, y: event.clientY};
             onLookInput({
-                x: dx / 60,
-                y: -dy / 60,
+                x: dx / 15,
+                y: -dy / 15,
             });
         };
 
