@@ -2,6 +2,7 @@ import "./globals.css";
 import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import React from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { NotificationProvider } from "@/providers/NotificationContext";
 import WalletProvider from "@/providers/WalletProvider";
@@ -28,6 +29,7 @@ export default function RootLayout({
               </AuthProvider>
             </WalletProvider>
           </NotificationProvider>
+          <Analytics />
         </body>
         </html>
     );
