@@ -20,7 +20,9 @@ export default function LoginForm() {
             if (!window.ethereum) {
                 if (isMobileDevice()) {
                     openMetaMaskDeepLink();
-                    throw new Error("Redirecting to MetaMask app...");
+                    setError("Opening MetaMask app...");
+                    setIsLoading(false);
+                    return;
                 }
                 throw new Error("Please install MetaMask to use wallet authentication");
             }

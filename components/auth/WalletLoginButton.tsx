@@ -17,7 +17,6 @@ export default function WalletLoginButton() {
     const handleWalletLogin = async () => {
         if (!window.ethereum) {
             if (isMobileDevice()) {
-                showError("Open in MetaMask", "Redirecting you to the MetaMask app...");
                 openMetaMaskDeepLink();
                 return;
             }

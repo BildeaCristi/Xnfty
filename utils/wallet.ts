@@ -4,6 +4,6 @@ export const isMobileDevice = () =>
 
 export const openMetaMaskDeepLink = () => {
     if (typeof window === 'undefined') return;
-    const target = `${window.location.host}${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const target = `${window.location.hostname}${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.location.href = `https://metamask.app.link/dapp/${target}`;
 };

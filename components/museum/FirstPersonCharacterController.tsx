@@ -162,8 +162,8 @@ export default function FirstPersonCharacterController({
 
         if (isTouchDevice && (lookVector.x !== 0 || lookVector.y !== 0)) {
             euler.current.setFromQuaternion(camera.quaternion);
-            euler.current.y -= lookVector.x * 0.03;
-            euler.current.x -= lookVector.y * 0.03;
+            euler.current.y -= lookVector.x * 0.06;
+            euler.current.x -= lookVector.y * 0.06;
             euler.current.x = Math.max(minPolarAngle - Math.PI / 2, Math.min(maxPolarAngle - Math.PI / 2, euler.current.x));
 
             camera.quaternion.setFromEuler(euler.current);
