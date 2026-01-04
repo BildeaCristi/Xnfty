@@ -31,7 +31,8 @@ function clampVector(dx: number, dy: number, radius: number) {
 export default function MobileControls({
                                           onMove,
                                           onLook,
-                                          onJump,
+                                          onJumpStart,
+                                          onJumpEnd,
                                           onInteractStart,
                                           onInteractEnd,
                                       }: MobileControlsProps) {
