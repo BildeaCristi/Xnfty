@@ -9,11 +9,19 @@ import {useMuseumStore} from '@/store/MuseumStore';
 interface FirstPersonCharacterControllerProps {
     enabled?: boolean;
     position?: [number, number, number];
+    moveInput?: { x: number; y: number };
+    lookInput?: { x: number; y: number };
+    touchJump?: boolean;
+    isTouchDevice?: boolean;
 }
 
 export default function FirstPersonCharacterController({
                                                            enabled = true,
-                                                           position = [0, 1.6, 0]
+                                                           position = [0, 1.6, 0],
+                                                           moveInput = {x: 0, y: 0},
+                                                           lookInput = {x: 0, y: 0},
+                                                           touchJump = false,
+                                                           isTouchDevice = false
                                                        }: FirstPersonCharacterControllerProps) {
     const {camera, gl} = useThree();
     const {playerSpeed} = useMuseumStore();
@@ -27,6 +35,9 @@ export default function FirstPersonCharacterController({
     const moveLeft = useRef(false);
     const moveRight = useRef(false);
     const jump = useRef(false);
+    const moveInputRef = useRef(moveInput);
+    const lookInputRef = useRef(lookInput);
+    const touchJumpRef = useRef(touchJump);
 
     // Camera rotation
     const euler = useRef(new Euler(0, 0, 0, 'YXZ'));
@@ -36,7 +47,7 @@ export default function FirstPersonCharacterController({
     useEffect(() => {
         // Pointer lock controls
         const handleClick = () => {
-            if (enabled) {
+            if (enabled && !isTouchDevice) {
                 gl.domElement.requestPointerLock();
             }
         };
@@ -46,7 +57,7 @@ export default function FirstPersonCharacterController({
         };
 
         const handleMouseMove = (event: MouseEvent) => {
-            if (!isLocked.current || !enabled) return;
+            if (!isLocked.current || !enabled || isTouchDevice) return;
 
             const {movementX, movementY} = event;
 
@@ -128,13 +139,35 @@ export default function FirstPersonCharacterController({
                 document.exitPointerLock();
             }
         };
-    }, [camera, gl, enabled]);
+    }, [camera, gl, enabled, isTouchDevice]);
+
+    useEffect(() => {
+        moveInputRef.current = moveInput;
+    }, [moveInput]);
+
+    useEffect(() => {
+        lookInputRef.current = lookInput;
+    }, [lookInput]);
+
+    useEffect(() => {
+        touchJumpRef.current = touchJump;
+    }, [touchJump]);
 
     useFrame(() => {
-        if (!rigidBodyRef.current || !enabled || !isLocked.current) return;
+        if (!rigidBodyRef.current || !enabled || (!isLocked.current && !isTouchDevice)) return;
 
         const body = rigidBodyRef.current;
         const velocity = body.linvel();
+        const lookVector = lookInputRef.current;
+
+        if (isTouchDevice && (lookVector.x !== 0 || lookVector.y !== 0)) {
+            euler.current.setFromQuaternion(camera.quaternion);
+            euler.current.y -= lookVector.x * 0.03;
+            euler.current.x -= lookVector.y * 0.03;
+            euler.current.x = Math.max(minPolarAngle - Math.PI / 2, Math.min(maxPolarAngle - Math.PI / 2, euler.current.x));
+
+            camera.quaternion.setFromEuler(euler.current);
+        }
 
         // Get movement direction based on camera rotation
         const cameraDirection = new Vector3();
@@ -147,11 +180,12 @@ export default function FirstPersonCharacterController({
 
         // Calculate movement
         const movement = new Vector3();
+        const inputVector = moveInputRef.current;
+        const forwardInput = (moveForward.current ? 1 : 0) - (moveBackward.current ? 1 : 0) + inputVector.y;
+        const rightInput = (moveRight.current ? 1 : 0) - (moveLeft.current ? 1 : 0) + inputVector.x;
 
-        if (moveForward.current) movement.add(cameraDirection);  // W = forward
-        if (moveBackward.current) movement.sub(cameraDirection); // S = backward
-        if (moveRight.current) movement.add(cameraRight);       // D = right
-        if (moveLeft.current) movement.sub(cameraRight);        // A = left
+        if (forwardInput !== 0) movement.add(cameraDirection.clone().multiplyScalar(forwardInput));
+        if (rightInput !== 0) movement.add(cameraRight.clone().multiplyScalar(rightInput));
 
         movement.normalize();
 
@@ -164,7 +198,7 @@ export default function FirstPersonCharacterController({
         body.setLinvel({x: movement.x, y: velocity.y, z: movement.z}, true);
 
         // Jump
-        if (jump.current && Math.abs(velocity.y) < 0.1) {
+        if ((jump.current || touchJumpRef.current) && Math.abs(velocity.y) < 0.1) {
             body.setLinvel({x: velocity.x, y: 5, z: velocity.z}, true);
         }
 
