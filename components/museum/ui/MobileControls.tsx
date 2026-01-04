@@ -1,7 +1,7 @@
 "use client";
 
 import {useCallback, useRef, useState} from 'react';
-import type {PointerEvent} from 'react';
+import type {PointerEvent, RefObject} from 'react';
 
 interface Vector2 {
     x: number;
@@ -47,7 +47,7 @@ export default function MobileControls({
 
     const updateJoystick = useCallback((
         event: PointerEvent<HTMLDivElement>,
-        baseRef: React.RefObject<HTMLDivElement>,
+        baseRef: RefObject<HTMLDivElement | null>,
         setKnob: (vector: Vector2) => void,
         onVector: (vector: Vector2) => void,
     ) => {
